@@ -12,7 +12,8 @@ def buscar_dados_api_clima(lat, lon):
       return {
         "api_temperatura": api_dados_clima['main']['temp'],
         "api_umidade": api_dados_clima['main']['humidity'],
-        "api_sensacao_termica": api_dados_clima['main']['feels_like']
+        "api_sensacao_termica": api_dados_clima['main']['feels_like'],
+        "api_vento": api_dados_clima['wind']['speed']
       }
     
     except Exception as e:
