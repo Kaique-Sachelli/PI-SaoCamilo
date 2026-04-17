@@ -47,10 +47,11 @@ Este projeto visa otimizar o monitoramento do balanço hídrico de atletas, perm
 ### Stack Tecnológica (Sugestão)
 | Camada | Tecnologia |
 | :--- | :--- |
-| **Frontend Mobile** | React Native |
-| **Frontend Web** | React.js |
-| **Backend** | Node.js / Python |
-| **Banco de Dados** | PostgreSQL / MySQL |
+| **Frontend Mobile** | Flutter |
+| **Frontend Web** | HTML / CSS / JavaScript |
+| **Backend** | Node.js |
+| **Banco de Dados** | MySQL |
+| **Algoritmo (Motor de Cálculo)** | Python |
 
 ---
 
