@@ -1,0 +1,356 @@
+body {      
+  min-height: 100vh;        
+  margin: 0;                
+  width: 100%;
+  height: 100%;
+  display: flex;
+  place-items: center;
+  background-image: url('../Img/Background.png');
+}
+
+/* Começo do código do logo */
+.logo {
+  position: absolute;
+  top: 10px;
+  left: auto;
+  height: auto;
+}
+/* Fim do código do logo */
+
+/* Começo do código do container */
+.container-principal {
+  width: 100%;
+  height: auto;
+  padding-bottom: 5em;
+}
+
+.container-principal .row {
+  display: flexbox;
+  width: 100%;
+  justify-content: center;
+}
+
+.container-login {
+  max-width: 500px; 
+  background: #ffffff;
+  border-radius: 40px;
+  padding: 25px 35px;
+  border: 3px solid #dcdcdc;
+  /* margin: 20px; */
+}
+
+.container-login h1 {
+  text-align: center; 
+  font-family: 'Roboto Slab', serif;
+  font-size: 30px; 
+  color: #000000; 
+}
+
+.container-login .email {
+  width: 100%;
+  background: white;
+  border: 1px solid #dcdcdc !important;
+  font-family: 'Roboto', sans-serif;
+  border: none;
+  padding: 15px 20px;
+  border-radius: 20px;
+  margin-top: 15px;
+  box-sizing: border-box;
+}
+
+.container-login .email:focus {
+    outline: none;
+}
+/* Fim do código do container */
+
+/* Começo do código do botão entrar */
+.container-login .botao-entrar{
+  display: block;
+  width: 100%;
+  font-family: 'Roboto', sans-serif !important;
+  margin: 20px auto; 
+  border-radius: 20px; 
+  border: none;
+  background-color: #cf1f1f;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 15px;
+  width: 100%;
+  font-size: 1.2em;
+  font-weight: 500;
+  cursor: pointer; 
+  transition: background-color 0.3s;
+}
+
+.container-login .botao-entrar:hover {
+  transform: scale(1.01);
+}
+
+.container-login .botao-entrar:active {
+  background-color: #e93232;
+}
+/* Fim do código do botao entrar */
+
+
+/* Começo do código esqueceu senha */
+.esqueci-senha {
+  display: inline-block;
+  margin-top: 16px;
+  margin-left: 10px;
+  color: #005c6d;
+  font-family: 'Roboto', sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.esqueci-senha:hover {
+  text-decoration: underline;
+}
+/* Fim do código esqueceu senha */
+
+/* Começo do código do modal */
+.modal-senha {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.modal-senha.show {
+  display: flex;
+}
+
+.modal-senha .modal-content {
+  width: min(420px, 100%);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px 26px;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.18);
+  position: relative;
+}
+
+.modal-senha .modal-content h2 {
+  margin: 0 0 14px;
+  font-family: 'Roboto Slab', serif;
+  font-size: 26px;
+  color: #000000;
+}
+
+.modal-senha .modal-content p {
+  margin: 0;
+  color: #333333;
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.6;
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: #333333;
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  background: #e0e0e0;
+}
+/* Fim do código do modal */
+
+.signup-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 24px auto 0;
+  text-align: center;
+}
+
+.signup-container span {
+  display: block;
+  margin-bottom: 12px;
+  font-family: 'Roboto', sans-serif;
+  color: #000000;
+}
+
+.criar-conta-link {
+  display: inline-block;
+  width: 100%;
+  max-width: 320px;
+  padding: 12px 18px;
+  border: 2px solid #cf1f1f;
+  color: #cf1f1f;
+  border-radius: 16px;
+  text-decoration: none;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+.criar-conta-link:hover {
+  background-color: #cf1f1f;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.modal-cadastro {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.modal-cadastro.show {
+  display: flex;
+}
+
+.modal-cadastro .modal-content {
+  width: min(460px, 100%);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px 26px;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.18);
+  position: relative;
+}
+
+.modal-cadastro .modal-content h2 {
+  margin: 0 0 18px;
+  font-family: 'Roboto Slab', serif;
+  font-size: 28px;
+  color: #000000;
+  text-align: center;
+}
+
+.modal-cadastro .modal-content label {
+  display: block;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+  font-weight: 600;
+}
+
+.modal-cadastro .modal-input {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #dcdcdc;
+  font-family: 'Roboto', sans-serif;
+  padding: 14px 18px;
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+
+.modal-cadastro .modal-input:focus {
+  outline: none;
+  border-color: #cf1f1f;
+}
+
+.modal-cadastro .modal-submit {
+  width: 100%;
+  margin-top: 24px;
+  padding: 14px;
+  border: none;
+  border-radius: 16px;
+  background-color: #cf1f1f;
+  color: #ffffff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.modal-cadastro .modal-submit:hover {
+  background-color: #b71818;
+  transform: translateY(-1px);
+}
+
+.modal-cadastro .modal-submit:active {
+  background-color: #9e1414;
+}
+
+/* Começo do código de mostrar senha */
+.mostrar {
+  width: 100%;
+  background: white;
+  border: 1px solid #ccc !important;
+  font-family: 'Roboto', sans-serif;
+  border: none;
+  padding: 15px 20px;
+  border-radius: 20px;
+  margin-top: 15px;
+  border-inline: 2px solid transparent;
+  box-sizing: border-box;
+}
+
+.mostrar:focus {
+  outline: none;
+  border-inline: 2px solid #FF161F;
+}
+
+.mostrar-container {
+  position: relative;
+  width: 100%;
+}
+
+.toggle-senha {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-15%);
+  cursor: pointer;
+  font-size: 18px;
+  color: #777;
+  transition: 0.2s;
+}
+
+.toggle-senha:hover {
+  color: #FF161F;
+}
+/* Fim do código de mostrar senha */
+
+
+/* Começo do código da notificação */
+#notificacao {
+  position: fixed; 
+  top: 20px;
+  right: 20px;
+  padding: 16px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  opacity: 0;
+  transform: translateX(150%);
+  transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+}
+
+#notificacao.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+#notificacao.sucesso {
+  background-color: #28a745; 
+}
+
+#notificacao.erro {
+  background-color: #BA1A1A;
+}
+
+/* Fim do código da notificação * /
