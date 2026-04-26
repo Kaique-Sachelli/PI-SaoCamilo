@@ -1,55 +1,62 @@
 header {
-    height: 120px;
-    padding: 20px;
-}
-
-header .row {
-    display: flexbox;
-    justify-content: center;
-}
-
-header h1, header h2 {
-    text-align: center;
-}
-
-header h2 {
-    font-weight: 400 !important;
+    background-color: rgb(240, 240, 240);
+    height: 40px;
 }
 
 .titulo {
-    font-size: 36px;
-    font-weight: 600;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 15px;
 }
 
 .subtitulo {
-    font-size: 24px;
-    font-weight: 700;
-    color: rgb(50, 50, 50);
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.texto {
+    font-size: 16px;
+    color: gray;
 }
 
 .navbar {
     height: 120px;
-    border: solid 1px rgb(100, 0, 0); 
-    background-color: #E32429;
     justify-content: space-between;
-    padding-inline: 50px;
+    padding-inline: 30px;
+}
+
+.navbar .row {
+    display: flexbox;
+    justify-content: space-between;
 }
 
 .navbar .botao {
-    background-color: #E32429;
-    border: none; 
-    border-radius: 15px;
-    color: white;
-    height: 100%;
-    font-size: large;
+    border-radius: 25px;
+    height: 40px;
 }
 
-.navbar .botao:hover {
+.cinza {
+    border: solid 1px gray;
+}
+
+.cinza:hover {
+    background-color: rgb(200, 200, 200);
+}
+
+.vermelho {
+    background-color: #E32429;
+    color: white;
+    border: none; 
+}
+
+.vermelho:hover {
     background-color: #b31d22;
 }
 
 .container .row {
-    margin-top: 50px;
+    display: flexbox;
+    justify-content: space-between;
+    margin-bottom: 50px;
 }
 
 .container input {
@@ -59,19 +66,37 @@ header h2 {
 .container .row .botao {
     display: flex;
     justify-self: center;
-    justify-content: center;
     align-items: center;
     width: 100%;
     height: 40px;
     margin-top: 10px;
     border: none;
-    border-radius: 15px;
+    border-radius: 10px;
     background-color: white;
-    color: rgb(50, 50, 50);
+    color: #212529;
     font-size: 20px;
     font-weight: 600;
+    padding-inline: 10px;
 }
 
 .container .row .botao:hover {
     background-color: rgb(230, 230, 230);
+}
+
+.container .row .botao:active {
+    background-color: #E32429;
+    color: white;
+}
+
+.container .topicos .row {
+    justify-content: space-around;
+}
+
+.container .topico {
+    display: inline-block;
+    width: 48%;
+    border: solid 1px rgb(200, 200, 200);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
 }
