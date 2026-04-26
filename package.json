@@ -2,7 +2,7 @@
   "name": "pi-saocamilo",
   "version": "1.0.0",
   "description": "> **Projeto Integrador:** Aplicativo e Aplicação Web para Avaliação da Taxa de Sudorese e Suporte à Tomada de Decisão em Hidratação de Atletas.",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
