@@ -68,6 +68,8 @@ body {
   display: block;
   width: 100%;
   font-family: 'Roboto', sans-serif !important;
+  text-align: center;
+  text-decoration: none;
   margin: 20px auto; 
   border-radius: 20px; 
   border: none;
