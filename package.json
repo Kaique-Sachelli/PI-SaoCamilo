@@ -1,0 +1,23 @@
+{
+  "name": "pi-saocamilo",
+  "version": "1.0.0",
+  "description": "> **Projeto Integrador:** Aplicativo e Aplicação Web para Avaliação da Taxa de Sudorese e Suporte à Tomada de Decisão em Hidratação de Atletas.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kaique-Sachelli/PI-SaoCamilo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kaique-Sachelli/PI-SaoCamilo/issues"
+  },
+  "homepage": "https://github.com/Kaique-Sachelli/PI-SaoCamilo#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
