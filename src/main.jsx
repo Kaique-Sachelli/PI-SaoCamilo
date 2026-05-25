@@ -2,11 +2,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import Sessoes from "./Sessoes";
+import Cronometro from "./Cronometro";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <Sessoes />
+    <Cronometro />
   </StrictMode>
 );
 
