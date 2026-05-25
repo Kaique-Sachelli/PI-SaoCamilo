@@ -1,0 +1,234 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  background: #222;
+}
+
+.app {
+  width: 375px;
+  height: 100vh;
+  margin: auto;
+
+  background: linear-gradient(
+    180deg,
+    #d91522 0%,
+    #bf0817 50%,
+    #a90011 100%
+  );
+
+  color: white;
+  padding: 8px 12px;
+}
+
+.topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-size: 13px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.led {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #3dff35;
+}
+
+.tipo {
+  font-size: 12px;
+}
+
+.cronometro {
+  margin-top: 100px;
+  text-align: center;
+}
+
+.cronometro p {
+  font-size: 18px;
+  font-weight: 300;
+  margin-bottom: 10px;
+}
+
+.cronometro h1 {
+  font-size: 66px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.hidratacao {
+  display: flex;
+  justify-content: center;
+  margin-top: 55px;
+}
+
+.circulo {
+  width: 165px;
+  height: 165px;
+
+  border-radius: 50%;
+  border: 7px solid rgba(255, 255, 255, 0.35);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.gota {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.circulo h2 {
+  font-size: 60px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.circulo span {
+  font-size: 14px;
+}
+
+.tituloHidratacao {
+  margin-top: 55px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.cards {
+  margin-top: 12px;
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.card {
+  flex: 1;
+
+  background: rgba(255,255,255,.45);
+
+  border-radius: 18px;
+
+  text-align: center;
+
+  padding: 14px;
+}
+
+.icone {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.card h3 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.card p {
+  font-size: 15px;
+  opacity: .9;
+}
+
+.acoes {
+  margin-top: 18px;
+
+  display: flex;
+  justify-content: space-around;
+}
+
+.acoes button {
+  width: 38px;
+  height: 38px;
+
+  border: none;
+  border-radius: 50%;
+
+  font-size: 28px;
+  font-weight: bold;
+
+  background: rgba(255,255,255,.65);
+
+  cursor: pointer;
+}
+
+.alimento {
+  width: 100%;
+
+  margin-top: 18px;
+
+  border: none;
+  border-radius: 10px;
+
+  padding: 12px;
+
+  background: rgba(255,255,255,.55);
+
+  font-size: 16px;
+
+  cursor: pointer;
+}
+
+.rodape {
+  margin-top: 48px;
+  display: flex;
+  gap: 10px;
+}
+
+.botao {
+  flex: 1;
+
+  background: white;
+
+  color: #ff1200;
+
+  border: none;
+  border-radius: 10px;
+
+  padding: 16px 10px;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.listaAlimentos {
+  margin-top: 10px;
+  max-height: 120px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.listaAlimentos::-webkit-scrollbar {
+  width: 6px;
+}
+
+.listaAlimentos::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.5);
+  border-radius: 10px;
+}
+
+.itemAlimento {
+  background: rgba(255,255,255,.25);
+  padding: 10px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  color: white;
+}
+
+.vazio {
+  text-align: center;
+  opacity: .7;
+}

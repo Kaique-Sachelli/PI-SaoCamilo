@@ -1,0 +1,205 @@
+/* Configuração para ocupar toda a tela do celular Android */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f8f9fa;
+  overflow: hidden; /* Previne scroll duplo no navegador do celular */
+}
+
+.tela-android-cheia {
+  width: 100%;
+  height: 100vh; /* Ocupa exatamente a altura visível do aparelho */
+  display: flex;
+  flex-direction: column;
+  background-color: #f8f9fa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+/* Header Fixo Vermelho */
+.header{
+  background-color: #d91f26;
+  color: #ffffff;
+  padding: 40px 24px 32px 24px;
+  border-bottom-left-radius: 32px;
+  border-bottom-right-radius: 32px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.botao-voltar {
+  position: absolute;
+  top: 40px;
+  left: 20px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.usuario-nome {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.usuario-subtitulo {
+  margin: 6px 0 0 0;
+  font-size: 14px;
+  opacity: 0.9;
+  font-weight: 300;
+  text-align: center;
+}
+
+/* Área central de rolagem */
+.conteudo-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px 90px 20px; /* Margem inferior reserva para o menu não tampar o conteúdo */
+  box-sizing: border-box;
+}
+
+/* Oculta a barra de rolagem visual mantendo a função de scroll ativa */
+.conteudo-scroll::-webkit-scrollbar {
+  width: 0px;
+}
+
+/* Grid de Resumos - Ajustado para alinhar perfeitamente abaixo do topo */
+.grid-resumo {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 8px; /* Espaço sutil após o contêiner vermelho */
+  margin-bottom: 24px;
+}
+
+.card-mini {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+.icone {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.coracao { color: #e1251b; }
+.gota{ color: #1e73be; }
+
+.valor-resumo {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.legenda-resumo {
+  font-size: 10px;
+  color: #a0aec0;
+  font-weight: 500;
+  margin-top: 4px;
+  line-height: 1.2;
+}
+
+.lista-sessoes {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card-sessao {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+.topo-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.titulo-sessao {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.destaque-vermelho {
+  color: #e1251b;
+}
+
+.seta-direita {
+  color: #cbd5e0;
+  font-weight: bold;
+}
+
+.linhas-detalhes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.linha-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.rotulo {
+  color: #718096;
+}
+
+.dado {
+  color: #2d3748;
+  font-weight: 500;
+}
+
+.perda-verde {
+  color: #3cd87a;
+  font-weight: 600;
+}
+
+/* Menu de Navegação Inferior */
+.menu-inferior {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border-top: 1px solid #0000001e;
+  padding: 12px 32px 20px 32px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -4px 12px rgba(255, 255, 255, 0.03);
+  z-index: 10;
+}
+
+.botao-menu-item {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;      
+    cursor: pointer;
+}
+
+.botao-menu-item:hover, .item-ativo {
+  opacity: 1;
+}
