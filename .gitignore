@@ -1,2 +1,16 @@
 .env
 node_modules/
+
+.expo/
+dist/
+web-build/
+*.keystore
+*.p12
+*.key
+*.mobileprovision
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
