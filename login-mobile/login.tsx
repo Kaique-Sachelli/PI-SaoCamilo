@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   ScrollView,
   Platform,
+  ImageBackground,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 
@@ -53,12 +54,18 @@ export default function LoginScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={{ flex: 1, width: '100%' }}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
+    <ImageBackground
+      source={require('./img/Background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}>
+        <SafeAreaView style={{ flex: 1, width: '100%' }}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+
           {/* Logo Section */}
           <ThemedView style={styles.logoSection}>
             <ThemedView style={styles.logoContainer}>
@@ -171,10 +178,14 @@ export default function LoginScreen() {
         </ScrollView>
       </SafeAreaView>
     </ThemedView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },
