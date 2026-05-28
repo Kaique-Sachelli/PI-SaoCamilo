@@ -6,15 +6,13 @@ import {
   SafeAreaView,
   ScrollView,
   Platform,
+  Text,
   ImageBackground,
+  View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { UniversityLogo } from '@/components/university-logo';
-import { useTheme } from '@/hooks/use-theme';
-import { Spacing } from '@/constants/theme';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -22,7 +20,6 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const theme = useTheme();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -44,12 +41,10 @@ export default function LoginScreen() {
   };
 
   const handleForgotPassword = () => {
-    // router.push('/forgot-password');
     alert('Funcionalidade de recuperação de senha em desenvolvimento');
   };
 
   const handleCreateAccount = () => {
-    // router.push('/register');
     alert('Funcionalidade de cadastro em desenvolvimento');
   };
 
@@ -59,44 +54,44 @@ export default function LoginScreen() {
       style={styles.backgroundImage}
       resizeMode="cover"
     >
-      <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}>
+      {/* Trocado ThemedView por View */}
+      <View style={styles.container}>
         <SafeAreaView style={{ flex: 1, width: '100%' }}>
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
 
-          {/* Logo Section */}
-          <ThemedView style={styles.logoSection}>
-            <ThemedView style={styles.logoContainer}>
+          {/* Logo Section - Trocado ThemedView por View */}
+          <View style={styles.logoSection}>
+            <View style={styles.logoContainer}>
               <UniversityLogo size={100} />
-            </ThemedView>
-            <ThemedText type="subtitle" style={styles.universityName}>
+            </View>
+            <Text style={styles.universityName}>
               CENTRO UNIVERSITÁRIO
-            </ThemedText>
-            <ThemedText type="title" style={styles.campusName}>
+            </Text>
+            <Text style={styles.campusName}>
               SÃOCAMILO
-            </ThemedText>
-          </ThemedView>
+            </Text>
+          </View>
 
-          {/* Login Form Section */}
-          <ThemedView style={styles.formSection}>
-            <ThemedText type="title" style={styles.loginTitle}>
+          {/* Login Form Section - Trocado ThemedView por View */}
+          <View style={styles.formSection}>
+            <Text style={styles.loginTitle}>
               LOGIN
-            </ThemedText>
+            </Text>
 
             {/* Email Input */}
             <TextInput
               style={[
                 styles.input,
                 {
-                  color: theme.text,
-                  borderColor: theme.textSecondary,
-                  backgroundColor: theme.background,
+                  color: '#747474',
+                  borderColor: '#747474',
+                  backgroundColor: '#ffffff',
                 },
               ]}
               placeholder="E-mail:"
-              placeholderTextColor={theme.textSecondary}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -109,13 +104,12 @@ export default function LoginScreen() {
               style={[
                 styles.input,
                 {
-                  color: theme.text,
-                  borderColor: theme.textSecondary,
-                  backgroundColor: theme.background,
+                  color: '#747474',
+                  borderColor: '#747474',
+                  backgroundColor: '#ffffff',
                 },
               ]}
               placeholder="Senha:"
-              placeholderTextColor={theme.textSecondary}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -128,9 +122,9 @@ export default function LoginScreen() {
               disabled={loading}
               style={styles.forgotPasswordContainer}
             >
-              <ThemedText type="link" style={styles.forgotPasswordText}>
+              <Text style={styles.forgotPasswordText}>
                 Esqueci minha senha?
-              </ThemedText>
+              </Text>
             </TouchableOpacity>
 
             {/* Login Button */}
@@ -140,12 +134,11 @@ export default function LoginScreen() {
               disabled={loading}
               activeOpacity={0.8}
             >
-              <ThemedText
-                type="smallBold"
+              <Text
                 style={[styles.loginButtonText, { color: '#ffffff' }]}
               >
                 {loading ? 'ENTRANDO...' : 'ENTRAR'}
-              </ThemedText>
+              </Text>
             </TouchableOpacity>
 
             {/* Privacy Policy Link */}
@@ -153,31 +146,31 @@ export default function LoginScreen() {
               style={styles.privacyContainer}
               disabled={loading}
             >
-              <ThemedText type="small" style={styles.privacyText}>
+              <Text style={styles.privacyText}>
                 Política de privacidade
-              </ThemedText>
+              </Text>
             </TouchableOpacity>
-          </ThemedView>
+          </View>
 
-          {/* Register Section */}
-          <ThemedView style={styles.registerSection}>
-            <ThemedText type="default" style={styles.registerQuestion}>
+          {/* Register Section - Trocado ThemedView por View */}
+          <View style={styles.registerSection}>
+            <Text style={styles.registerQuestion}>
               Não possuo conta?
-            </ThemedText>
+            </Text>
             <TouchableOpacity
               style={styles.registerButton}
-              onPress={handleCreateAccount}
+              onPress={() => navigation.navigate('cadastro')}
               disabled={loading}
               activeOpacity={0.8}
             >
-              <ThemedText type="smallBold" style={styles.registerButtonText}>
+              <Text style={styles.registerButtonText}>
                 Criar conta
-              </ThemedText>
+              </Text>
             </TouchableOpacity>
-          </ThemedView>
+          </View>
         </ScrollView>
       </SafeAreaView>
-    </ThemedView>
+    </View>
     </ImageBackground>
   );
 }
@@ -191,19 +184,19 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.four,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
     justifyContent: 'space-between',
   },
   logoSection: {
     alignItems: 'center',
-    marginBottom: Spacing.six,
-    paddingTop: Spacing.four,
+    marginBottom: 10,
+    paddingTop: 10,
   },
   logoContainer: {
     width: 120,
     height: 120,
-    marginBottom: Spacing.three,
+    marginBottom: 10,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 12,
@@ -212,7 +205,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '400',
     letterSpacing: 1,
-    marginBottom: Spacing.half,
+    marginBottom: 10,
   },
   campusName: {
     fontSize: 24,
@@ -220,27 +213,27 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   formSection: {
-    gap: Spacing.three,
-    marginBottom: Spacing.five,
+    gap: 10,
+    marginBottom: 10,
   },
   loginTitle: {
     textAlign: 'center',
     fontSize: 32,
     fontWeight: '700',
-    marginBottom: Spacing.two,
+    marginBottom: 10,
   },
   input: {
     borderWidth: 1,
     borderRadius: 8,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
     fontSize: 16,
     fontWeight: '500',
-    marginBottom: Spacing.one,
+    marginBottom: 10,
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-start',
-    marginBottom: Spacing.two,
+    marginBottom: 10,
   },
   forgotPasswordText: {
     fontSize: 14,
@@ -249,11 +242,11 @@ const styles = StyleSheet.create({
   loginButton: {
     backgroundColor: '#B3151F',
     borderRadius: 8,
-    paddingVertical: Spacing.three,
-    paddingHorizontal: Spacing.four,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: Spacing.two,
+    marginVertical: 10,
     minHeight: 48,
   },
   loginButtonDisabled: {
@@ -266,7 +259,7 @@ const styles = StyleSheet.create({
   },
   privacyContainer: {
     alignItems: 'center',
-    marginTop: Spacing.two,
+    marginTop: 10,
   },
   privacyText: {
     color: '#666666',
@@ -274,9 +267,9 @@ const styles = StyleSheet.create({
   },
   registerSection: {
     alignItems: 'center',
-    gap: Spacing.two,
-    paddingVertical: Spacing.four,
-    marginTop: Spacing.four,
+    gap: 10,
+    paddingVertical: 10,
+    marginTop: 10,
   },
   registerQuestion: {
     fontSize: 16,
@@ -286,8 +279,8 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#B3151F',
     borderRadius: 8,
-    paddingVertical: Spacing.three,
-    paddingHorizontal: Spacing.four,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 200,
