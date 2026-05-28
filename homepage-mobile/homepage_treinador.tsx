@@ -1,7 +1,7 @@
 import { Text, View, StyleSheet, Image, TextInput, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context"
 
-export default function Homepage() {
+export default function HomepageTreinador() {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={styles.header}>
@@ -10,7 +10,7 @@ export default function Homepage() {
                     <Image source={require("../assets/sino.png")} style={styles.sino} />
                 </View>
                 <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
-                <Text style={styles.treinador}>Olá, treinador</Text>
+                <Text style={styles.funcao}>Olá, treinador</Text>
             </View>
 
             <View style={styles.conteudo}>
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
         fontWeight: "200",
         marginBottom: 50,
     },
-    treinador: {
+    funcao: {
         fontSize: 20,
         color: "#ffffff",
         fontWeight: "600",

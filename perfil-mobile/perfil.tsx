@@ -65,14 +65,14 @@ export default function Perfil() {
               <Image source={require("../assets/configuracao.png")} style={styles.config}/>
               <Text style={styles.texto}>Preferências</Text>
             </View>
-            <Image source={require("../assets/seta-direita2.png")}/>
+            <Image source={require("../assets/seta-direita2.png")} style={styles.seta}/>
           </View>
           <View style={styles.row}>
             <View style={{flexDirection: "row"}}>
               <Image source={require("../assets/perfil.png")} style={styles.config}/>
               <Text style={styles.texto}>Editar Perfil</Text>
             </View>
-            <Image source={require("../assets/seta-direita2.png")}/>
+            <Image source={require("../assets/seta-direita2.png")} style={styles.seta}/>
           </View>
         </View>
       </View>
@@ -175,5 +175,10 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     marginRight: 5,
+  },
+  seta: {
+    width: 8,
+    height: 12,
+    alignSelf: "center"
   },
 });
