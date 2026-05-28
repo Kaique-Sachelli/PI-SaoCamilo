@@ -6,13 +6,13 @@ import {
   SafeAreaView,
   ScrollView,
   Platform,
+  View,
   KeyboardAvoidingView,
+  ImageBackground,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useTheme } from '@/hooks/use-theme';
 import { Spacing } from '@/constants/theme';
 
 export default function CadastroScreen() {
@@ -23,7 +23,6 @@ export default function CadastroScreen() {
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const theme = useTheme();
 
   const handleVoltar = () => {
     router.back();
@@ -38,8 +37,6 @@ export default function CadastroScreen() {
     setLoading(true);
     try {
       console.log('Cadastro attempt:', { nome, dataNascimento, telefone, email, senha });
-      // Após cadastro bem-sucedido, voltar para a tela de login
-      // router.back();
     } catch (error) {
       alert('Erro ao criar conta');
       console.error(error);
@@ -49,26 +46,30 @@ export default function CadastroScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={{ flex: 1, width: '100%' }}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          {/* Header com título e botão voltar */}
-          <ThemedView style={styles.header}>
+    <ImageBackground
+      source={require('./img/Background.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <View style={[styles.container, { backgroundColor: 'transparent' }]}>
+        <SafeAreaView style={{ flex: 1, width: '100%' }}>
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
+          <View style={styles.header}>
             <ThemedText type="small" style={styles.headerTitle}>
               Cadastro - Atleta
             </ThemedText>
-          </ThemedView>
+          </View>
 
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* Botão Voltar */}
+
             <TouchableOpacity
-              onPress={handleVoltar}
+              onPress={() => navigation.navigate('login')}
               style={styles.voltarContainer}
               disabled={loading}
             >
@@ -78,11 +79,11 @@ export default function CadastroScreen() {
             </TouchableOpacity>
 
             {/* Card do Formulário */}
-            <ThemedView
+            <View
               style={[
                 styles.formCard,
                 {
-                  backgroundColor: theme.background,
+                  backgroundColor: '#ffffff',
                   shadowColor: '#000',
                 },
               ]}
@@ -97,13 +98,12 @@ export default function CadastroScreen() {
                 style={[
                   styles.input,
                   {
-                    color: theme.text,
-                    borderColor: theme.textSecondary,
-                    backgroundColor: theme.background,
+                    color: '#747474',
+                    borderColor: '#747474',
+                    backgroundColor: '#ffffff',
                   },
                 ]}
                 placeholder="Nome:"
-                placeholderTextColor={theme.textSecondary}
                 value={nome}
                 onChangeText={setNome}
                 autoCapitalize="words"
@@ -115,13 +115,12 @@ export default function CadastroScreen() {
                 style={[
                   styles.input,
                   {
-                    color: theme.text,
-                    borderColor: theme.textSecondary,
-                    backgroundColor: theme.background,
+                    color: '#747474',
+                    borderColor: '#747474',
+                    backgroundColor: '#ffffff',
                   },
                 ]}
                 placeholder="Data de nascimento:"
-                placeholderTextColor={theme.textSecondary}
                 value={dataNascimento}
                 onChangeText={setDataNascimento}
                 keyboardType="numeric"
@@ -133,13 +132,12 @@ export default function CadastroScreen() {
                 style={[
                   styles.input,
                   {
-                    color: theme.text,
-                    borderColor: theme.textSecondary,
-                    backgroundColor: theme.background,
+                    color: '#747474',
+                    borderColor: '#747474',
+                    backgroundColor: '#ffffff',
                   },
                 ]}
                 placeholder="Telefone:"
-                placeholderTextColor={theme.textSecondary}
                 value={telefone}
                 onChangeText={setTelefone}
                 keyboardType="phone-pad"
@@ -151,13 +149,12 @@ export default function CadastroScreen() {
                 style={[
                   styles.input,
                   {
-                    color: theme.text,
-                    borderColor: theme.textSecondary,
-                    backgroundColor: theme.background,
+                    color: '#747474',
+                    borderColor: '#747474',
+                    backgroundColor: '#ffffff',
                   },
                 ]}
                 placeholder="E-mail:"
-                placeholderTextColor={theme.textSecondary}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -170,13 +167,12 @@ export default function CadastroScreen() {
                 style={[
                   styles.input,
                   {
-                    color: theme.text,
-                    borderColor: theme.textSecondary,
-                    backgroundColor: theme.background,
+                    color: '#747474',
+                    borderColor: '#747474',
+                    backgroundColor: '#ffffff',
                   },
                 ]}
                 placeholder="Senha:"
-                placeholderTextColor={theme.textSecondary}
                 value={senha}
                 onChangeText={setSenha}
                 secureTextEntry
@@ -197,15 +193,19 @@ export default function CadastroScreen() {
                   {loading ? 'Criando...' : 'Criar Conta'}
                 </ThemedText>
               </TouchableOpacity>
-            </ThemedView>
+            </View>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </ThemedView>
+    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },
