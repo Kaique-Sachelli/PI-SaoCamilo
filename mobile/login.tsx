@@ -159,7 +159,7 @@ export default function LoginScreen() {
             </Text>
             <TouchableOpacity
               style={styles.registerButton}
-              onPress={() => navigation.navigate('cadastro')}
+              onPress={() => router.push('/cadastro')}
               disabled={loading}
               activeOpacity={0.8}
             >
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   formCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     paddingHorizontal: 4,
     paddingVertical: 5,
     gap: 3,
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     marginBottom: 10,
-    width: '80%',
+    width: '90%',
     alignSelf: 'center',
   },
   forgotPasswordContainer: {
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     alignItems: 'center',
     marginVertical: 10,
-    width: '80%',
+    width: '90%',
     alignSelf: 'center',
   },
   loginButtonDisabled: {
@@ -296,6 +296,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minWidth: 200,
     minHeight: 48,
+    marginBottom: 50,
   },
   criarconta: {
     color: '#B3151F',
