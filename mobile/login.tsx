@@ -7,12 +7,11 @@ import {
   ScrollView,
   Platform,
   Text,
+  Image,
   ImageBackground,
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-
-import { UniversityLogo } from '@/components/university-logo';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -29,9 +28,7 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      // TODO: Implement login API call
       console.log('Login attempt:', { email, password });
-      // router.replace('/(tabs)/');
     } catch (error) {
       alert('Erro ao fazer login');
       console.error(error);
@@ -62,20 +59,22 @@ export default function LoginScreen() {
             showsVerticalScrollIndicator={false}
           >
 
-          {/* Logo Section - Trocado ThemedView por View */}
-          <View style={styles.logoSection}>
-            <View style={styles.logoContainer}>
-              <UniversityLogo size={100} />
-            </View>
-            <Text style={styles.universityName}>
-              CENTRO UNIVERSITÁRIO
-            </Text>
-            <Text style={styles.campusName}>
-              SÃOCAMILO
-            </Text>
-          </View>
+          <Image 
+            source={require('./img/Logo completa sem fundo.png')} 
+            style={styles.logo} 
+          />
 
-          {/* Login Form Section - Trocado ThemedView por View */}
+          {/* Card do Formulário */}
+          <View
+            style={[
+              styles.formCard,
+                {
+                  backgroundColor: '#ffffff',
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+                },
+              ]}
+          >
+
           <View style={styles.formSection}>
             <Text style={styles.loginTitle}>
               LOGIN
@@ -151,6 +150,7 @@ export default function LoginScreen() {
               </Text>
             </TouchableOpacity>
           </View>
+          </View>
 
           {/* Register Section - Trocado ThemedView por View */}
           <View style={styles.registerSection}>
@@ -163,7 +163,7 @@ export default function LoginScreen() {
               disabled={loading}
               activeOpacity={0.8}
             >
-              <Text style={styles.registerButtonText}>
+              <Text style={styles.criarconta}>
                 Criar conta
               </Text>
             </TouchableOpacity>
@@ -178,34 +178,41 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
+    width: '100%',
+    height: '100%',
   },
   container: {
     flex: 1,
+  },
+  logo: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  formCard: {
+    borderRadius: 16,
+    paddingHorizontal: 4,
+    paddingVertical: 5,
+    gap: 3,
+      ...Platform.select({
+      ios: {
+          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+      },
+      android: {
+          elevation: 8,
+      },
+      web: {
+          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+      },
+    }),
   },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 10,
     paddingVertical: 10,
     justifyContent: 'space-between',
-  },
-  logoSection: {
-    alignItems: 'center',
-    marginBottom: 10,
-    paddingTop: 10,
-  },
-  logoContainer: {
-    width: 120,
-    height: 120,
-    marginBottom: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 12,
-  },
-  universityName: {
-    fontSize: 12,
-    fontWeight: '400',
-    letterSpacing: 1,
-    marginBottom: 10,
   },
   campusName: {
     fontSize: 24,
@@ -224,15 +231,18 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 20,
     paddingHorizontal: 10,
     paddingVertical: 10,
     fontSize: 16,
     fontWeight: '500',
     marginBottom: 10,
+    width: '80%',
+    alignSelf: 'center',
   },
   forgotPasswordContainer: {
-    alignSelf: 'flex-start',
+    alignSelf: 'center',
+    width: '80%',
     marginBottom: 10,
   },
   forgotPasswordText: {
@@ -241,13 +251,13 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     backgroundColor: '#B3151F',
-    borderRadius: 8,
+    borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 10,
     alignItems: 'center',
-    justifyContent: 'center',
     marginVertical: 10,
-    minHeight: 48,
+    width: '80%',
+    alignSelf: 'center',
   },
   loginButtonDisabled: {
     opacity: 0.6,
@@ -278,6 +288,7 @@ const styles = StyleSheet.create({
   registerButton: {
     borderWidth: 1.5,
     borderColor: '#B3151F',
+    backgroundColor: '#ffffff',
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 10,
@@ -286,7 +297,7 @@ const styles = StyleSheet.create({
     minWidth: 200,
     minHeight: 48,
   },
-  registerButtonText: {
+  criarconta: {
     color: '#B3151F',
     fontSize: 16,
     letterSpacing: 0.5,
