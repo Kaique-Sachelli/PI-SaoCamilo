@@ -27,7 +27,7 @@ export default function CadastroScreen() {
   const handleVoltar = () => {
     router.back();
   };
-
+  
   const handleCriarConta = async () => {
     if (!nome || !dataNascimento || !telefone || !email || !senha) {
       alert('Por favor, preencha todos os campos');
@@ -57,11 +57,6 @@ export default function CadastroScreen() {
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           >
-          <View style={styles.header}>
-            <ThemedText type="small" style={styles.headerTitle}>
-              Cadastro - Atleta
-            </ThemedText>
-          </View>
 
           <ScrollView
             contentContainerStyle={styles.scrollContent}
@@ -84,7 +79,7 @@ export default function CadastroScreen() {
                 styles.formCard,
                 {
                   backgroundColor: '#ffffff',
-                  shadowColor: '#000',
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
                 },
               ]}
             >
@@ -179,6 +174,23 @@ export default function CadastroScreen() {
                 editable={!loading}
               />
 
+              {/* Campo Nome */}
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    color: '#747474',
+                    borderColor: '#747474',
+                    backgroundColor: '#ffffff',
+                  },
+                ]}
+                placeholder="Nome:"
+                value={nome}
+                onChangeText={setNome}
+                autoCapitalize="words"
+                editable={!loading}
+              />
+
               {/* Botão Criar Conta */}
               <TouchableOpacity
                 style={[styles.criarContaButton, loading && styles.buttonDisabled]}
@@ -205,6 +217,8 @@ export default function CadastroScreen() {
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
+    width: '100%',
+    height: '100%',
   },
   container: {
     flex: 1,
@@ -230,7 +244,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.one,
   },
   voltarText: {
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: '500',
     color: '#333333',
   },
@@ -241,18 +255,20 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     ...Platform.select({
       ios: {
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
       },
       android: {
-        elevation: 6,
+        elevation: 8,
+      },
+      web: {
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
       },
     }),
   },
   cadastroTitle: {
+    color: '#000000',
     textAlign: 'center',
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: '700',
     marginBottom: Spacing.two,
   },
