@@ -70,7 +70,7 @@ export default function LoginScreen() {
               styles.formCard,
                 {
                   backgroundColor: '#ffffff',
-                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+                  elevation: 8,
                 },
               ]}
           >
@@ -198,13 +198,13 @@ const styles = StyleSheet.create({
     gap: 3,
       ...Platform.select({
       ios: {
-          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+          boxshadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
       },
       android: {
           elevation: 8,
       },
       web: {
-          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+          boxshadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
       },
     }),
   },

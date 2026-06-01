@@ -131,7 +131,7 @@ body {
   background: #ffffff;
   border-radius: 24px;
   padding: 28px 26px;
-  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.18);
+  box-boxshadow: 0 18px 54px rgba(0, 0, 0, 0.18);
   position: relative;
 }
 
@@ -224,7 +224,7 @@ body {
   background: #ffffff;
   border-radius: 24px;
   padding: 28px 26px;
-  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.18);
+  box-boxshadow: 0 18px 54px rgba(0, 0, 0, 0.18);
   position: relative;
 }
 
@@ -335,7 +335,7 @@ body {
   font-size: 16px;
   font-weight: 500;
   color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-boxshadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   z-index: 1001;
   opacity: 0;
   transform: translateX(150%);

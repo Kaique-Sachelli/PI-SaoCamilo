@@ -12,6 +12,7 @@ import {
   Text,
   KeyboardAvoidingView,
   ImageBackground,
+  BoxShadowValue,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 
@@ -82,7 +83,7 @@ export default function CadastroScreen() {
                 styles.formCard,
                 {
                   backgroundColor: '#ffffff',
-                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+                  elevation: 6,
                 },
               ]}
             >
@@ -278,13 +279,13 @@ const styles = StyleSheet.create({
     gap: 3,
     ...Platform.select({
       ios: {
-        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+        boxshadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
       },
       android: {
         elevation: 8,
       },
       web: {
-        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+        boxshadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
       },
     }),
   },
@@ -343,13 +344,13 @@ const styles = StyleSheet.create({
     // Sombra para dar o efeito de elemento flutuante igual ao do vídeo
     ...Platform.select({
       ios: {
-        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
+        boxshadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
       },
       android: {
         elevation: 5,
       },
       web: {
-        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
+        boxshadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
       },
     }),
   },
