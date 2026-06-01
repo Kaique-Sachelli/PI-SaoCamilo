@@ -8,7 +8,7 @@ export default function HomepageAdm() {
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={styles.titulo}>São Camilo</Text>
           <TouchableOpacity>
-            <Image source={require("../assets/sino.png")} style={styles.sino}/>
+            <Image source={require("../assets/sino.png")} style={styles.sino} />
           </TouchableOpacity>
         </View>
         <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
@@ -17,38 +17,52 @@ export default function HomepageAdm() {
 
       <View style={styles.conteudo}>
         <View style={styles.container}>
-          <View style={{alignSelf: "center"}}>
-            <Image source={require("../assets/grafico.png")} style={styles.grafico}/>
+          <View style={{ alignSelf: "center" }}>
+            <Image source={require("../assets/grafico.png")} style={styles.grafico} />
           </View>
         </View>
         <Text style={styles.painel}>Painel</Text>
         <View style={styles.containerMenor}>
           <View style={styles.row}>
-            <View style={{flexDirection: "row"}}>
-              <Image source={require("../assets/solicitacoes.png")} style={styles.icone}/>
+            <View style={{ flexDirection: "row" }}>
+              <Image source={require("../assets/solicitacoes.png")} style={styles.icone} />
               <Text style={styles.texto}>Solicitações de cadastro</Text>
             </View>
-            <Image source={require("../assets/seta-direita2.png")} style={styles.seta}/>
+            <Image source={require("../assets/seta-direita2.png")} style={styles.seta} />
           </View>
         </View>
         <View style={styles.containerMenor}>
           <View style={styles.row}>
-            <View style={{flexDirection: "row"}}>
-              <Image source={require("../assets/gerenciar.png")} style={styles.icone}/>
+            <View style={{ flexDirection: "row" }}>
+              <Image source={require("../assets/gerenciar.png")} style={styles.icone} />
               <Text style={styles.texto}>Gerenciar Usuários</Text>
             </View>
-            <Image source={require("../assets/seta-direita2.png")} style={styles.seta}/>
+            <Image source={require("../assets/seta-direita2.png")} style={styles.seta} />
           </View>
         </View>
         <View style={styles.containerMenor}>
           <View style={styles.row}>
-            <View style={{flexDirection: "row"}}>
-              <Image source={require("../assets/batimento2.png")} style={styles.icone}/>
+            <View style={{ flexDirection: "row" }}>
+              <Image source={require("../assets/batimento2.png")} style={styles.icone} />
               <Text style={styles.texto}>Ver Atletas</Text>
             </View>
-            <Image source={require("../assets/seta-direita2.png")} style={styles.seta}/>
+            <Image source={require("../assets/seta-direita2.png")} style={styles.seta} />
           </View>
         </View>
+      </View>
+      <View style={styles.navbar}>
+        <TouchableOpacity>
+          <Image source={require("../assets/homepage.png")} style={styles.homepage} />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Image source={require("../assets/batimento3.png")} style={styles.batimento} />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Image source={require("../assets/documento.png")} style={styles.documento} />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Image source={require("../assets/perfil2.png")} style={styles.perfil} />
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -134,5 +148,31 @@ const styles = StyleSheet.create({
     width: 8,
     height: 12,
     alignSelf: "center"
+  },
+  navbar: {
+    backgroundColor: "#ccc",
+    padding: 25,
+    flexDirection: "row",
+    justifyContent: "space-around"
+  },
+  homepage: {
+    alignSelf: "center",
+    width: 30,
+    height: 33,
+  },
+  batimento: {
+    alignSelf: "center",
+    width: 33,
+    height: 30,
+  },
+  documento: {
+    alignSelf: "center",
+    width: 27,
+    height: 33,
+  },
+  perfil: {
+    alignSelf: "center",
+    width: 27,
+    height: 30,
   },
 });
