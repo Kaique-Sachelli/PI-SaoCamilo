@@ -50,6 +50,20 @@ export default function HomepageAtleta() {
           <Text style={styles.textoBranco}>PRONTO PARA TREINAR?</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.navbar}>
+        <TouchableOpacity>
+          <Image source={require("../assets/homepage.png")} style={styles.homepage}/>
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Image source={require("../assets/batimento3.png")} style={styles.batimento}/>
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Image source={require("../assets/documento.png")} style={styles.documento}/>
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Image source={require("../assets/perfil2.png")} style={styles.perfil}/>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -166,5 +180,31 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     alignContent: "center",
     textAlign: "center",
+  },
+  navbar: {
+    backgroundColor: "#ccc",
+    padding: 25,
+    flexDirection: "row",
+    justifyContent: "space-around"
+  },
+  homepage: {
+    alignSelf: "center",
+    width: 30,
+    height: 33,
+  },
+  batimento: {
+    alignSelf: "center",
+    width: 33,
+    height: 30,
+  },
+  documento: {
+    alignSelf: "center",
+    width: 27,
+    height: 33,
+  },
+  perfil: {
+    alignSelf: "center",
+    width: 27,
+    height: 30,
   },
 });
