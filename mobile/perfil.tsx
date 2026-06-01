@@ -6,7 +6,7 @@ export default function Perfil() {
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.header}>
         <TouchableOpacity>
-          <Image source={require("../assets/sino.png")} style={styles.sino} />
+          <Image source={require("../assets/sino.png")} style={styles.sino}/>
         </TouchableOpacity>
         <View style={{ alignSelf: "center" }}>
           <Image source={require("../assets/marcus.jpg")} style={styles.atleta} />
