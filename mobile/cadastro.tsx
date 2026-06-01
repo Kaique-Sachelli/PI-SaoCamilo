@@ -7,13 +7,13 @@ import {
   ScrollView,
   Platform,
   View,
+  Modal,
+  FlatList,
+  Text,
   KeyboardAvoidingView,
   ImageBackground,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-
-import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
 
 export default function CadastroScreen() {
   const [nome, setNome] = useState('');
@@ -22,12 +22,15 @@ export default function CadastroScreen() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
+  const [dropdownVisivel, setDropdownVisivel] = useState(false);
+  const [genero, setGenero] = useState('');
+  const opcoesFiltro = ['Atleta', 'Treinador', 'Médico', 'Nutricionista'];
   const router = useRouter();
 
   const handleVoltar = () => {
     router.back();
   };
-
+  
   const handleCriarConta = async () => {
     if (!nome || !dataNascimento || !telefone || !email || !senha) {
       alert('Por favor, preencha todos os campos');
@@ -57,11 +60,6 @@ export default function CadastroScreen() {
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           >
-          <View style={styles.header}>
-            <ThemedText type="small" style={styles.headerTitle}>
-              Cadastro - Atleta
-            </ThemedText>
-          </View>
 
           <ScrollView
             contentContainerStyle={styles.scrollContent}
@@ -69,13 +67,13 @@ export default function CadastroScreen() {
           >
 
             <TouchableOpacity
-              onPress={() => navigation.navigate('login')}
+              onPress={() => router.push('/login')}
               style={styles.voltarContainer}
               disabled={loading}
             >
-              <ThemedText type="small" style={styles.voltarText}>
+              <Text style={styles.voltarText}>
                 ← Voltar
-              </ThemedText>
+              </Text>
             </TouchableOpacity>
 
             {/* Card do Formulário */}
@@ -84,14 +82,14 @@ export default function CadastroScreen() {
                 styles.formCard,
                 {
                   backgroundColor: '#ffffff',
-                  shadowColor: '#000',
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
                 },
               ]}
             >
               {/* Título Cadastro */}
-              <ThemedText type="title" style={styles.cadastroTitle}>
+              <Text style={styles.cadastroTitle}>
                 Cadastro
-              </ThemedText>
+              </Text>
 
               {/* Campo Nome */}
               <TextInput
@@ -179,6 +177,50 @@ export default function CadastroScreen() {
                 editable={!loading}
               />
 
+
+              {/* Botão do Dropdown */}
+              <TouchableOpacity
+                activeOpacity={0.7}
+                disabled={loading}
+                style={[styles.input, { borderColor: '#747474', backgroundColor: '#ffffff', justifyContent: 'center' }]}
+                onPress={() => setDropdownVisivel(true)}
+              >
+                <Text style={{ color: genero ? '#747474' : '#747474', fontSize: 16, fontWeight: '500' }}>
+                  {genero || 'Selecione o Gênero:'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Estrutura Dropdown Flutuante */}
+              <Modal
+                visible={dropdownVisivel}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setDropdownVisivel(false)}
+              >
+                {/* Toque fora para fechar */}
+                <TouchableOpacity 
+                  style={styles.dropdownOverlay} 
+                  activeOpacity={1} 
+                  onPress={() => setDropdownVisivel(false)}
+                >
+                  {/* Caixa de Opções */}
+                  <View style={styles.dropdownContainer}>
+                    <FlatList
+                      data={opcoesFiltro}
+                      keyExtractor={(item) => item}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity 
+                          style={styles.dropdownItem} 
+                          onPress={() => { setGenero(item); setDropdownVisivel(false); }}
+                        >
+                          <Text style={styles.dropdownItemText}>{item}</Text>
+                        </TouchableOpacity>
+                      )}
+                    />
+                  </View>
+                </TouchableOpacity>
+              </Modal>
+
               {/* Botão Criar Conta */}
               <TouchableOpacity
                 style={[styles.criarContaButton, loading && styles.buttonDisabled]}
@@ -186,12 +228,11 @@ export default function CadastroScreen() {
                 disabled={loading}
                 activeOpacity={0.8}
               >
-                <ThemedText
-                  type="smallBold"
+                <Text
                   style={[styles.criarContaButtonText, { color: '#ffffff' }]}
                 >
                   {loading ? 'Criando...' : 'Criar Conta'}
-                </ThemedText>
+                </Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -205,75 +246,79 @@ export default function CadastroScreen() {
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
+    width: '100%',
+    height: '100%',
   },
   container: {
     flex: 1,
-  },
-  header: {
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.two,
-    paddingBottom: Spacing.one,
-  },
-  headerTitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#666666',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    justifyContent: 'center',
   },
   voltarContainer: {
     alignSelf: 'flex-start',
-    marginBottom: Spacing.four,
-    paddingVertical: Spacing.one,
+    marginBottom: 20,
+    paddingVertical: 1,
+    marginTop: -50,
   },
   voltarText: {
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: '500',
     color: '#333333',
   },
   formCard: {
-    borderRadius: 16,
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.five,
-    gap: Spacing.three,
+    borderRadius: 20,
+    paddingHorizontal: 4,
+    paddingVertical: 5,
+    gap: 3,
     ...Platform.select({
       ios: {
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
       },
       android: {
-        elevation: 6,
+        elevation: 8,
+      },
+      web: {
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
       },
     }),
   },
   cadastroTitle: {
+    color: '#000000',
     textAlign: 'center',
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: '700',
-    marginBottom: Spacing.two,
+    marginBottom: 20,
   },
   input: {
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
     fontSize: 16,
     fontWeight: '500',
-    marginBottom: Spacing.one,
+    marginBottom: 10,
+    width: '90%',
+    alignSelf: 'center',
+    minHeight: 48,
   },
   criarContaButton: {
     backgroundColor: '#B3151F',
-    borderRadius: 8,
-    paddingVertical: Spacing.three,
-    paddingHorizontal: Spacing.four,
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: Spacing.two,
+    marginTop: 10,
     minHeight: 48,
+    marginBottom: 10,
+    alignSelf: 'center',
+    width: '90%',
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -283,4 +328,38 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.5,
   },
+  dropdownOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)', // Um fundo quase invisível para detectar o clique fora
+    justifyContent: 'center', // Alinha no centro ou ajuste a posição usando margens se preferir fixar perto do input
+    alignItems: 'center',
+  },
+  dropdownContainer: {
+    backgroundColor: '#ffffff',
+    width: '80%', // Largura da caixinha do menu
+    borderRadius: 8,
+    maxHeight: 200,
+    paddingVertical: 5,
+    // Sombra para dar o efeito de elemento flutuante igual ao do vídeo
+    ...Platform.select({
+      ios: {
+        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
+      },
+      android: {
+        elevation: 5,
+      },
+      web: {
+        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
+      },
+    }),
+  },
+  dropdownItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+  },
+  dropdownItemText: {
+    fontSize: 16,
+    color: '#333333',
+  },
 });
+
