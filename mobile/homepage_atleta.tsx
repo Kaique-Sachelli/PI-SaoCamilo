@@ -8,7 +8,7 @@ export default function HomepageAtleta() {
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={styles.titulo}>São Camilo</Text>
           <TouchableOpacity>
-            <Image source={require("../assets/sino.png")} style={styles.sino}/>
+            <Image source={require("./assets/Img/sino.png")} style={styles.sino}/>
           </TouchableOpacity>
         </View>
         <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
@@ -52,16 +52,16 @@ export default function HomepageAtleta() {
       </View>
       <View style={styles.navbar}>
         <TouchableOpacity>
-          <Image source={require("../assets/homepage.png")} style={styles.homepage}/>
+          <Image source={require("./assets/Img/homepage.png")} style={styles.homepage}/>
         </TouchableOpacity>
         <TouchableOpacity>
-          <Image source={require("../assets/batimento3.png")} style={styles.batimento}/>
+          <Image source={require("./assets/Img/batimento3.png")} style={styles.batimento}/>
         </TouchableOpacity>
         <TouchableOpacity>
-          <Image source={require("../assets/documento.png")} style={styles.documento}/>
+          <Image source={require("./assets/Img/documento.png")} style={styles.documento}/>
         </TouchableOpacity>
         <TouchableOpacity>
-          <Image source={require("../assets/perfil2.png")} style={styles.perfil}/>
+          <Image source={require("./assets/Img/perfil2.png")} style={styles.perfil}/>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

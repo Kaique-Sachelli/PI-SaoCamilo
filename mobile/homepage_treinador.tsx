@@ -7,7 +7,7 @@ export default function HomepageTreinador() {
             <View style={styles.header}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                     <Text style={styles.titulo}>São Camilo</Text>
-                    <Image source={require("../assets/sino.png")} style={styles.sino} />
+                    <Image source={require("./assets/Img/sino.png")} style={styles.sino} />
                 </View>
                 <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
                 <Text style={styles.funcao}>Olá, treinador</Text>
@@ -19,12 +19,12 @@ export default function HomepageTreinador() {
                     <Text style={styles.time}>Meu time</Text>
                     <TouchableOpacity style={{ flexDirection: "row" }}>
                         <Text style={styles.gerenciar}>Gerenciar </Text>
-                        <Image source={require("../assets/gerenciar.png")} style={styles.icone} />
+                        <Image source={require("./assets/Img/gerenciar.png")} style={styles.icone} />
                     </TouchableOpacity>
                 </View>
                 <View style={styles.container}>
                     <View style={{ flexDirection: "row" }}>
-                        <Image source={require("../assets/marcus.jpg")} style={styles.atleta} />
+                        <Image source={require("./assets/Img/marcus.jpg")} style={styles.atleta} />
                         <View style={{ marginLeft: 10 }}>
                             <Text style={styles.nome}>Marcus Silva</Text>
                             <Text style={styles.esporte}>Vôlei</Text>
@@ -32,22 +32,22 @@ export default function HomepageTreinador() {
                     </View>
                     <View style={{ flexDirection: "row" }}>
                         <View style={styles.verde}></View>
-                        <Image source={require("../assets/seta-direita.png")} style={styles.seta} />
+                        <Image source={require("./assets/Img/seta-direita.png")} style={styles.seta} />
                     </View>
                 </View>
             </View>
             <View style={styles.navbar}>
                 <TouchableOpacity>
-                    <Image source={require("../assets/homepage.png")} style={styles.homepage} />
+                    <Image source={require("./assets/Img/homepage.png")} style={styles.homepage} />
                 </TouchableOpacity>
                 <TouchableOpacity>
-                    <Image source={require("../assets/batimento3.png")} style={styles.batimento} />
+                    <Image source={require("./assets/Img/batimento3.png")} style={styles.batimento} />
                 </TouchableOpacity>
                 <TouchableOpacity>
-                    <Image source={require("../assets/documento.png")} style={styles.documento} />
+                    <Image source={require("./assets/Img/documento.png")} style={styles.documento} />
                 </TouchableOpacity>
                 <TouchableOpacity>
-                    <Image source={require("../assets/perfil2.png")} style={styles.perfil} />
+                    <Image source={require("./assets/Img/perfil2.png")} style={styles.perfil} />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

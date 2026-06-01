@@ -6,10 +6,10 @@ export default function Perfil() {
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.header}>
         <TouchableOpacity>
-          <Image source={require("../assets/sino.png")} style={styles.sino} />
+          <Image source={require("./assets/Img/sino.png")} style={styles.sino} />
         </TouchableOpacity>
         <View style={{ alignSelf: "center" }}>
-          <Image source={require("../assets/marcus.jpg")} style={styles.atleta} />
+          <Image source={require("./assets/Img/marcus.jpg")} style={styles.atleta} />
           <Text style={styles.nome}>Kaique</Text>
           <Text style={styles.subtitulo}>Volêi • Arremessador</Text>
         </View>
@@ -18,21 +18,21 @@ export default function Perfil() {
         <View style={styles.container}>
           <Text style={styles.topico}>Informações Pessoais</Text>
           <View style={styles.linha}>
-            <Image source={require("../assets/email.png")} style={styles.icone} />
+            <Image source={require("./assets/Img/email.png")} style={styles.icone} />
             <View>
               <Text style={styles.subtopico}>E-mail:</Text>
               <Text style={styles.info}>carlinmaia@gmail.com</Text>
             </View>
           </View>
           <View style={styles.linha}>
-            <Image source={require("../assets/telefone.png")} style={styles.icone} />
+            <Image source={require("./assets/Img/telefone.png")} style={styles.icone} />
             <View>
               <Text style={styles.subtopico}>Telefone:</Text>
               <Text style={styles.info}>(55)11 4002-8922</Text>
             </View>
           </View>
           <View style={styles.linha}>
-            <Image source={require("../assets/idade.png")} style={styles.icone} />
+            <Image source={require("./assets/Img/idade.png")} style={styles.icone} />
             <View>
               <Text style={styles.subtopico}>Idade:</Text>
               <Text style={styles.info}>45 anos</Text>
@@ -43,14 +43,14 @@ export default function Perfil() {
           <Text style={styles.topico}>Perfil Atlético</Text>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
             <View style={styles.vermelho}>
-              <Image source={require("../assets/batimento.png")} style={styles.batida} />
+              <Image source={require("./assets/Img/batimento.png")} style={styles.batida} />
               <View style={{ alignSelf: "center" }}>
                 <Text style={styles.subtopico}>Altura</Text>
                 <Text style={styles.info}>177 cm</Text>
               </View>
             </View>
             <View style={styles.vermelho}>
-              <Image source={require("../assets/batimento.png")} style={styles.batida} />
+              <Image source={require("./assets/Img/batimento.png")} style={styles.batida} />
               <View style={{ alignSelf: "center" }}>
                 <Text style={styles.subtopico}>Peso</Text>
                 <Text style={styles.info}>78 kg</Text>
@@ -62,32 +62,32 @@ export default function Perfil() {
           <Text style={styles.topico}>Configurações</Text>
           <View style={styles.row}>
             <View style={{ flexDirection: "row" }}>
-              <Image source={require("../assets/configuracao.png")} style={styles.config} />
+              <Image source={require("./assets/Img/configuracao.png")} style={styles.config} />
               <Text style={styles.texto}>Preferências</Text>
             </View>
-            <Image source={require("../assets/seta-direita2.png")} style={styles.seta} />
+            <Image source={require("./assets/Img/seta-direita2.png")} style={styles.seta} />
           </View>
           <View style={styles.row}>
             <View style={{ flexDirection: "row" }}>
-              <Image source={require("../assets/perfil.png")} style={styles.config} />
+              <Image source={require("./assets/Img/perfil.png")} style={styles.config} />
               <Text style={styles.texto}>Editar Perfil</Text>
             </View>
-            <Image source={require("../assets/seta-direita2.png")} style={styles.seta} />
+            <Image source={require("./assets/Img/seta-direita2.png")} style={styles.seta} />
           </View>
         </View>
       </View>
       <View style={styles.navbar}>
         <TouchableOpacity>
-          <Image source={require("../assets/homepage.png")} style={styles.homepage} />
+          <Image source={require("./assets/Img/homepage.png")} style={styles.homepage} />
         </TouchableOpacity>
         <TouchableOpacity>
-          <Image source={require("../assets/batimento3.png")} style={styles.batimento} />
+          <Image source={require("./assets/Img/batimento3.png")} style={styles.batimento} />
         </TouchableOpacity>
         <TouchableOpacity>
-          <Image source={require("../assets/documento.png")} style={styles.documento} />
+          <Image source={require("./assets/Img/documento.png")} style={styles.documento} />
         </TouchableOpacity>
         <TouchableOpacity>
-          <Image source={require("../assets/perfil2.png")} style={styles.perfil} />
+          <Image source={require("./assets/Img/perfil2.png")} style={styles.perfil} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>

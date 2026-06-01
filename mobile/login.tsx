@@ -47,7 +47,7 @@ export default function LoginScreen() {
 
   return (
     <ImageBackground
-      source={require('./img/Background.png')}
+      source={require('./assets/Img/Background.png')}
       style={styles.backgroundImage}
       resizeMode="cover"
     >
@@ -60,7 +60,7 @@ export default function LoginScreen() {
           >
 
           <Image 
-            source={require('./img/Logo completa sem fundo.png')} 
+            source={require('./assets/Img/Logo completa sem fundo.png')} 
             style={styles.logo} 
           />
 

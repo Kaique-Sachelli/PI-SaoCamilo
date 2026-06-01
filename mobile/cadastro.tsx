@@ -50,7 +50,7 @@ export default function CadastroScreen() {
 
   return (
     <ImageBackground
-      source={require('./img/Background.png')}
+      source={require('./assets/Img/Background.png')}
       style={styles.backgroundImage}
       resizeMode="cover"
     >

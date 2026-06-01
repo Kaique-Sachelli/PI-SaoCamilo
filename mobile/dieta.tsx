@@ -7,10 +7,10 @@ export default function Perfil() {
       <View style={styles.conteudo}>
         <View style={styles.row}>
           <TouchableOpacity>
-            <Image source={require("../assets/seta-esquerda.png")} style={styles.setaEsquerda}/>
+            <Image source={require("./assets/Img/seta-esquerda.png")} style={styles.setaEsquerda}/>
           </TouchableOpacity>
           <TouchableOpacity>
-            <Image source={require("../assets/download.png")} style={styles.download}/>
+            <Image source={require("./assets/Img/download.png")} style={styles.download}/>
           </TouchableOpacity>
         </View>
         <View style={styles.centro}>
@@ -21,7 +21,7 @@ export default function Perfil() {
         </View>
         <TouchableOpacity style={styles.botao}>
           <Text style={styles.azul}>Enviar</Text>
-          <Image source={require("../assets/seta-direita-azul.png")} style={styles.setaDireita}/>
+          <Image source={require("./assets/Img/seta-direita-azul.png")} style={styles.setaDireita}/>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
