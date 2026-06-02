@@ -95,7 +95,7 @@ export default function SessoesTreinador() {
               key={s.id}
               style={styles.sessaoCard}
               activeOpacity={0.75}
-              onPress={() => {/* navegar para detalhes */ }}
+              onPress={() => router.push('/sessao_selecionada')}
             >
               {/* Cabeçalho da sessão */}
               <View style={styles.sessaoTopo}>
