@@ -107,17 +107,32 @@ export default function ExamesMedico() {
 
           {/* Tabs — mesmo padrão de TelaAtleta */}
           <View style={styles.tabsContainer}>
-            {(['Sessões', 'Dieta', 'Exames'] as Aba[]).map((aba) => (
-              <TouchableOpacity
-                key={aba}
-                style={[styles.tab, abaAtiva === aba && styles.tabAtiva]}
-                onPress={() => setAbaAtiva(aba)}
-              >
-                <Text style={[styles.tabTexto, abaAtiva === aba && styles.tabTextoAtivo]}>
-                  {aba}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            <TouchableOpacity
+              style={[styles.tab, abaAtiva === 'Sessões' && styles.tabAtiva]}
+              onPress={() => setAbaAtiva('Sessões')}
+            >
+              <Text style={[styles.tabTexto, abaAtiva === 'Sessões' && styles.tabTextoAtivo]}>
+                Sessões
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.tab, abaAtiva === 'Dieta' && styles.tabAtiva]}
+              onPress={() => router.push('/dieta')}
+            >
+              <Text style={[styles.tabTexto, abaAtiva === 'Dieta' && styles.tabTextoAtivo]}>
+                Dieta
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.tab, abaAtiva === 'Exames' && styles.tabAtiva]}
+              onPress={() => setAbaAtiva('Exames')}
+            >
+              <Text style={[styles.tabTexto, abaAtiva === 'Exames' && styles.tabTextoAtivo]}>
+                Exames
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 
