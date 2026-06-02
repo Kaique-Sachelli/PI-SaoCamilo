@@ -138,7 +138,7 @@ export default function CronometroScreen() {
           <TextInput
             style={styles.inputHidratacao}
             placeholder="Insira a quantidade inserida..."
-            placeholderTextColor="#c0636b"
+            placeholderTextColor="#e78585"
             keyboardType="numeric"
             value={quantidade}
             onChangeText={setQuantidade}
@@ -362,8 +362,7 @@ const styles = StyleSheet.create({
   btnEncerrar: {
     flex: 1,
     flexDirection: 'row',
-    borderWidth: 2,
-    borderColor: '#ffffff',
+    backgroundColor: '#ffffff',
     borderRadius: 14,
     paddingVertical: 14,
     justifyContent: 'center',
