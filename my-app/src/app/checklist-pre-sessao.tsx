@@ -37,7 +37,7 @@ function Header({ onBack }: { onBack: () => void }) {
   return (
     <View style={[styles.headerWrap, { paddingTop: insets.top }]}>
       <TouchableOpacity 
-      // onPress={() => router.push('')} 
+      onPress={() => router.push('/homepage_atleta')} 
       style={styles.backBtn} 
       hitSlop={12}
       >
@@ -46,22 +46,6 @@ function Header({ onBack }: { onBack: () => void }) {
       <Text style={styles.headerTitle}>Checklist Pré-Sessão</Text>
       {/* spacer to center the title */}
       <View style={styles.backBtn} />
-    </View>
-  );
-}
-
-function ProgressBar({ current, total }: { current: number; total: number }) {
-  return (
-    <View style={styles.progressRow}>
-      {Array.from({ length: total }).map((_, i) => (
-        <View
-          key={i}
-          style={[
-            styles.progressSeg,
-            i < current ? styles.progressActive : styles.progressInactive,
-          ]}
-        />
-      ))}
     </View>
   );
 }
@@ -140,12 +124,10 @@ function EnvConditions({
       <Text style={styles.sectionLabel}>Condições ambientais</Text>
       <View style={styles.envRow}>
         <View style={[styles.card, styles.envCard]}>
-          <Text style={styles.envIcon}>🌡</Text>
           <Text style={styles.envLabel}>TEMP.</Text>
           <Text style={styles.envValue}>{temp}°C</Text>
         </View>
         <View style={[styles.card, styles.envCard]}>
-          <Text style={[styles.envIcon, { color: '#1976d2' }]}>💨</Text>
           <Text style={styles.envLabel}>UMIDADE</Text>
           <Text style={styles.envValue}>{humidity}%</Text>
         </View>
@@ -168,11 +150,6 @@ export default function ChecklistPreSessao() {
   return (
     <View style={styles.container}>
       <Header onBack={() => router.back()} />
-
-      <View style={styles.redBg}>
-        <ProgressBar current={1} total={3} />
-      </View>
-
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -220,21 +197,8 @@ const styles = StyleSheet.create({
   backBtn: { width: 32 },
   backArrow: { color: '#fff', fontSize: 28, lineHeight: 32, fontWeight: '300' },
   headerTitle: { color: '#fff', fontSize: 16, fontWeight: '700', letterSpacing: 0.2 },
-
-  progressRow: {
-    flexDirection: 'row',
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-  },
-  progressSeg: { flex: 1, height: 4, borderRadius: 2 },
-  progressActive: { backgroundColor: '#4caf50' },
-  progressInactive: { backgroundColor: 'rgba(255,255,255,0.35)' },
-
   scroll: { flex: 1 },
   scrollContent: { padding: 16, gap: 14, paddingBottom: 32 },
-
-
   card: {
     backgroundColor: '#fff',
     borderRadius: CARD_RADIUS,
