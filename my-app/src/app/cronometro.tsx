@@ -155,8 +155,8 @@ export default function CronometroScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity 
-          style={styles.btnEncerrar} 
-          // onPress={() => router.push('')}
+          style={styles.btnEncerrar}
+          onPress={() => router.push('/checklist-pos-sessao')}
           >
             <Text style={styles.btnAcaoIcon}>⏹</Text>
             <Text style={styles.btnAcaoTexto}>Encerrar</Text>

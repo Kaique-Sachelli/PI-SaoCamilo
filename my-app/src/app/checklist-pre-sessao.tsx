@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  SafeAreaView,
   Platform,
 } from 'react-native';
 import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 type UrineLevel = {
@@ -32,23 +32,6 @@ const URINE_LEVELS: UrineLevel[] = [
   { id: 8, bg: '#4E342E', textColor: '#f5f0ee', badge: 'Hidratação insuficiente', badgeBg: '#ffebee', badgeText: '#b71c1c' },
 ];
 
-function Header({ onBack }: { onBack: () => void }) {
-  const insets = useSafeAreaInsets();
-  return (
-    <View style={[styles.headerWrap, { paddingTop: insets.top }]}>
-      <TouchableOpacity 
-      onPress={() => router.push('/homepage_atleta')} 
-      style={styles.backBtn} 
-      hitSlop={12}
-      >
-        <Text style={styles.backArrow}>‹</Text>
-      </TouchableOpacity>
-      <Text style={styles.headerTitle}>Checklist Pré-Sessão</Text>
-      {/* spacer to center the title */}
-      <View style={styles.backBtn} />
-    </View>
-  );
-}
 
 function WeightInput({
   value,
@@ -148,8 +131,14 @@ export default function ChecklistPreSessao() {
   }
 
   return (
-    <View style={styles.container}>
-      <Header onBack={() => router.back()} />
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.push('/homepage_atleta')} style={styles.voltarBtn}>
+          <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitulo}>Checklist Pré-Sessão</Text>
+      </View>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -170,7 +159,7 @@ export default function ChecklistPreSessao() {
           <Text style={styles.startBtnText}>Iniciar sessão  →</Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -185,18 +174,25 @@ const styles = StyleSheet.create({
   },
 
 
-  redBg: { backgroundColor: RED },
-  headerWrap: {
-    backgroundColor: RED,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  header: {
+    backgroundColor: '#B3151F',
+    paddingTop: Platform.OS === 'android' ? 40 : 10,
+    paddingBottom: 18,
     paddingHorizontal: 16,
-    paddingBottom: 10,
   },
-  backBtn: { width: 32 },
-  backArrow: { color: '#fff', fontSize: 28, lineHeight: 32, fontWeight: '300' },
-  headerTitle: { color: '#fff', fontSize: 16, fontWeight: '700', letterSpacing: 0.2 },
+  voltarBtn: {
+    marginBottom: 4,
+  },
+  voltarTexto: {
+    color: '#ffffff',
+    fontSize: 14,
+    opacity: 0.85,
+  },
+  headerTitulo: {
+    color: '#ffffff',
+    fontSize: 24,
+    fontWeight: '700',
+  },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, gap: 14, paddingBottom: 32 },
   card: {
@@ -265,7 +261,7 @@ const styles = StyleSheet.create({
 
 
   startBtn: {
-    backgroundColor: '#43a047',
+    backgroundColor: '#22C55E',
     borderRadius: 14,
     paddingVertical: 15,
     alignItems: 'center',
