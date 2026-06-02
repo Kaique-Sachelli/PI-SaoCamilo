@@ -1,7 +1,39 @@
 import { Text, View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context"
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+
+function BottomNav() {
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  return (
+    <View style={[styles.bottomNav, { paddingBottom: insets.bottom + 8 }]}>
+      <TouchableOpacity style={styles.navItem}>
+        <Text style={[styles.navIcon, styles.navIconActive]}>⌂</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.navItem}>
+        <Text style={styles.navIcon}>∿</Text>
+      </TouchableOpacity>
+      <TouchableOpacity 
+      style={styles.navItem}
+      onPress={() => router.push('/historico_atleta')}
+      >
+        <Text style={styles.navIcon}>☰</Text>
+      </TouchableOpacity>
+      <TouchableOpacity 
+      style={styles.navItem}
+      
+      >
+        <Text style={styles.navIcon}>◯</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 
 export default function Perfil() {
+  const router = useRouter();
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.header}>
@@ -59,6 +91,7 @@ export default function Perfil() {
           </View>
         </View>
       </View>
+      <BottomNav />
     </SafeAreaView>
   );
 }
@@ -190,4 +223,14 @@ const styles = StyleSheet.create({
     width: 27,
     height: 30,
   },
+  bottomNav: {
+  backgroundColor: '#fff',
+  borderTopWidth: 1,
+  borderTopColor: '#e8e8e8',
+  flexDirection: 'row',
+  paddingTop: 10,
+  },
+  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  navIcon: { fontSize: 22, color: '#aaa' },
+  navIconActive: { color: '#C92E2B' },
 });
