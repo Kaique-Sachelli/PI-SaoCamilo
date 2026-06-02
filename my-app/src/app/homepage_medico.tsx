@@ -21,13 +21,13 @@ const ATLETAS = [
   { id: 5, nome: 'Márcia Figueiras',  esporte: 'Natação', ativo: true,  foto: null },
 ];
 
-const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9'];
-
 function iniciais(nome: string) {
   return nome.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
 }
 
-export default function ListaAtletas() {
+const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9'];
+
+export default function HomepageTreinador() {
   const router = useRouter();
   const [busca, setBusca] = useState('');
 
@@ -43,34 +43,41 @@ export default function ListaAtletas() {
       resizeMode="cover"
     >
       <SafeAreaView style={styles.safeArea}>
-
         {/* ── Header ── */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
-            <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitulo}>Atletas</Text>
+          <View style={styles.headerTop}>
+            <View>
+              <Text style={styles.titulo}>São Camilo</Text>
+              <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
+            </View>
+            <View style={styles.sinoWrap}>
+              <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
+              <View style={styles.sinoDot} />
+            </View>
+          </View>
+          <Text style={styles.funcao}>Olá, Treinador</Text>
         </View>
 
+        {/* ── Conteúdo ── */}
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* ── Barra de pesquisa ── */}
+          {/* Barra de pesquisa */}
           <View style={styles.searchRow}>
             <Text style={styles.searchIcone}>🔍</Text>
             <TextInput
               style={styles.searchInput}
               placeholder="Pesquisar"
-              placeholderTextColor="#bbb"
+              placeholderTextColor="#aaa"
               value={busca}
               onChangeText={setBusca}
             />
           </View>
 
-          {/* ── Cabeçalho lista ── */}
+          {/* Cabeçalho da lista */}
           <View style={styles.listHeader}>
             <Text style={styles.listTitulo}>Meu time</Text>
             <TouchableOpacity
@@ -82,13 +89,13 @@ export default function ListaAtletas() {
             </TouchableOpacity>
           </View>
 
-          {/* ── Lista de atletas ── */}
+          {/* Lista de atletas */}
           {atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
               key={atleta.id}
               style={styles.atletaCard}
               activeOpacity={0.75}
-              onPress={() => router.push('/TelaAtleta')}
+              onPress={() => router.push('/sessoes_treinador')}
             >
               <View style={styles.atletaLeft}>
                 {atleta.foto ? (
@@ -114,7 +121,7 @@ export default function ListaAtletas() {
 
         {/* ── Bottom Nav ── */}
         <View style={styles.navbar}>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_adm')}>
+          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_treinador')}>
             <Image source={require('./assets/Img/homepage.png')} style={styles.navImg} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.navItem}>
@@ -127,7 +134,6 @@ export default function ListaAtletas() {
             <Image source={require('./assets/Img/perfil2.png')} style={styles.navImg} />
           </TouchableOpacity>
         </View>
-
       </SafeAreaView>
     </ImageBackground>
   );
@@ -143,18 +149,32 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: RED,
     paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 24,
+    paddingTop: 12,
+    paddingBottom: 28,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
-  voltarBtn: { marginBottom: 4 },
-  voltarTexto: { color: 'rgba(255,255,255,0.8)', fontSize: 14 },
-  headerTitulo: { color: '#fff', fontSize: 32, fontWeight: '700' },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 24,
+  },
+  titulo: { fontSize: 28, color: '#fff', fontWeight: '700' },
+  subtitulo: { fontSize: 16, color: 'rgba(255,255,255,0.75)', fontWeight: '300', marginTop: 2 },
+  sinoWrap: { position: 'relative', marginTop: 4 },
+  sino: { width: 28, height: 28, tintColor: '#fff' },
+  sinoDot: {
+    position: 'absolute', top: 0, right: 0,
+    width: 9, height: 9, borderRadius: 5,
+    backgroundColor: '#FF9800',
+    borderWidth: 1.5, borderColor: RED,
+  },
+  funcao: { fontSize: 20, color: '#fff', fontWeight: '700' },
 
   // Scroll
   scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 24, gap: 10 },
+  scrollContent: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
 
   // Search
   searchRow: {
@@ -164,24 +184,26 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: Platform.OS === 'ios' ? 10 : 6,
+    marginBottom: 6,
     ...Platform.select({
       ios: { boxshadow: '0px 1px 4px rgba(0,0,0,0.08)' },
       android: { elevation: 2 },
       web: { boxshadow: '0px 1px 4px rgba(0,0,0,0.08)' },
     }),
   },
-  searchIcone: { fontSize: 15, marginRight: 8, opacity: 0.45 },
-  searchInput: { flex: 1, fontSize: 14, color: '#333' },
+  searchIcone: { fontSize: 16, marginRight: 8, opacity: 0.5 },
+  searchInput: { flex: 1, fontSize: 15, color: '#333' },
 
   // List header
   listHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 4,
   },
   listTitulo: { fontSize: 16, fontWeight: '700', color: '#111' },
   gerenciarBtn: { flexDirection: 'row', alignItems: 'center' },
-  gerenciarTexto: { fontSize: 14, color: RED, fontWeight: '600' },
+  gerenciarTexto: { fontSize: 15, color: RED, fontWeight: '600' },
   gerenciarIcone: { width: 18, height: 16, tintColor: RED },
 
   // Athlete cards
@@ -200,7 +222,7 @@ const styles = StyleSheet.create({
     }),
   },
   atletaLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  atletaAvatar: { width: 46, height: 46, borderRadius: 23 },
+  atletaAvatar: { width: 44, height: 44, borderRadius: 22 },
   atletaAvatarPlaceholder: { justifyContent: 'center', alignItems: 'center' },
   atletaIniciais: { color: '#fff', fontWeight: '700', fontSize: 15 },
   atletaInfo: { gap: 2 },
@@ -210,7 +232,7 @@ const styles = StyleSheet.create({
   statusDot: { width: 12, height: 12, borderRadius: 6 },
   dotVerde: { backgroundColor: '#4CAF50' },
   dotVermelho: { backgroundColor: '#e53935' },
-  atletaSeta: { fontSize: 22, color: '#ccc' },
+  atletaSeta: { fontSize: 22, color: '#ccc', fontWeight: '300' },
 
   // Navbar
   navbar: {
