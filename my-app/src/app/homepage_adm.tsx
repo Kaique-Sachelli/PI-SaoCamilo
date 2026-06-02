@@ -1,178 +1,183 @@
-import { Text, View, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context"
+import {
+  Text,
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ImageBackground,
+  Platform,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+
+const MENU = [
+  { id: 1, icone: require('./assets/Img/solicitacoes.png'),  label: 'Solicitações de cadastro', rota: '/cadastro'              },
+  { id: 2, icone: require('./assets/Img/gerenciar.png'),     label: 'Gerenciar Usuários',        rota: '/TelaGerenciarAtletas'  },
+  { id: 3, icone: require('./assets/Img/batimento2.png'),    label: 'Ver Atletas',               rota: '/TelaAtleta'            },
+];
 
 export default function HomepageAdm() {
+  const router = useRouter();
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.header}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={styles.titulo}>São Camilo</Text>
-          <TouchableOpacity>
-            <Image source={require("./assets/Img/sino.png")} style={styles.sino} />
+    <ImageBackground
+      source={require('./assets/Img/Background.png')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <SafeAreaView style={styles.safeArea}>
+
+        {/* ── Header ── */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <View>
+              <Text style={styles.titulo}>Hidra Pro-formance</Text>
+              <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
+            </View>
+            <View style={styles.sinoWrap}>
+              <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
+              <View style={styles.sinoDot} />
+            </View>
+          </View>
+          <Text style={styles.funcao}>Olá, Administrador</Text>
+        </View>
+
+        {/* ── Conteúdo ── */}
+        <View style={styles.conteudo}>
+
+          {/* Gráfico */}
+          <View style={styles.graficoCard}>
+            <Image source={require('./assets/Img/grafico.png')} style={styles.grafico} />
+          </View>
+
+          {/* Painel */}
+          <Text style={styles.painelLabel}>Painel</Text>
+
+          {MENU.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.menuCard}
+              activeOpacity={0.75}
+              onPress={() => router.push(item.rota as any)}
+            >
+              <View style={styles.menuEsquerda}>
+                <Image source={item.icone} style={styles.menuIcone} />
+                <Text style={styles.menuTexto}>{item.label}</Text>
+              </View>
+              <Text style={styles.menuSeta}>›</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* ── Bottom Nav ── */}
+        <View style={styles.navbar}>
+          <TouchableOpacity style={styles.navItem}>
+            <Image source={require('./assets/Img/homepage.png')} style={styles.navImg} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem}>
+            <Image source={require('./assets/Img/batimento3.png')} style={styles.navImg} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem}>
+            <Image source={require('./assets/Img/documento.png')} style={styles.navImg} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem}>
+            <Image source={require('./assets/Img/perfil2.png')} style={styles.navImg} />
           </TouchableOpacity>
         </View>
-        <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
-        <Text style={styles.funcao}>Olá, Administrador</Text>
-      </View>
 
-      <View style={styles.conteudo}>
-        <View style={styles.container}>
-          <View style={{ alignSelf: "center" }}>
-            <Image source={require("./assets/Img/grafico.png")} style={styles.grafico} />
-          </View>
-        </View>
-        <Text style={styles.painel}>Painel</Text>
-        <View style={styles.containerMenor}>
-          <View style={styles.row}>
-            <View style={{ flexDirection: "row" }}>
-              <Image source={require("./assets/Img/solicitacoes.png")} style={styles.icone} />
-              <Text style={styles.texto}>Solicitações de cadastro</Text>
-            </View>
-            <Image source={require("./assets/Img/seta-direita2.png")} style={styles.seta} />
-          </View>
-        </View>
-        <View style={styles.containerMenor}>
-          <View style={styles.row}>
-            <View style={{ flexDirection: "row" }}>
-              <Image source={require("./assets/Img/gerenciar.png")} style={styles.icone} />
-              <Text style={styles.texto}>Gerenciar Usuários</Text>
-            </View>
-            <Image source={require("./assets/Img/seta-direita2.png")} style={styles.seta} />
-          </View>
-        </View>
-        <View style={styles.containerMenor}>
-          <View style={styles.row}>
-            <View style={{ flexDirection: "row" }}>
-              <Image source={require("./assets/Img/batimento2.png")} style={styles.icone} />
-              <Text style={styles.texto}>Ver Atletas</Text>
-            </View>
-            <Image source={require("./assets/Img/seta-direita2.png")} style={styles.seta} />
-          </View>
-        </View>
-      </View>
-      <View style={styles.navbar}>
-        <TouchableOpacity>
-          <Image source={require("./assets/Img/homepage.png")} style={styles.homepage} />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image source={require("./assets/Img/batimento3.png")} style={styles.batimento} />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image source={require("./assets/Img/documento.png")} style={styles.documento} />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image source={require("./assets/Img/perfil2.png")} style={styles.perfil} />
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
+const RED = '#B3151F';
+
 const styles = StyleSheet.create({
+  background: { flex: 1 },
+  safeArea: { flex: 1, backgroundColor: 'transparent' },
+
+  // Header
   header: {
-    backgroundColor: "#E32429",
-    padding: 20,
-    paddingBottom: 50,
-    borderBottomEndRadius: 50,
-    borderBottomStartRadius: 50,
+    backgroundColor: RED,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 28,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
-  titulo: {
-    fontSize: 32,
-    color: "#FFF",
-    fontWeight: "700",
-  },
-  sino: {
-    alignSelf: "center",
-    width: 32,
-    height: 32,
-  },
-  subtitulo: {
-    fontSize: 20,
-    color: "#ffffff",
-    fontWeight: "200",
-    marginBottom: 50,
-  },
-  funcao: {
-    fontSize: 20,
-    color: "#ffffff",
-    fontWeight: "600",
-  },
-  conteudo: {
-    flex: 1,
-    padding: 25,
-  },
-  container: {
-    backgroundColor: "#F6F6F6",
-    borderWidth: 1,
-    borderColor: "#b7b7b7",
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 30,
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 20,
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  titulo: { fontSize: 26, color: '#fff', fontWeight: '700' },
+  subtitulo: { fontSize: 15, color: 'rgba(255,255,255,0.75)', fontWeight: '300', marginTop: 2 },
+  sinoWrap: { position: 'relative', marginTop: 4 },
+  sino: { width: 28, height: 28, tintColor: '#fff' },
+  sinoDot: {
+    position: 'absolute', top: 0, right: 0,
+    width: 9, height: 9, borderRadius: 5,
+    backgroundColor: '#FF9800',
+    borderWidth: 1.5, borderColor: RED,
   },
-  grafico: {
-    width: 175,
-    height: 166,
+  funcao: { fontSize: 20, color: '#fff', fontWeight: '700' },
+
+  // Conteúdo
+  conteudo: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    gap: 10,
   },
-  painel: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginLeft: 5,
-    marginBottom: 10,
+
+  // Gráfico
+  graficoCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    alignItems: 'center',
+    paddingVertical: 20,
+    marginBottom: 4,
+    ...Platform.select({
+      ios: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' },
+      android: { elevation: 2 },
+      web: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' },
+    }),
   },
-  containerMenor: {
-    backgroundColor: "#F6F6F6",
-    borderWidth: 1,
-    borderColor: "#b7b7b7",
-    borderRadius: 10,
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    marginBottom: 10,
+  grafico: { width: 180, height: 170, resizeMode: 'contain' },
+
+  // Painel label
+  painelLabel: { fontSize: 15, fontWeight: '600', color: '#333', marginLeft: 2 },
+
+  // Menu cards
+  menuCard: {
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    ...Platform.select({
+      ios: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' },
+      android: { elevation: 2 },
+      web: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' },
+    }),
   },
-  texto: {
-    fontSize: 16,
-    fontWeight: "600",
-    alignSelf: "center"
-  },
-  icone: {
-    width: 20,
-    height: 20,
-    marginRight: 20,
-    alignSelf: "center"
-  },
-  seta: {
-    width: 8,
-    height: 12,
-    alignSelf: "center"
-  },
+  menuEsquerda: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  menuIcone: { width: 22, height: 22, resizeMode: 'contain', tintColor: RED },
+  menuTexto: { fontSize: 15, fontWeight: '600', color: '#111' },
+  menuSeta: { fontSize: 22, color: '#ccc' },
+
+  // Navbar
   navbar: {
-    backgroundColor: "#ccc",
-    padding: 25,
-    flexDirection: "row",
-    justifyContent: "space-around"
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
   },
-  homepage: {
-    alignSelf: "center",
-    width: 30,
-    height: 33,
-  },
-  batimento: {
-    alignSelf: "center",
-    width: 33,
-    height: 30,
-  },
-  documento: {
-    alignSelf: "center",
-    width: 27,
-    height: 33,
-  },
-  perfil: {
-    alignSelf: "center",
-    width: 27,
-    height: 30,
-  },
+  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  navImg: { width: 26, height: 26, resizeMode: 'contain' },
 });
