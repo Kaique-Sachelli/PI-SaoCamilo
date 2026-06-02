@@ -29,7 +29,7 @@ export default function TelaDetalhesTreino() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="chevron-back" size={24} color="#fff" />
+          {/* <Ionicons name="chevron-back" size={24} color="#fff" /> */}
         </TouchableOpacity>
 
         <Text style={styles.titulo}>
@@ -56,11 +56,11 @@ export default function TelaDetalhesTreino() {
                 Tempo Total
               </Text>
 
-              <Ionicons
+              {/* <Ionicons
                 name="time-outline"
                 size={18}
                 color="#D91C23"
-              />
+              /> */}
             </View>
 
             <View style={styles.cardValorContainer}>
@@ -82,11 +82,11 @@ export default function TelaDetalhesTreino() {
                 Hidratação
               </Text>
 
-              <Ionicons
+              {/* <Ionicons
                 name="water-outline"
                 size={18}
                 color="#D91C23"
-              />
+              /> */}
             </View>
 
             <View style={styles.cardValorContainer}>
@@ -191,11 +191,11 @@ export default function TelaDetalhesTreino() {
         <View style={styles.infoCard}>
 
           <View style={styles.iconText}>
-            <Ionicons
+            {/* <Ionicons
               name="thermometer-outline"
               size={18}
               color="#D91C23"
-            />
+            /> */}
             <Text style={styles.infoLabel}>
               Temperatura
             </Text>
@@ -210,11 +210,11 @@ export default function TelaDetalhesTreino() {
         <View style={styles.infoCard}>
 
           <View style={styles.iconText}>
-            <Ionicons
+            {/* <Ionicons
               name="water-outline"
               size={18}
               color="#D91C23"
-            />
+            /> */}
             <Text style={styles.infoLabel}>
               Umidade
             </Text>
@@ -229,11 +229,11 @@ export default function TelaDetalhesTreino() {
         <View style={styles.infoCard}>
 
           <View style={styles.iconText}>
-            <MaterialCommunityIcons
+            {/* <MaterialCommunityIcons
               name="basketball"
               size={18}
               color="#D91C23"
-            />
+            /> */}
             <Text style={styles.infoLabel}>
               Esporte
             </Text>
@@ -248,11 +248,11 @@ export default function TelaDetalhesTreino() {
         <View style={styles.infoCard}>
 
           <View style={styles.iconText}>
-            <Ionicons
+            {/* <Ionicons
               name="pulse-outline"
               size={18}
               color="#D91C23"
-            />
+            /> */}
             <Text style={styles.infoLabel}>
               Intensidade
             </Text>
@@ -270,22 +270,22 @@ export default function TelaDetalhesTreino() {
             style={styles.button}
             onPress={() => alert('Download iniciado')}
           >
-            <Ionicons
+            {/* <Ionicons
               name="download-outline"
               size={22}
               color="#fff"
-            />
+            /> */}
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.button}
             onPress={() => alert('Relatório gerado')}
           >
-            <Ionicons
+            {/* <Ionicons
               name="document-text-outline"
               size={22}
               color="#fff"
-            />
+            /> */}
           </TouchableOpacity>
 
         </View>
@@ -297,41 +297,41 @@ export default function TelaDetalhesTreino() {
         <TouchableOpacity
           onPress={() => router.push('/homepage_treinador')}
         >
-          <Ionicons
+          {/* <Ionicons
             name="home-outline"
             size={26}
             color="#222"
-          />
+          /> */}
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => router.push('/TelaDetalhesTreino')}
         >
-          <Ionicons
+          {/* <Ionicons
             name="pulse"
             size={26}
             color="#D91C23"
-          />
+          /> */}
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => router.push('/checklist-pre-sessao')}
         >
-          <Ionicons
+          {/* <Ionicons
             name="document-text-outline"
             size={26}
             color="#222"
-          />
+          /> */}
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => router.push('/perfil')}
         >
-          <Ionicons
+          {/* <Ionicons
             name="person-outline"
             size={26}
             color="#222"
-          />
+          /> */}
         </TouchableOpacity>
 
       </View>
