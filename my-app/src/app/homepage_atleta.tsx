@@ -1,7 +1,34 @@
 import { Text, View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context"
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+function BottomNav() {
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  return (
+    <View style={[styles.bottomNav, { paddingBottom: insets.bottom + 8 }]}>
+      <TouchableOpacity style={styles.navItem}>
+        <Text style={[styles.navIcon, styles.navIconActive]}>⌂</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.navItem}>
+        <Text style={styles.navIcon}>∿</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.navItem}>
+        <Text style={styles.navIcon}>☰</Text>
+      </TouchableOpacity>
+      <TouchableOpacity 
+      style={styles.navItem}
+      onPress={() => router.push('/perfil')}
+      >
+        <Text style={styles.navIcon}>◯</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
 
 export default function HomepageAtleta() {
+  const router = useRouter();
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.header}>
@@ -46,24 +73,15 @@ export default function HomepageAtleta() {
             </View>
           </View>
         </View>
-        <TouchableOpacity style={styles.botao}>
+        <TouchableOpacity 
+        style={styles.botao}
+        onPress={() => router.push('/checklist-pre-sessao')}
+        >
           <Text style={styles.textoBranco}>PRONTO PARA TREINAR?</Text>
+          
         </TouchableOpacity>
       </View>
-      <View style={styles.navbar}>
-        <TouchableOpacity>
-          <Image source={require("./assets/Img/homepage.png")} style={styles.homepage}/>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image source={require("./assets/Img/batimento3.png")} style={styles.batimento}/>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image source={require("./assets/Img/documento.png")} style={styles.documento}/>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image source={require("./assets/Img/perfil2.png")} style={styles.perfil}/>
-        </TouchableOpacity>
-      </View>
+      <BottomNav />
     </SafeAreaView>
   );
 }
@@ -207,4 +225,14 @@ const styles = StyleSheet.create({
     width: 27,
     height: 30,
   },
+    bottomNav: {
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#e8e8e8',
+    flexDirection: 'row',
+    paddingTop: 10,
+  },
+  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  navIcon: { fontSize: 22, color: '#aaa' },
+  navIconActive: { color: '#C92E2B' },
 });

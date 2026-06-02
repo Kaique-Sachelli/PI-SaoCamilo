@@ -36,7 +36,11 @@ function Header({ onBack }: { onBack: () => void }) {
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.headerWrap, { paddingTop: insets.top }]}>
-      <TouchableOpacity onPress={onBack} style={styles.backBtn} hitSlop={12}>
+      <TouchableOpacity 
+      // onPress={() => router.push('')} 
+      style={styles.backBtn} 
+      hitSlop={12}
+      >
         <Text style={styles.backArrow}>‹</Text>
       </TouchableOpacity>
       <Text style={styles.headerTitle}>Checklist Pré-Sessão</Text>
@@ -150,26 +154,6 @@ function EnvConditions({
   );
 }
 
-function BottomNav() {
-  const insets = useSafeAreaInsets();
-  return (
-    <View style={[styles.bottomNav, { paddingBottom: insets.bottom + 8 }]}>
-      <TouchableOpacity style={styles.navItem}>
-        <Text style={[styles.navIcon, styles.navIconActive]}>⌂</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem}>
-        <Text style={styles.navIcon}>∿</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem}>
-        <Text style={styles.navIcon}>☰</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem}>
-        <Text style={styles.navIcon}>◯</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
 export default function ChecklistPreSessao() {
   const [weight, setWeight] = useState('72,5');
   const [selectedUrine, setSelectedUrine] = useState(2);
@@ -201,12 +185,14 @@ export default function ChecklistPreSessao() {
 
         <EnvConditions temp={temp} humidity={humidity} />
 
-        <TouchableOpacity style={styles.startBtn} activeOpacity={0.85} onPress={handleStart}>
+        <TouchableOpacity 
+        style={styles.startBtn} 
+        activeOpacity={0.85} 
+        onPress={() => router.push('/cronometro')}
+        >
           <Text style={styles.startBtnText}>Iniciar sessão  →</Text>
         </TouchableOpacity>
       </ScrollView>
-
-      <BottomNav />
     </View>
   );
 }
@@ -323,16 +309,4 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   startBtnText: { color: '#fff', fontSize: 16, fontWeight: '700', letterSpacing: 0.3 },
-
-
-  bottomNav: {
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#e8e8e8',
-    flexDirection: 'row',
-    paddingTop: 10,
-  },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navIcon: { fontSize: 22, color: '#aaa' },
-  navIconActive: { color: RED },
 });
