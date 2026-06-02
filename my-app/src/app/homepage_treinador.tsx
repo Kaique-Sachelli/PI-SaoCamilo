@@ -95,7 +95,7 @@ export default function HomepageTreinador() {
               key={atleta.id}
               style={styles.atletaCard}
               activeOpacity={0.75}
-              onPress={() => router.push('/TelaAtleta')}
+              onPress={() => router.push('/sessoes_treinador')}
             >
               <View style={styles.atletaLeft}>
                 {atleta.foto ? (
