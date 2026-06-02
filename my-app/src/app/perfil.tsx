@@ -58,37 +58,6 @@ export default function Perfil() {
             </View>
           </View>
         </View>
-        <View style={styles.container}>
-          <Text style={styles.topico}>Configurações</Text>
-          <View style={styles.row}>
-            <View style={{ flexDirection: "row" }}>
-              <Image source={require("./assets/Img/configuracao.png")} style={styles.config} />
-              <Text style={styles.texto}>Preferências</Text>
-            </View>
-            <Image source={require("./assets/Img/seta-direita2.png")} style={styles.seta} />
-          </View>
-          <View style={styles.row}>
-            <View style={{ flexDirection: "row" }}>
-              <Image source={require("./assets/Img/perfil.png")} style={styles.config} />
-              <Text style={styles.texto}>Editar Perfil</Text>
-            </View>
-            <Image source={require("./assets/Img/seta-direita2.png")} style={styles.seta} />
-          </View>
-        </View>
-      </View>
-      <View style={styles.navbar}>
-        <TouchableOpacity>
-          <Image source={require("./assets/Img/homepage.png")} style={styles.homepage} />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image source={require("./assets/Img/batimento3.png")} style={styles.batimento} />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image source={require("./assets/Img/documento.png")} style={styles.documento} />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image source={require("./assets/Img/perfil2.png")} style={styles.perfil} />
-        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -96,7 +65,7 @@ export default function Perfil() {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: "#E32429",
+    backgroundColor: "#C92E2B",
     padding: 20,
     paddingBottom: 70,
     borderBottomEndRadius: 30,
@@ -132,10 +101,10 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   container: {
-    backgroundColor: "#F6F6F6",
-    borderWidth: 1,
-    borderColor: "#b7b7b7",
-    borderRadius: 15,
+    backgroundColor: "#ffffff",
+    borderWidth: 0.5,
+    borderColor: "#747474",
+    borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 30,
     marginBottom: 20,

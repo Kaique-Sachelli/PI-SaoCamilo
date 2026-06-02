@@ -58,7 +58,10 @@ export default function ChecklistPosSessaoScreen() {
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
+          <TouchableOpacity 
+          onPress={() => router.back()} 
+          style={styles.voltarBtn}
+          >
             <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitulo}>Checklist Pós-Sessão</Text>
@@ -133,7 +136,11 @@ export default function ChecklistPosSessaoScreen() {
           </View>
 
           {/* Botão Salvar */}
-          <TouchableOpacity style={styles.btnSalvar} onPress={handleSalvar} activeOpacity={0.85}>
+          <TouchableOpacity 
+          style={styles.btnSalvar} 
+          onPress={() => router.push('/homepage_atleta')} 
+          activeOpacity={0.85}
+          >
             <Text style={styles.btnSalvarTexto}>Salvar e encerrar</Text>
           </TouchableOpacity>
         </ScrollView>
