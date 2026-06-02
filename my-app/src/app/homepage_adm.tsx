@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 const MENU = [
-  { id: 1, icone: require('./assets/Img/solicitacoes.png'),  label: 'Solicitações de cadastro', rota: '/cadastro'              },
+  { id: 1, icone: require('./assets/Img/solicitacoes.png'),  label: 'Solicitações de cadastro', rota: '/solicitacoes_cadastro'              },
   { id: 2, icone: require('./assets/Img/gerenciar.png'),     label: 'Gerenciar Usuários',        rota: '/TelaGerenciarAtletas'  },
   { id: 3, icone: require('./assets/Img/batimento2.png'),    label: 'Ver Atletas',               rota: '/TelaAtleta'            },
 ];
