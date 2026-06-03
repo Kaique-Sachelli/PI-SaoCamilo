@@ -1,236 +1,251 @@
-import { Text, View, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context"
+import {
+  Text,
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ImageBackground,
+  Platform,
+  Alert,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-
-function BottomNav() {
-  const insets = useSafeAreaInsets();
-  const router = useRouter();
-  return (
-    <View style={[styles.bottomNav, { paddingBottom: insets.bottom + 8 }]}>
-      <TouchableOpacity style={styles.navItem}>
-        <Text style={[styles.navIcon, styles.navIconActive]}>⌂</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem}>
-        <Text style={styles.navIcon}>∿</Text>
-      </TouchableOpacity>
-      <TouchableOpacity 
-      style={styles.navItem}
-      onPress={() => router.push('/historico_atleta')}
-      >
-        <Text style={styles.navIcon}>☰</Text>
-      </TouchableOpacity>
-      <TouchableOpacity 
-      style={styles.navItem}
-      
-      >
-        <Text style={styles.navIcon}>◯</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
 
 export default function Perfil() {
   const router = useRouter();
+
+  const handleSair = () => {
+    Alert.alert('Sair', 'Deseja encerrar a sessão?', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Sair', style: 'destructive', onPress: () => router.replace('/login') },
+    ]);
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.header}>
-        <TouchableOpacity>
-          <Image source={require("./assets/Img/sino.png")} style={styles.sino} />
-        </TouchableOpacity>
-        <View style={{ alignSelf: "center" }}>
-          <Image source={require("./assets/Img/marcus.jpg")} style={styles.atleta} />
-          <Text style={styles.nome}>Kaique</Text>
-          <Text style={styles.subtitulo}>Volêi • Arremessador</Text>
+    <ImageBackground
+      source={require('./assets/Img/Background.png')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <SafeAreaView style={styles.safeArea}>
+
+        {/* ── Header ── */}
+        <View style={styles.header}>
+          {/* Sino */}
+          <View style={styles.sinoWrap}>
+            <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
+            <View style={styles.sinoDot} />
+          </View>
+
+          {/* Avatar centralizado */}
+          <View style={styles.avatarWrap}>
+            <Image source={require('./assets/Img/marcus.jpg')} style={styles.avatar} />
+          </View>
+
+          <Text style={styles.nome}>Kacique</Text>
+          <Text style={styles.posicao}>Vôlei  •  Arremessador</Text>
         </View>
-      </View>
-      <View style={styles.conteudo}>
-        <View style={styles.container}>
-          <Text style={styles.topico}>Informações Pessoais</Text>
-          <View style={styles.linha}>
-            <Image source={require("./assets/Img/email.png")} style={styles.icone} />
-            <View>
-              <Text style={styles.subtopico}>E-mail:</Text>
-              <Text style={styles.info}>carlinmaia@gmail.com</Text>
-            </View>
-          </View>
-          <View style={styles.linha}>
-            <Image source={require("./assets/Img/telefone.png")} style={styles.icone} />
-            <View>
-              <Text style={styles.subtopico}>Telefone:</Text>
-              <Text style={styles.info}>(55)11 4002-8922</Text>
-            </View>
-          </View>
-          <View style={styles.linha}>
-            <Image source={require("./assets/Img/idade.png")} style={styles.icone} />
-            <View>
-              <Text style={styles.subtopico}>Idade:</Text>
-              <Text style={styles.info}>45 anos</Text>
-            </View>
-          </View>
-        </View>
-        <View style={styles.container}>
-          <Text style={styles.topico}>Perfil Atlético</Text>
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <View style={styles.vermelho}>
-              <Image source={require("./assets/Img/batimento.png")} style={styles.batida} />
-              <View style={{ alignSelf: "center" }}>
-                <Text style={styles.subtopico}>Altura</Text>
-                <Text style={styles.info}>177 cm</Text>
+
+        {/* ── Conteúdo ── */}
+        <View style={styles.conteudo}>
+
+          {/* Card Informações Pessoais */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitulo}>Informações Pessoais</Text>
+
+            <View style={styles.linhaInfo}>
+              <Image source={require('./assets/Img/email.png')} style={styles.icone} />
+              <View>
+                <Text style={styles.linhaLabel}>E-mail:</Text>
+                <Text style={styles.linhaValor}>carlinmaia@gmail.com</Text>
               </View>
             </View>
-            <View style={styles.vermelho}>
-              <Image source={require("./assets/Img/batimento.png")} style={styles.batida} />
-              <View style={{ alignSelf: "center" }}>
-                <Text style={styles.subtopico}>Peso</Text>
-                <Text style={styles.info}>78 kg</Text>
+
+            <View style={styles.linhaInfo}>
+              <Image source={require('./assets/Img/telefone.png')} style={styles.icone} />
+              <View>
+                <Text style={styles.linhaLabel}>Telefone:</Text>
+                <Text style={styles.linhaValor}>(55)11 4002-8922</Text>
+              </View>
+            </View>
+
+            <View style={styles.linhaInfo}>
+              <Image source={require('./assets/Img/idade.png')} style={styles.icone} />
+              <View>
+                <Text style={styles.linhaLabel}>Idade:</Text>
+                <Text style={styles.linhaValor}>45 anos</Text>
               </View>
             </View>
           </View>
+
+          {/* Card Perfil Atlético */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitulo}>Perfil Atlético</Text>
+            <View style={styles.atleticoRow}>
+              <View style={styles.atleticoItem}>
+                <Image source={require('./assets/Img/batimento.png')} style={styles.atleticoIcone} />
+                <Text style={styles.atleticoLabel}>Altura</Text>
+                <Text style={styles.atleticoValor}>177 cm</Text>
+              </View>
+              <View style={styles.atleticoItem}>
+                <Image source={require('./assets/Img/batimento.png')} style={styles.atleticoIcone} />
+                <Text style={styles.atleticoLabel}>Peso</Text>
+                <Text style={styles.atleticoValor}>78 kg</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Espaçador */}
+          <View style={{ flex: 1 }} />
+
+          {/* Botão Sair */}
+          <TouchableOpacity style={styles.btnSair} onPress={handleSair} activeOpacity={0.8}>
+            <Text style={styles.btnSairIcone}>↪</Text>
+            <Text style={styles.btnSairTexto}>Sair</Text>
+          </TouchableOpacity>
+
         </View>
-      </View>
-      <BottomNav />
-    </SafeAreaView>
+
+        {/* ── Bottom Nav ── */}
+        <View style={styles.navbar}>
+          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_atleta')}>
+            <Image source={require('./assets/Img/homepage.png')} style={styles.navImg} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/historico_atleta')}>
+            <Image source={require('./assets/Img/batimento3.png')} style={styles.navImg} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/checklist-pre-sessao')}>
+            <Image source={require('./assets/Img/documento.png')} style={styles.navImg} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/perfil')}>
+            <Image source={require('./assets/Img/perfil2.png')} style={[styles.navImg, styles.navImgAtivo]} />
+          </TouchableOpacity>
+        </View>
+
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
+const RED = '#B3151F';
+
 const styles = StyleSheet.create({
+  background: { flex: 1 },
+  safeArea: { flex: 1, backgroundColor: 'transparent' },
+
+  // Header
   header: {
-    backgroundColor: "#C92E2B",
-    padding: 20,
-    paddingBottom: 70,
-    borderBottomEndRadius: 30,
-    borderBottomStartRadius: 30,
-    marginBottom: -50,
+    backgroundColor: RED,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 32,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    alignItems: 'center',
   },
-  sino: {
-    alignSelf: 'flex-end',
-    width: 32,
-    height: 32,
+  sinoWrap: {
+    position: 'absolute',
+    top: 14,
+    right: 20,
   },
-  atleta: {
-    width: 60,
-    height: 60,
-    borderRadius: 100,
-    alignSelf: "center",
+  sino: { width: 26, height: 26, tintColor: '#fff' },
+  sinoDot: {
+    position: 'absolute', top: 0, right: 0,
+    width: 8, height: 8, borderRadius: 4,
+    backgroundColor: '#FF9800',
+    borderWidth: 1.5, borderColor: RED,
   },
-  nome: {
-    fontSize: 24,
-    color: "#ffffff",
-    fontWeight: "600",
-    alignSelf: "center",
+  avatarWrap: {
+    marginTop: 16,
+    marginBottom: 10,
+    ...Platform.select({
+      ios: { boxshadow: '0px 4px 12px rgba(0,0,0,0.3)' },
+      android: { elevation: 6 },
+      web: { boxshadow: '0px 4px 12px rgba(0,0,0,0.3)' },
+    }),
   },
-  subtitulo: {
-    fontSize: 20,
-    color: "#ffffff",
-    fontWeight: "200",
-    alignSelf: "center",
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 3,
+    borderColor: '#fff',
   },
+  nome: { fontSize: 22, color: '#fff', fontWeight: '700', marginBottom: 4 },
+  posicao: { fontSize: 15, color: 'rgba(255,255,255,0.85)', fontWeight: '400' },
+
+  // Conteúdo
   conteudo: {
     flex: 1,
-    padding: 25,
-    paddingTop: 0,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 24,
+    gap: 14,
   },
-  container: {
-    backgroundColor: "#ffffff",
-    borderWidth: 0.5,
-    borderColor: "#747474",
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    marginBottom: 20,
+
+  // Cards
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 18,
+    gap: 14,
+    ...Platform.select({
+      ios: { boxshadow: '0px 2px 8px rgba(0,0,0,0.07)' },
+      android: { elevation: 2 },
+      web: { boxshadow: '0px 2px 8px rgba(0,0,0,0.07)' },
+    }),
   },
-  topico: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 20,
+  cardTitulo: { fontSize: 17, fontWeight: '700', color: '#111', marginBottom: 2 },
+
+  // Linhas informações
+  linhaInfo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  icone: { width: 28, height: 28, resizeMode: 'contain' },
+  linhaLabel: { fontSize: 12, color: '#888', marginBottom: 1 },
+  linhaValor: { fontSize: 15, fontWeight: '500', color: '#111' },
+
+  // Perfil atlético
+  atleticoRow: { flexDirection: 'row', gap: 12 },
+  atleticoItem: {
+    flex: 1,
+    backgroundColor: '#ffd2d4',
+    borderRadius: 14,
+    padding: 16,
+    gap: 4,
   },
-  linha: {
-    marginBottom: 20,
-    flexDirection: "row",
-  },
-  row: {
-    marginBottom: 20,
-    flexDirection: "row",
-    justifyContent: "space-between"
-  },
-  icone: {
-    width: 30,
-    height: 30,
-    marginRight: 10,
-    alignSelf: "center",
-  },
-  subtopico: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#6E6E6E",
-  },
-  info: {
-    fontSize: 15,
-    fontWeight: "500",
-  },
-  vermelho: {
-    borderRadius: 20,
-    backgroundColor: "#ffd2d4",
-    padding: 20,
-    width: "45%",
-  },
-  batida: {
-    width: 30,
-    height: 20,
-    marginRight: 5,
-  },
-  texto: {
-    fontSize: 18,
-    fontWeight: "400",
-    marginBottom: 20,
-  },
-  config: {
-    width: 28,
-    height: 28,
-    marginRight: 5,
-  },
-  seta: {
-    width: 8,
-    height: 12,
-    alignSelf: "center"
-  },
+  atleticoIcone: { width: 28, height: 18, resizeMode: 'contain', marginBottom: 4 },
+  atleticoLabel: { fontSize: 13, color: '#555', fontWeight: '500' },
+  atleticoValor: { fontSize: 17, fontWeight: '700', color: '#111' },
+
+  // Navbar
   navbar: {
-    backgroundColor: "#ccc",
-    padding: 25,
-    flexDirection: "row",
-    justifyContent: "space-around"
-  },
-  homepage: {
-    alignSelf: "center",
-    width: 30,
-    height: 33,
-  },
-  batimento: {
-    alignSelf: "center",
-    width: 33,
-    height: 30,
-  },
-  documento: {
-    alignSelf: "center",
-    width: 27,
-    height: 33,
-  },
-  perfil: {
-    alignSelf: "center",
-    width: 27,
-    height: 30,
-  },
-  bottomNav: {
-  backgroundColor: '#fff',
-  borderTopWidth: 1,
-  borderTopColor: '#e8e8e8',
-  flexDirection: 'row',
-  paddingTop: 10,
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
   },
   navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navIcon: { fontSize: 22, color: '#aaa' },
-  navIconActive: { color: '#C92E2B' },
+  navImg: { width: 26, height: 26, resizeMode: 'contain' },
+  navImgAtivo: { tintColor: RED },
+
+  // Botão sair
+  btnSair: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    borderWidth: 2,
+    borderColor: RED,
+    borderRadius: 14,
+    paddingVertical: 16,
+    backgroundColor: '#fff',
+    ...Platform.select({
+      ios: { boxshadow: '0px 2px 6px rgba(0,0,0,0.06)' },
+      android: { elevation: 2 },
+      web: { boxshadow: '0px 2px 6px rgba(0,0,0,0.06)' },
+    }),
+  },
+  btnSairIcone: { fontSize: 20, color: RED },
+  btnSairTexto: { fontSize: 18, fontWeight: '700', color: RED },
 });

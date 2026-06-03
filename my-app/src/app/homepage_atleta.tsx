@@ -158,7 +158,7 @@ export default function HomepageAtleta() {
           <TouchableOpacity style={styles.navItem} onPress={() => router.push('/historico_atleta')}>
             <Image source={require('./assets/Img/batimento3.png')} style={styles.navImg} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
+          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/checklist-pre-sessao')}>
             <Image source={require('./assets/Img/documento.png')} style={styles.navImg} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.navItem} onPress={() => router.push('/perfil')}>

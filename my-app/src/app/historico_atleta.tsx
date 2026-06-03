@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   View,
   Text,
+  Image,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -311,16 +312,16 @@ export default function HistoricoAtleta() {
       {/* Bottom Nav */}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_atleta')}>
-          <Text style={styles.navIcone}>⌂</Text>
+          <Image source={require('./assets/Img/homepage.png')} style={styles.navImg} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={[styles.navIcone, styles.navIconeAtivo]}>∿</Text>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/historico_atleta')}>
+          <Image source={require('./assets/Img/batimento3.png')} style={[styles.navImg, styles.navImgAtivo]} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcone}>☰</Text>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/checklist-pre-sessao')}>
+          <Image source={require('./assets/Img/documento.png')} style={styles.navImg} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/perfil')}>
-          <Text style={styles.navIcone}>◯</Text>
+          <Image source={require('./assets/Img/perfil2.png')} style={styles.navImg} />
         </TouchableOpacity>
       </View>
 
@@ -452,13 +453,14 @@ const styles = StyleSheet.create({
   // Bottom nav
   bottomNav: {
     flexDirection: 'row',
-    borderTopWidth: 1, borderTopColor: '#e8e8e8',
+    borderTopWidth: 1, borderTopColor: '#eee',
     backgroundColor: '#fff',
     paddingVertical: 10,
+    paddingHorizontal: 10,
   },
   navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navIcone: { fontSize: 22, color: '#aaa' },
-  navIconeAtivo: { color: RED },
+  navImg: { width: 26, height: 26, resizeMode: 'contain' },
+  navImgAtivo: { tintColor: RED },
 
   // Modal calendário
   modalOverlay: {
