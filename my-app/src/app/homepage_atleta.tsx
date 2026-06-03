@@ -1,238 +1,316 @@
-import { Text, View, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context"
+import {
+  Text,
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  ImageBackground,
+  Platform,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-function BottomNav() {
-  const insets = useSafeAreaInsets();
-  const router = useRouter();
-  return (
-    <View style={[styles.bottomNav, { paddingBottom: insets.bottom + 8 }]}>
-      <TouchableOpacity style={styles.navItem}>
-        <Text style={[styles.navIcon, styles.navIconActive]}>⌂</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem}>
-        <Text style={styles.navIcon}>∿</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem}>
-        <Text style={styles.navIcon}>☰</Text>
-      </TouchableOpacity>
-      <TouchableOpacity 
-      style={styles.navItem}
-      onPress={() => router.push('/perfil')}
-      >
-        <Text style={styles.navIcon}>◯</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
+// Dados fictícios de clima
+const CLIMA = {
+  temp: 22,
+  descricao: 'Nublado',
+  chuva: '10%',
+  umidade: '75%',
+  vento: '0 km/h',
+  diaSemana: 'terça-feira',
+  hora: '10:00',
+};
+
+// Pontos do gráfico de temperatura (simulado)
+const PONTOS_GRAFICO = [22, 21, 20, 19, 19, 19, 19, 19, 19, 19, 19, 19];
+const HORAS_GRAFICO  = ['11:00','14:00','17:00','20:00','23:00','02:00','05:00','08:00'];
 
 export default function HomepageAtleta() {
   const router = useRouter();
+
+  // Mini gráfico de linha como barras
+  const maxVal = Math.max(...PONTOS_GRAFICO);
+  const minVal = Math.min(...PONTOS_GRAFICO);
+  const range  = maxVal - minVal || 1;
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.header}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={styles.titulo}>São Camilo</Text>
-          <TouchableOpacity>
-            <Image source={require("./assets/Img/sino.png")} style={styles.sino}/>
+    <ImageBackground
+      source={require('./assets/Img/Background.png')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <SafeAreaView style={styles.safeArea}>
+
+        {/* ── Header ── */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <View>
+              <Text style={styles.titulo}>São Camilo</Text>
+              <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
+            </View>
+            <View style={styles.sinoWrap}>
+              <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
+              <View style={styles.sinoDot} />
+            </View>
+          </View>
+          <Text style={styles.funcao}>Olá, Erick Ken</Text>
+        </View>
+
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* ── Última sessão ── */}
+          <Text style={styles.secaoLabel}>Última sessão</Text>
+
+          <View style={styles.sessaoCard}>
+            <View style={styles.sessaoTopo}>
+              <Text style={styles.sessaoData}>Treino  Ontem, 18:30</Text>
+              <View style={styles.hidratacaoOkBadge}>
+                <Text style={styles.hidratacaoOkTexto}>Hidratação OK</Text>
+              </View>
+            </View>
+
+            <Text style={styles.sessaoNome}>Corrida intervalar</Text>
+
+            <View style={styles.metricasRow}>
+              <View style={styles.metricaItem}>
+                <Text style={styles.metricaLabel}>Taxa de sudorese</Text>
+                <Text style={styles.metricaValor}>1.2 <Text style={styles.metricaUnidade}>L/h</Text></Text>
+              </View>
+              <View style={styles.metricaItem}>
+                <Text style={styles.metricaLabel}>Perda de peso</Text>
+                <Text style={styles.metricaValor}>1.8<Text style={styles.metricaUnidade}>kg</Text></Text>
+              </View>
+              <View style={styles.metricaItem}>
+                <Text style={styles.metricaLabel}>Perda de peso</Text>
+                <Text style={[styles.metricaValor, { color: '#22c55e' }]}>-1.5%</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* ── Card Clima ── */}
+          <View style={styles.climaCard}>
+            {/* Topo clima */}
+            <View style={styles.climaTopo}>
+              <View style={styles.climaEsquerda}>
+                <Text style={styles.climaNuvem}>🌥</Text>
+                <View>
+                  <Text style={styles.climaTemp}>{CLIMA.temp}°C</Text>
+                  <Text style={styles.climaDetalhes}>Chuva: {CLIMA.chuva}</Text>
+                  <Text style={styles.climaDetalhes}>Umidade: {CLIMA.umidade}</Text>
+                  <Text style={styles.climaDetalhes}>Vento: {CLIMA.vento}</Text>
+                </View>
+              </View>
+              <View style={styles.climaDireita}>
+                <Text style={styles.climaTitulo}>Clima</Text>
+                <Text style={styles.climaDiaSemana}>{CLIMA.diaSemana}, {CLIMA.hora}</Text>
+                <Text style={styles.climaDescricao}>{CLIMA.descricao}</Text>
+              </View>
+            </View>
+
+            {/* Tabs */}
+            <View style={styles.climaTabs}>
+              {['Temperatura', 'Chuva', 'Vento'].map((tab, i) => (
+                <TouchableOpacity key={tab} style={[styles.climaTab, i === 0 && styles.climaTabAtivo]}>
+                  <Text style={[styles.climaTabTexto, i === 0 && styles.climaTabTextoAtivo]}>{tab}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Gráfico de temperatura (barras como sparkline) */}
+            <View style={styles.graficoWrap}>
+              {PONTOS_GRAFICO.map((v, i) => {
+                const altura = ((v - minVal) / range) * 28 + 8;
+                return (
+                  <View key={i} style={styles.graficoColunaWrap}>
+                    <View style={[styles.graficoColuna, { height: altura }]} />
+                  </View>
+                );
+              })}
+            </View>
+
+            {/* Horas */}
+            <View style={styles.horasRow}>
+              {HORAS_GRAFICO.map((h, i) => (
+                <Text key={i} style={styles.horaTexto}>{h}</Text>
+              ))}
+            </View>
+          </View>
+
+          {/* ── Botão Pronto para Treinar ── */}
+          <TouchableOpacity
+            style={styles.btnTreinar}
+            activeOpacity={0.85}
+            onPress={() => router.push('/checklist-pre-sessao')}
+          >
+            <Text style={styles.btnTreinarTexto}>PRONTO PARA TREINAR?</Text>
+          </TouchableOpacity>
+        </ScrollView>
+
+        {/* ── Bottom Nav ── */}
+        <View style={styles.navbar}>
+          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_atleta')}>
+            <Image source={require('./assets/Img/homepage.png')} style={[styles.navImg, styles.navImgAtivo]} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/historico_atleta')}>
+            <Image source={require('./assets/Img/batimento3.png')} style={styles.navImg} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem}>
+            <Image source={require('./assets/Img/documento.png')} style={styles.navImg} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/perfil')}>
+            <Image source={require('./assets/Img/perfil2.png')} style={styles.navImg} />
           </TouchableOpacity>
         </View>
-        <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
-        <Text style={styles.funcao}>Olá, Atleta</Text>
-      </View>
 
-      <View style={styles.conteudo}>
-        <Text style={styles.painel}>Última sessão</Text>
-        <View style={styles.container}>
-          <View style={styles.row}>
-            <Text style={styles.textoCinza}>Treino Ontem, 18:30</Text>
-            <View style={styles.verde}>
-              <Text style={styles.textoVerde}>Hidratação OK</Text>
-            </View>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.texto20}>Corrida Intervalar</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.texto12}>Taixa de sudorese</Text>
-            <Text style={styles.texto12}>Perda de peso</Text>
-            <Text style={styles.texto12}>Perda de peso</Text>
-          </View>
-          <View style={styles.row}>
-            <View style={styles.row}>
-              <Text style={styles.texto15}>1.2</Text>
-              <Text style={styles.medida}>L/h</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.texto15}>1.8</Text>
-              <Text style={styles.medida}>kg</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.textoVerde2}>-1.5%</Text>
-            </View>
-          </View>
-        </View>
-        <TouchableOpacity 
-        style={styles.botao}
-        onPress={() => router.push('/checklist-pre-sessao')}
-        >
-          <Text style={styles.textoBranco}>PRONTO PARA TREINAR?</Text>
-          
-        </TouchableOpacity>
-      </View>
-      <BottomNav />
-    </SafeAreaView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
+const RED = '#B3151F';
+
 const styles = StyleSheet.create({
+  background: { flex: 1 },
+  safeArea: { flex: 1, backgroundColor: 'transparent' },
+
+  // Header
   header: {
-    backgroundColor: "#E32429",
-    padding: 20,
-    paddingBottom: 50,
-    borderBottomEndRadius: 50,
-    borderBottomStartRadius: 50,
+    backgroundColor: RED,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 28,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
-  titulo: {
-    fontSize: 32,
-    color: "#FFF",
-    fontWeight: "700",
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
-  sino: {
-    alignSelf: "center",
-    width: 32,
-    height: 32,
+  titulo: { fontSize: 28, color: '#fff', fontWeight: '700' },
+  subtitulo: { fontSize: 15, color: 'rgba(255,255,255,0.75)', fontWeight: '300', marginTop: 2 },
+  sinoWrap: { position: 'relative', marginTop: 4 },
+  sino: { width: 28, height: 28, tintColor: '#fff' },
+  sinoDot: {
+    position: 'absolute', top: 0, right: 0,
+    width: 9, height: 9, borderRadius: 5,
+    backgroundColor: '#FF9800',
+    borderWidth: 1.5, borderColor: RED,
   },
-  subtitulo: {
-    fontSize: 20,
-    color: "#ffffff",
-    fontWeight: "200",
-    marginBottom: 50,
+  funcao: { fontSize: 26, color: '#fff', fontWeight: '700' },
+
+  // Scroll
+  scroll: { flex: 1 },
+  scrollContent: { padding: 16, gap: 14, paddingBottom: 24 },
+
+  secaoLabel: { fontSize: 16, fontWeight: '600', color: '#222' },
+
+  // Sessão card
+  sessaoCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    gap: 10,
+    ...Platform.select({
+      ios: { boxshadow: '0px 2px 8px rgba(0,0,0,0.08)' },
+      android: { elevation: 3 },
+      web: { boxshadow: '0px 2px 8px rgba(0,0,0,0.08)' },
+    }),
   },
-  funcao: {
-    fontSize: 20,
-    color: "#ffffff",
-    fontWeight: "600",
+  sessaoTopo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  conteudo: {
-    flex: 1,
-    padding: 25,
-  },
-  container: {
-    backgroundColor: "#F6F6F6",
-    borderWidth: 1,
-    borderColor: "#b7b7b7",
+  sessaoData: { fontSize: 13, color: '#888' },
+  hidratacaoOkBadge: {
+    backgroundColor: '#dcfce7',
     borderRadius: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 30,
-    marginBottom: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 3,
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  hidratacaoOkTexto: { fontSize: 12, color: '#15803d', fontWeight: '600' },
+  sessaoNome: { fontSize: 20, fontWeight: '700', color: '#111' },
+  metricasRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
+  metricaItem: { gap: 2 },
+  metricaLabel: { fontSize: 11, color: '#999' },
+  metricaValor: { fontSize: 16, fontWeight: '700', color: '#111' },
+  metricaUnidade: { fontSize: 11, fontWeight: '400', color: '#888' },
+
+  // Clima card
+  climaCard: {
+    backgroundColor: '#1a1a2e',
+    borderRadius: 16,
+    padding: 14,
+    gap: 10,
+    ...Platform.select({
+      ios: { boxshadow: '0px 2px 8px rgba(0,0,0,0.2)' },
+      android: { elevation: 4 },
+      web: { boxshadow: '0px 2px 8px rgba(0,0,0,0.2)' },
+    }),
   },
-  painel: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginLeft: 5,
-    marginBottom: 10,
+  climaTopo: { flexDirection: 'row', justifyContent: 'space-between' },
+  climaEsquerda: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  climaNuvem: { fontSize: 36, marginTop: 2 },
+  climaTemp: { fontSize: 28, fontWeight: '700', color: '#fff' },
+  climaDetalhes: { fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 1 },
+  climaDireita: { alignItems: 'flex-end', gap: 2 },
+  climaTitulo: { fontSize: 14, fontWeight: '700', color: '#fff' },
+  climaDiaSemana: { fontSize: 11, color: 'rgba(255,255,255,0.6)' },
+  climaDescricao: { fontSize: 11, color: 'rgba(255,255,255,0.6)' },
+
+  // Tabs clima
+  climaTabs: { flexDirection: 'row', gap: 16 },
+  climaTab: { paddingBottom: 4 },
+  climaTabAtivo: { borderBottomWidth: 2, borderBottomColor: '#fff' },
+  climaTabTexto: { fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: '500' },
+  climaTabTextoAtivo: { color: '#fff', fontWeight: '700' },
+
+  // Gráfico
+  graficoWrap: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    height: 44,
+    gap: 2,
   },
-  textoCinza: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#777",
-    alignContent: "center"
+  graficoColunaWrap: { flex: 1, justifyContent: 'flex-end' },
+  graficoColuna: {
+    backgroundColor: 'rgba(255,255,255,0.35)',
+    borderRadius: 2,
+    width: '100%',
   },
-  verde: {
-    paddingHorizontal: 15,
-    paddingVertical: 2,
-    backgroundColor: "#c4ffda",
-    borderRadius: 20,
-    alignContent: "center"
+  horasRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  horaTexto: { fontSize: 9, color: 'rgba(255,255,255,0.45)' },
+
+  // Botão treinar
+  btnTreinar: {
+    backgroundColor: '#22c55e',
+    borderRadius: 40,
+    paddingVertical: 18,
+    alignItems: 'center',
+    ...Platform.select({
+      ios: { boxshadow: '0px 4px 12px rgba(34,197,94,0.4)' },
+      android: { elevation: 4 },
+      web: { boxshadow: '0px 4px 12px rgba(34,197,94,0.4)' },
+    }),
   },
-  textoVerde: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#177D3C",
-    alignContent: "center"
-  },
-  texto20: {
-    fontSize: 20,
-    fontWeight: "500",
-    alignContent: "center",
-    marginVertical: 20,
-  },
-  texto12: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#777",
-    alignContent: "center",
-    marginBottom: 5,
-  },
-  texto15: {
-    fontSize: 15,
-    fontWeight: "500",
-    alignContent: "center"
-  },
-  medida: {
-    fontSize: 10,
-    fontWeight: "500",
-    alignContent: "flex-end"
-  },
-  textoVerde2: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#22C55E",
-    alignContent: "center"
-  },
-  botao: {
-    backgroundColor: "#22C55E",
-    borderRadius: 50,
-    paddingVertical: 20,
-    paddingHorizontal: 30,
-  },
-  textoBranco: {
-    fontSize: 20,
-    fontWeight: "500",
-    color: "#ffffff",
-    alignContent: "center",
-    textAlign: "center",
-  },
+  btnTreinarTexto: { color: '#fff', fontSize: 18, fontWeight: '700', letterSpacing: 1 },
+
+  // Navbar
   navbar: {
-    backgroundColor: "#ccc",
-    padding: 25,
-    flexDirection: "row",
-    justifyContent: "space-around"
-  },
-  homepage: {
-    alignSelf: "center",
-    width: 30,
-    height: 33,
-  },
-  batimento: {
-    alignSelf: "center",
-    width: 33,
-    height: 30,
-  },
-  documento: {
-    alignSelf: "center",
-    width: 27,
-    height: 33,
-  },
-  perfil: {
-    alignSelf: "center",
-    width: 27,
-    height: 30,
-  },
-    bottomNav: {
+    flexDirection: 'row',
     backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#e8e8e8',
-    flexDirection: 'row',
-    paddingTop: 10,
+    borderTopColor: '#eee',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
   },
   navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navIcon: { fontSize: 22, color: '#aaa' },
-  navIconActive: { color: '#C92E2B' },
+  navImg: { width: 26, height: 26, resizeMode: 'contain' },
+  navImgAtivo: { tintColor: RED },
 });
