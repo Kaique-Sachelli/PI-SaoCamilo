@@ -126,7 +126,7 @@ export default function PerfilAtleta() {
           <TouchableOpacity
             style={styles.btnAzulOutline}
             activeOpacity={0.85}
-            onPress={() => router.push('/dieta')}
+            onPress={() => router.push('/relatorio_alimentar')}
           >
             <Text style={styles.btnAzulOutlineTexto}>Adicionar Relatório alimentar</Text>
           </TouchableOpacity>
