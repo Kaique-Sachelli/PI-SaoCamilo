@@ -13,6 +13,9 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 
+const API_URL = 'http://ip do computador';
+
+
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,9 +31,34 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      console.log('Login attempt:', { email, password });
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha: password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.sucesso) {
+        alert(data.mensagem ?? 'Credenciais inválidas');
+        return;
+      }
+
+      const papel = data.usuario[0]?.tipo_perfil;
+      // redireiciona o usuário de acordo com seu papel no aplicativo
+      if (papel === 'Atleta') {
+        router.push('/homepage_atleta');
+      } else if (papel === 'Nutricionista') {
+        router.push('/homepage_nutricionista');
+      } else if (papel === 'Treinador') {
+        router.push('/homepage_treinador');
+      } else if (papel === 'Medico') {
+        router.push('/homepage_medico');
+      } else {
+        router.push('/homepage_adm');
+      }
     } catch (error) {
-      alert('Erro ao fazer login');
+      alert('Não foi possível conectar ao servidor');
       console.error(error);
     } finally {
       setLoading(false);
@@ -129,8 +157,7 @@ export default function LoginScreen() {
             {/* Login Button */}
             <TouchableOpacity
               style={[styles.loginButton, loading && styles.loginButtonDisabled]}
-              // onPress={() => router.push('/homepage_atleta')}
-              onPress={() => router.push('/homepage_adm')}
+              onPress={handleLogin}
               disabled={loading}
               activeOpacity={0.8}
             >
