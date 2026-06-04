@@ -1,0 +1,81 @@
+-- CREATE DATABASE IF NOT EXISTS nutri_esportiva;
+-- USE nutri_esportiva;
+
+-- CREATE TABLE Usuario (
+--     id_usuario   INT          PRIMARY KEY AUTO_INCREMENT,
+--     nome         VARCHAR(100) NOT NULL,
+--     email        VARCHAR(100) NOT NULL UNIQUE,
+--     senha_hash   VARCHAR(255) NOT NULL,
+--     tipo_perfil  ENUM('Atleta', 'Nutricionista', 'Treinador', 'Medico', 'Suporte', 'Admin') NOT NULL
+-- );
+
+-- CREATE TABLE Atleta_Perfil (
+--     id_atleta            INT          PRIMARY KEY,
+--     idade                INT,
+--     sexo                 ENUM('M', 'F'),
+--     altura               DECIMAL(3,2),
+--     modalidade_esportiva VARCHAR(50),
+--     id_nutricionista     INT,
+--     id_treinador         INT,
+--     FOREIGN KEY (id_atleta)        REFERENCES Usuario(id_usuario),
+--     FOREIGN KEY (id_nutricionista) REFERENCES Usuario(id_usuario),
+--     FOREIGN KEY (id_treinador)     REFERENCES Usuario(id_usuario)
+-- );
+
+-- CREATE TABLE Sessao_Treino (
+--     id_sessao        INT           PRIMARY KEY AUTO_INCREMENT,
+--     id_atleta        INT           NOT NULL,
+--     data_hora_inicio TIMESTAMP     NOT NULL,
+--     duracao_minutos  INT,
+--     massa_pre        DECIMAL(5,2),
+--     massa_pos        DECIMAL(5,2),
+--     volume_urina_ml  DECIMAL(6,2),
+--     lat              DECIMAL(10,8),
+--     lon              DECIMAL(11,8),
+--     clima_temp       DECIMAL(4,1),
+--     clima_umidade    INT,
+--     clima_sensacao   DECIMAL(4,1),
+--     clima_vento      DECIMAL(5,2),
+--     status_sessao    ENUM('Pendente', 'Concluída') NOT NULL DEFAULT 'Pendente',
+--     FOREIGN KEY (id_atleta) REFERENCES Atleta_Perfil(id_atleta)
+-- );
+
+-- CREATE TABLE Registro_Hidratacao (
+--     id_registro      INT          PRIMARY KEY AUTO_INCREMENT,
+--     id_sessao        INT          NOT NULL,
+--     volume_ml        DECIMAL(6,2) NOT NULL,
+--     timestamp_evento TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (id_sessao) REFERENCES Sessao_Treino(id_sessao)
+-- );
+
+-- CREATE TABLE Resultado_Calculo (
+--     id_resultado         INT          PRIMARY KEY AUTO_INCREMENT,
+--     id_sessao            INT          NOT NULL,
+--     perda_massa_ajustada DECIMAL(5,2),
+--     taxa_sudorese        DECIMAL(5,2),
+--     percentual_variacao  DECIMAL(5,2),
+--     recomendacao_texto   VARCHAR(255),
+--     alerta_seguranca     TEXT,
+--     status_color         ENUM('Verde', 'Amarelo', 'Vermelho'),
+--     FOREIGN KEY (id_sessao) REFERENCES Sessao_Treino(id_sessao)
+-- );
+
+-- CREATE TABLE Saude_Sintomas (
+--     id_saude                   INT  PRIMARY KEY AUTO_INCREMENT,
+--     id_atleta                  INT  NOT NULL,
+--     data_registro              DATE,
+--     nivel_fadiga               INT,
+--     humor                      INT,
+--     dor_muscular               INT,
+--     sintomas_gastrointestinais TEXT,
+--     FOREIGN KEY (id_atleta) REFERENCES Atleta_Perfil(id_atleta)
+-- );
+
+-- CREATE TABLE Logs_Auditoria (
+--     id_log     INT          PRIMARY KEY AUTO_INCREMENT,
+--     id_usuario INT          NOT NULL,
+--     acao       VARCHAR(255) NOT NULL,
+--     data_hora  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+-- );
+
