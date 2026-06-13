@@ -50,10 +50,12 @@ export default function HomepageAtleta() {
               <Text style={styles.titulo}>São Camilo</Text>
               <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
             </View>
-            <View style={styles.sinoWrap}>
-              <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
-              <View style={styles.sinoDot} />
-            </View>
+            <TouchableOpacity>
+              <View style={styles.sinoWrap}>
+                <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
+                <View style={styles.sinoDot} />
+              </View>
+            </TouchableOpacity>
           </View>
           <Text style={styles.funcao}>Olá, Erick Ken</Text>
         </View>

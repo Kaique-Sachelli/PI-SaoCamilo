@@ -30,7 +30,18 @@ export default function CadastroScreen() {
   const handleVoltar = () => {
     router.back();
   };
-  
+
+  const formatarData = (texto: string) => {
+    const digitos = texto.replace(/\D/g, '').slice(0, 8);
+    let formatado = digitos;
+    if (digitos.length > 4) {
+      formatado = digitos.slice(0, 2) + '/' + digitos.slice(2, 4) + '/' + digitos.slice(4);
+    } else if (digitos.length > 2) {
+      formatado = digitos.slice(0, 2) + '/' + digitos.slice(2);
+    }
+    setDataNascimento(formatado);
+  };
+
   const handleCriarConta = async () => {
     if (!nome || !dataNascimento || !telefone || !email || !senha) {
       alert('Por favor, preencha todos os campos');
@@ -117,10 +128,11 @@ export default function CadastroScreen() {
                     backgroundColor: '#ffffff',
                   },
                 ]}
-                placeholder="Data de nascimento:"
+                placeholder="Data de nascimento: DD/MM/AAAA"
                 value={dataNascimento}
-                onChangeText={setDataNascimento}
+                onChangeText={formatarData}
                 keyboardType="numeric"
+                maxLength={10}
                 editable={!loading}
               />
 
@@ -185,7 +197,7 @@ export default function CadastroScreen() {
                 onPress={() => setDropdownVisivel(true)}
               >
                 <Text style={{ color: genero ? '#747474' : '#747474', fontSize: 16, fontWeight: '500' }}>
-                  {genero || 'Selecione o Gênero:'}
+                  {genero || 'Selecione o login:'}
                 </Text>
               </TouchableOpacity>
 
