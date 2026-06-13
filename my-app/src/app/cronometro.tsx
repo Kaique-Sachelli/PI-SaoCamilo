@@ -3,11 +3,12 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   Text,
   View,
+  ImageBackground,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 export default function CronometroScreen() {
@@ -60,6 +61,11 @@ export default function CronometroScreen() {
   };
 
   return (
+    <ImageBackground
+      source={require('./assets/Img/Background.png')}
+      style={styles.background}
+      resizeMode="cover"
+    >
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -164,10 +170,12 @@ export default function CronometroScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: { flex: 1 },
   safeArea: {
     flex: 1,
     backgroundColor: '#B3151F',

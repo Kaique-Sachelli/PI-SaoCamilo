@@ -2,16 +2,17 @@ import { useState } from 'react';
 import {
   View,
   Text,
-  Image,
   TextInput,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   Modal,
   Platform,
+  ImageBackground,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { NavbarAtleta } from './NavbarAtleta';
 
 const SESSOES = [
   {
@@ -169,6 +170,11 @@ export default function HistoricoAtleta() {
   const [busca, setBusca] = useState('');
 
   return (
+    <ImageBackground
+      source={require('./assets/Img/Background.png')}
+      style={styles.background}
+      resizeMode="cover"
+    >
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <View style={styles.header}>
@@ -309,21 +315,8 @@ export default function HistoricoAtleta() {
         </View>
       </ScrollView>
 
-      {/* Bottom Nav */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_atleta')}>
-          <Image source={require('./assets/Img/homepage.png')} style={styles.navImg} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/historico_atleta')}>
-          <Image source={require('./assets/Img/batimento3.png')} style={[styles.navImg, styles.navImgAtivo]} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/checklist-pre-sessao')}>
-          <Image source={require('./assets/Img/documento.png')} style={styles.navImg} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/perfil')}>
-          <Image source={require('./assets/Img/perfil2.png')} style={styles.navImg} />
-        </TouchableOpacity>
-      </View>
+      {/* ── Bottom Nav ── */}
+      <NavbarAtleta active="historico" />
 
       {/* Modal calendário */}
       <CalendarioModal
@@ -332,23 +325,27 @@ export default function HistoricoAtleta() {
         onSelectDate={(d) => setDataSel(d)}
       />
     </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const RED = '#B3151F';
 
 const styles = StyleSheet.create({
+  background: { flex: 1 },
   safeArea: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: 'transparent',
   },
 
   // Header
   header: {
     backgroundColor: RED,
-    paddingTop: Platform.OS === 'android' ? 40 : 10,
+    paddingTop: 10,
     paddingBottom: 18,
     paddingHorizontal: 16,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
   voltarBtn: { marginBottom: 4 },
   voltarTexto: { color: '#ffffff', fontSize: 14, opacity: 0.85 },
@@ -450,17 +447,6 @@ const styles = StyleSheet.create({
   exportIcone: { fontSize: 16, color: '#fff' },
   exportTexto: { fontSize: 15, fontWeight: '700', color: '#fff' },
 
-  // Bottom nav
-  bottomNav: {
-    flexDirection: 'row',
-    borderTopWidth: 1, borderTopColor: '#eee',
-    backgroundColor: '#fff',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-  },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navImg: { width: 26, height: 26, resizeMode: 'contain' },
-  navImgAtivo: { tintColor: RED },
 
   // Modal calendário
   modalOverlay: {

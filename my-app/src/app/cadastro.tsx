@@ -3,7 +3,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   Platform,
   View,
@@ -12,8 +11,8 @@ import {
   Text,
   KeyboardAvoidingView,
   ImageBackground,
-  BoxShadowValue,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 export default function CadastroScreen() {
@@ -55,8 +54,7 @@ export default function CadastroScreen() {
       style={styles.backgroundImage}
       resizeMode="cover"
     >
-      <View style={[styles.container, { backgroundColor: 'transparent' }]}>
-        <SafeAreaView style={{ flex: 1, width: '100%' }}>
+      <SafeAreaView style={styles.safeArea}>
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -239,7 +237,6 @@ export default function CadastroScreen() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </View>
     </ImageBackground>
   );
 }
@@ -250,10 +247,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  container: {
+  safeArea: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: 'transparent',
   },
   scrollContent: {
     flexGrow: 1,

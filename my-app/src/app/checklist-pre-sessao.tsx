@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
+  ImageBackground,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 
@@ -131,6 +132,11 @@ export default function ChecklistPreSessao() {
   }
 
   return (
+    <ImageBackground
+      source={require('./assets/Img/Background.png')}
+      style={styles.background}
+      resizeMode="cover"
+    >
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
@@ -160,6 +166,7 @@ export default function ChecklistPreSessao() {
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
+    </ImageBackground>
   );
 }
 
@@ -168,16 +175,18 @@ const RED = '#e53935';
 const CARD_RADIUS = 14;
 
 const styles = StyleSheet.create({
+  background: { flex: 1 },
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: 'transparent',
   },
-
 
   header: {
     backgroundColor: '#B3151F',
-    paddingTop: Platform.OS === 'android' ? 40 : 10,
+    paddingTop: 10,
     paddingBottom: 18,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
     paddingHorizontal: 16,
   },
   voltarBtn: {

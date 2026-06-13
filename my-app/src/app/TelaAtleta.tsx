@@ -5,8 +5,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  SafeAreaView,
+  ImageBackground,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // import { Ionicons } from '@expo/vector-icons';
 
@@ -16,6 +17,11 @@ export default function TelaAtleta() {
   const [abaAtiva, setAbaAtiva] = useState('Dieta');
 
   return (
+    <ImageBackground
+      source={require('./assets/Img/Background.png')}
+      style={styles.background}
+      resizeMode="cover"
+    >
     <SafeAreaView style={styles.container}>
 
 
@@ -128,14 +134,16 @@ export default function TelaAtleta() {
       </View>
 
     </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
 
+  background: { flex: 1 },
   container: {
     flex: 1,
-    backgroundColor: '#EDEDED',
+    backgroundColor: 'transparent',
   },
 
 

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { NavbarAtleta } from './NavbarAtleta';
 
 export default function PerfilAtleta() {
   const router = useRouter();
@@ -133,6 +134,10 @@ export default function PerfilAtleta() {
         </ScrollView>
 
       </SafeAreaView>
+
+      {/* ── Bottom Nav ── */}
+      <NavbarAtleta active="historico" />
+
     </ImageBackground>
   );
 }
