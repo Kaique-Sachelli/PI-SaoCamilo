@@ -115,7 +115,7 @@ export default function Perfil() {
       </ScrollView>
       </SafeAreaView>
 
-      <NavbarAtleta active="home" />
+      <NavbarAtleta active="perfil" />
 
     </ImageBackground>
   );

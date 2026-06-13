@@ -125,22 +125,6 @@ export default function SessoesTreinador() {
             </TouchableOpacity>
           ))}
         </ScrollView>
-
-        {/* ── Bottom Nav ── */}
-        <View style={styles.navbar}>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_treinador')}>
-            <Image source={require('./assets/Img/homepage.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/batimento3.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/documento.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/perfil2.png')} style={styles.navImg} />
-          </TouchableOpacity>
-        </View>
       </SafeAreaView>
     </ImageBackground>
   );
@@ -223,16 +207,4 @@ const styles = StyleSheet.create({
   detalheChave: { fontSize: 13, color: '#999' },
   detalheValor: { fontSize: 13, color: '#222', fontWeight: '500' },
   perdaVerde: { color: '#2e7d32', fontWeight: '600' },
-
-  // Navbar
-  navbar: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-  },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navImg: { width: 26, height: 26, resizeMode: 'contain' },
 });
