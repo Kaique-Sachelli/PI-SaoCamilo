@@ -79,3 +79,9 @@
 --     FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
 -- );
 
+-- INSERT INTO usuario VALUES (null, 'Jose', 'Adm@teste.com', '123', 'Admin');
+-- INSERT INTO usuario VALUES (null, 'Rodrigo', 'atleta@teste.com', '123', 'Atleta');
+-- INSERT INTO usuario VALUES (null, 'Marcia', 'medico@teste.com', '123', 'Médico');
+-- INSERT INTO usuario VALUES (null, 'Pedro', 'nutri@teste.com', '123', 'Nutricionista');
+-- INSERT INTO usuario VALUES (null, 'Guilherme', 'treinador@teste.com', '123', 'Treinador');
+
