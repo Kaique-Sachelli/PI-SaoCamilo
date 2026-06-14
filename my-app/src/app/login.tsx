@@ -12,8 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-
-const API_URL = 'http://ip do computador';
+import { getUrl } from '../constants/url';
 
 
 export default function LoginScreen() {
@@ -31,7 +30,7 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/login`, {
+      const response = await fetch(getUrl('/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, senha: password }),
