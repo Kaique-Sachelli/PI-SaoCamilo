@@ -1,16 +1,16 @@
--- CREATE DATABASE IF NOT EXISTS nutri_esportiva;
+-- -- CREATE DATABASE IF NOT EXISTS nutri_esportiva;
 -- USE nutri_esportiva;
 
 -- CREATE TABLE Usuario (
---     id_usuario   INT          PRIMARY KEY AUTO_INCREMENT,
---     nome         VARCHAR(100) NOT NULL,
---     email        VARCHAR(100) NOT NULL UNIQUE,
+--     id_usuario   INT PRIMARY KEY AUTO_INCREMENT,
+--     nome  VARCHAR(100) NOT NULL,
+--     email VARCHAR(100) NOT NULL UNIQUE,
 --     senha   VARCHAR(255) NOT NULL,
---     data_nascimento DATE,
---     telefone VARCHAR(20),
+--     data_nascimento DATE NOT NULL,
+--     telefone VARCHAR(20) NOT NULL,
 --     registro VARCHAR(50),
---     tipo_perfil  ENUM('Atleta', 'Nutricionista', 'Treinador', 'Medico', 'Suporte', 'Admin') NOT NULL,
---     situacao ENUM ('Pendente', 'Ativo', 'Desativado') DEFAULT ('Pendente')
+--     tipo_perfil ENUM('Atleta', 'Nutricionista', 'Treinador', 'Medico', 'Suporte', 'Admin') NOT NULL,
+--     situacao ENUM ('Pendente', 'Ativo', 'Desativado') DEFAULT ('Pendente') NOT NULL
 -- );
 
 -- CREATE TABLE Atleta_Perfil (
@@ -83,8 +83,10 @@
 --     FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
 -- );
 
--- INSERT INTO usuario VALUES (null, 'Jose', 'Adm@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', 'Admin', 'Ativo');
--- INSERT INTO usuario VALUES (null, 'Rodrigo', 'atleta@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', 'Atleta', 'Ativo');
--- INSERT INTO usuario VALUES (null, 'Marcia', 'medico@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', 'Médico', 'Ativo');
--- INSERT INTO usuario VALUES (null, 'Pedro', 'nutri@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', 'Nutricionista', 'Ativo');
--- INSERT INTO usuario VALUES (null, 'Guilherme', 'treinador@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', 'Treinador', 'Ativo');
+-- INSERT INTO Usuario (nome, email, senha, data_nascimento, telefone, registro, tipo_perfil, situacao) VALUES
+-- ('Jose',      'Adm@teste.com',       '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', '1985-03-12', '11987650001', null,  'Admin', 'Ativo'),
+-- ('Rodrigo',   'atleta@teste.com',    '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', '1998-07-25', '11987650002', 'REG-0002', 'Atleta', 'Ativo'),
+-- ('Marcia',    'medico@teste.com',    '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', '1980-11-03', '11987650003', 'CRM-12345', 'Medico', 'Ativo'),
+-- ('Pedro',     'nutri@teste.com',     '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', '1990-01-18', '11987650004', 'CRN-67890', 'Nutricionista', 'Ativo'),
+-- ('Guilherme', 'treinador@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', '1992-09-30', '11987650005', null , 'Treinador', 'Ativo');
+
