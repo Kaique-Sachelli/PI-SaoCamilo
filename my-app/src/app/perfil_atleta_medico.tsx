@@ -89,7 +89,7 @@ export default function PerfilAtleta() {
             <TouchableOpacity
               style={styles.btnAzul}
               activeOpacity={0.85}
-              onPress={() => router.push('/historico_atleta')}
+              onPress={() => router.push('/historico_longitudional_medico')}
             >
               <Text style={styles.btnAzulTexto}>Histórico Longitudinal</Text>
             </TouchableOpacity>
