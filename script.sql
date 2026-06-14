@@ -88,4 +88,3 @@
 -- INSERT INTO usuario VALUES (null, 'Marcia', 'medico@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', 'Médico', 'Ativo');
 -- INSERT INTO usuario VALUES (null, 'Pedro', 'nutri@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', 'Nutricionista', 'Ativo');
 -- INSERT INTO usuario VALUES (null, 'Guilherme', 'treinador@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', 'Treinador', 'Ativo');
-
