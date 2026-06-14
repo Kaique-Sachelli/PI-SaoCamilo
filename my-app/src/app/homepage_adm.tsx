@@ -4,16 +4,17 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  ScrollView,
   ImageBackground,
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { NavbarADM } from './Navbar_ADM';
 
 const MENU = [
   { id: 1, icone: require('./assets/Img/solicitacoes.png'),  label: 'Solicitações de cadastro', rota: '/solicitacoes_cadastro'},
   { id: 2, icone: require('./assets/Img/gerenciar.png'),     label: 'Gerenciar Usuários',        rota: '/gerenciar_usuarios'},
-  { id: 3, icone: require('./assets/Img/batimento2.png'),    label: 'Ver Atletas',               rota: '/lista_atletas'},
 ];
 
 export default function HomepageAdm() {
@@ -34,14 +35,24 @@ export default function HomepageAdm() {
               <Text style={styles.titulo}>Hidra Pro-formance</Text>
               <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
             </View>
-            <View style={styles.sinoWrap}>
-              <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
-              <View style={styles.sinoDot} />
-            </View>
+
+            <TouchableOpacity>
+              <View style={styles.sinoWrap}>
+                <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
+                <View style={styles.sinoDot} />
+              </View>
+            </TouchableOpacity>
+
           </View>
           <Text style={styles.funcao}>Olá, Administrador</Text>
         </View>
 
+        <ScrollView
+                  style={styles.scroll}
+                  contentContainerStyle={styles.scrollContent}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+        >
         {/* ── Conteúdo ── */}
         <View style={styles.conteudo}>
 
@@ -67,24 +78,10 @@ export default function HomepageAdm() {
               <Text style={styles.menuSeta}>›</Text>
             </TouchableOpacity>
           ))}
-        </View>
-
+          </View>
+        </ScrollView>
         {/* ── Bottom Nav ── */}
-        <View style={styles.navbar}>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/homepage.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/batimento3.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/documento.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/perfil2.png')} style={styles.navImg} />
-          </TouchableOpacity>
-        </View>
-
+        <NavbarADM active="home"/>
       </SafeAreaView>
     </ImageBackground>
   );
@@ -122,6 +119,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: RED,
   },
   funcao: { fontSize: 20, color: '#fff', fontWeight: '700' },
+  
+  // Scroll
+  scroll: { flex: 1 },
+  scrollContent: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
 
   // Conteúdo
   conteudo: {
