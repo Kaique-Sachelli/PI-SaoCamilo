@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { NavbarNutricionista } from './Navbar_nutricionista';
 
 const ATLETAS = [
   { id: 1, nome: 'Marcus Silva',      esporte: 'Vôlei',   ativo: true,  foto: require('./assets/Img/marcus.jpg') },
@@ -111,6 +112,8 @@ export default function HomepageNutricionista() {
             </TouchableOpacity>
           ))}
         </ScrollView>
+      {/* ── Bottom Nav ── */}
+      <NavbarNutricionista active="home"/>
       </SafeAreaView>
     </ImageBackground>
   );
