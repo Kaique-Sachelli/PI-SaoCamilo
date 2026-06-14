@@ -156,7 +156,17 @@ export default function SessoesMedico() {
           <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
             <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
           </TouchableOpacity>
-          <Text style={styles.nomeAtleta}>Atleta (Kacique)</Text>
+          <View style={styles.headerNomeRow}>
+            <Text style={styles.nomeAtleta}>Atleta (Kacique)</Text>
+            <TouchableOpacity 
+            onPress={() => router.push('/perfil_atleta')} 
+            activeOpacity={0.8}>
+              <Image
+                source={require('./assets/Img/marcus.jpg')}
+                style={styles.avatarImg}
+              />
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.tabsContainer}>
             {(['Sessões', 'Dieta', 'Exames'] as Aba[]).map((aba) => (
@@ -201,7 +211,9 @@ const styles = StyleSheet.create({
   },
   voltarBtn: { marginBottom: 6 },
   voltarTexto: { color: 'rgba(255,255,255,0.8)', fontSize: 14 },
-  nomeAtleta: { color: '#fff', fontSize: 26, fontWeight: '700', marginBottom: 18 },
+  headerNomeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 },
+  nomeAtleta: { color: '#fff', fontSize: 26, fontWeight: '700' },
+  avatarImg: { width: 46, height: 46, borderRadius: 23, borderWidth: 2, borderColor: '#fff' },
 
   // Tabs
   tabsContainer: {
