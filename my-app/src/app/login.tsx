@@ -141,7 +141,7 @@ export default function LoginScreen() {
 
             {/* Forgot Password Link */}
             <TouchableOpacity
-              // onPress={handleForgotPassword}
+              onPress={handleForgotPassword}
               disabled={loading}
               style={styles.forgotPasswordContainer}
             >
@@ -153,8 +153,8 @@ export default function LoginScreen() {
             {/* Login Button */}
             <TouchableOpacity
               style={[styles.loginButton, loading && styles.loginButtonDisabled]}
-              // onPress={handleLogin}
-              onPress={() => router.push('/homepage_medico')}
+              onPress={handleLogin}
+              // onPress={() => router.push('/homepage_medico')}
               disabled={loading}
               activeOpacity={0.8}
             >

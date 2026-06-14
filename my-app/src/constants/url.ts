@@ -2,7 +2,7 @@
 const IP_DO_COMPUTADOR = '192.168.15.32';
 const PORTA = 3000;
 
-export const API_URL = `http://${IP_DO_COMPUTADOR}:${PORTA}`;
+export const API_URL = `http://192.168.0.200:3000`;
 
 export function getUrl(rota: string): string {
   const rotaNormalizada = rota.startsWith('/') ? rota : `/${rota}`;
