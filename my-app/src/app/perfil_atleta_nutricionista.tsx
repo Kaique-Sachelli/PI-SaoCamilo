@@ -89,7 +89,7 @@ export default function PerfilAtleta() {
             <TouchableOpacity
               style={styles.btnAzul}
               activeOpacity={0.85}
-              onPress={() => router.push('/historico_longitudional_medico')}
+              onPress={() => router.push('/historico_longitudional_nutricionista')}
             >
               <Text style={styles.btnAzulTexto}>Histórico Longitudinal</Text>
             </TouchableOpacity>
@@ -115,6 +115,15 @@ export default function PerfilAtleta() {
               </View>
             </View>
           </View>
+
+          {/* ── Adicionar Relatório Alimentar ── */}
+          <TouchableOpacity
+            style={styles.btnAzulOutline}
+            activeOpacity={0.85}
+            onPress={() => router.push('/relatorio_alimentar')}
+          >
+            <Text style={styles.btnAzulOutlineTexto}>Adicionar Relatório alimentar</Text>
+          </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
     </ImageBackground>
