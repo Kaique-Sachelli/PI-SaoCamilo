@@ -156,7 +156,7 @@ export default function LoginScreen() {
             <TouchableOpacity
               style={[styles.loginButton, loading && styles.loginButtonDisabled]}
               // onPress={handleLogin}
-              onPress={() => router.push('/homepage_adm')}
+              onPress={() => router.push('/homepage_medico')}
               disabled={loading}
               activeOpacity={0.8}
             >
