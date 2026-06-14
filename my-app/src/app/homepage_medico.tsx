@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Text,
   View,
@@ -11,10 +11,27 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { NavbarMedico } from './Navbar_Medico';
+import { getUrl } from '../constants/url';
 
-const ATLETAS = [
+type Atleta = {
+  id: number;
+  nome: string;
+  esporte: string;
+  ativo: boolean;
+  foto: any | null;
+};
+
+type AtletaApi = {
+  id?: number;
+  nome?: string;
+  esporte?: string;
+  ativo?: boolean;
+  disponivel?: boolean;
+};
+
+const ATLETAS: Atleta[] = [
   { id: 1, nome: 'Marcus Silva',      esporte: 'Vôlei',   ativo: true,  foto: require('./assets/Img/marcus.jpg') },
   { id: 2, nome: 'Jéssica do Santos', esporte: 'Tênis',   ativo: false, foto: null },
   { id: 3, nome: 'Eurico Miranda',    esporte: 'Boxe',    ativo: false, foto: null },
@@ -28,11 +45,59 @@ function iniciais(nome: string) {
 
 const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9'];
 
-export default function HomepageTreinador() {
+export default function HomepageMedico() {
   const router = useRouter();
+  const { usuarioId, nome } = useLocalSearchParams<{ usuarioId?: string; nome?: string }>();
   const [busca, setBusca] = useState('');
+  const [atletas, setAtletas] = useState<Atleta[]>(ATLETAS);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState('');
 
-  const atletasFiltrados = ATLETAS.filter((a) =>
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarAtletas() {
+      setCarregando(true);
+      setErro('');
+
+      try {
+        const rota = usuarioId
+          ? `/homepage/medico?usuarioId=${encodeURIComponent(usuarioId)}`
+          : '/homepage/medico';
+        const response = await fetch(getUrl(rota));
+        const data = await response.json();
+
+        if (!response.ok || !data.sucesso) {
+          throw new Error(data.mensagem ?? 'Nao foi possivel carregar os atletas');
+        }
+
+        if (ativo && Array.isArray(data.atletas)) {
+          setAtletas(data.atletas.map((atleta: AtletaApi, index: number) => ({
+            id: Number(atleta.id ?? index + 1),
+            nome: atleta.nome ?? 'Atleta',
+            esporte: atleta.esporte ?? 'Sem modalidade',
+            ativo: Boolean(atleta.ativo ?? atleta.disponivel),
+            foto: null,
+          })));
+        }
+      } catch (error) {
+        if (ativo) {
+          setErro('Usando dados locais. Verifique se o servidor esta rodando.');
+          console.error(error);
+        }
+      } finally {
+        if (ativo) setCarregando(false);
+      }
+    }
+
+    carregarAtletas();
+
+    return () => {
+      ativo = false;
+    };
+  }, [usuarioId]);
+
+  const atletasFiltrados = atletas.filter((a) =>
     a.nome.toLowerCase().includes(busca.toLowerCase()) ||
     a.esporte.toLowerCase().includes(busca.toLowerCase())
   );
@@ -58,7 +123,7 @@ export default function HomepageTreinador() {
               </View>
             </TouchableOpacity>
           </View>
-          <Text style={styles.funcao}>Olá, Médico</Text>
+          <Text style={styles.funcao}>Olá, {nome || 'Médico'}</Text>
         </View>
 
         {/* ── Conteúdo ── */}
@@ -68,6 +133,9 @@ export default function HomepageTreinador() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
+          {carregando && <Text style={styles.infoTexto}>Carregando atletas...</Text>}
+          {erro ? <Text style={styles.erroTexto}>{erro}</Text> : null}
+
           {/* Barra de pesquisa */}
           <View style={styles.searchRow}>
             <Text style={styles.searchIcone}>🔍</Text>
@@ -164,6 +232,9 @@ const styles = StyleSheet.create({
   // Scroll
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
+
+  infoTexto: { fontSize: 12, color: '#555' },
+  erroTexto: { fontSize: 12, color: RED },
 
   // Search
   searchRow: {

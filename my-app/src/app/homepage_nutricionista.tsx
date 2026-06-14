@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Text,
   View,
@@ -11,9 +11,24 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { getUrl } from '../constants/url';
 
-const ATLETAS = [
+type AtletaNutricionista = {
+  id: number;
+  nome: string;
+  foto: any | null;
+  disponivel: boolean;
+};
+
+type AtletaApi = {
+  id?: number;
+  nome?: string;
+  ativo?: boolean;
+  disponivel?: boolean;
+};
+
+const ATLETAS: AtletaNutricionista[] = [
   { id: 1, nome: 'Marcus Silva',      foto: require('./assets/Img/marcus.jpg'), disponivel: true  },
   { id: 2, nome: 'Jéssica do Santos', foto: null,                               disponivel: true  },
   { id: 3, nome: 'Eurico Miranda',    foto: null,                               disponivel: false },
@@ -38,11 +53,58 @@ function dataAtual() {
 
 export default function HomepageNutricionista() {
   const router = useRouter();
+  const { usuarioId, nome } = useLocalSearchParams<{ usuarioId?: string; nome?: string }>();
   const [busca, setBusca] = useState('');
+  const [atletas, setAtletas] = useState<AtletaNutricionista[]>(ATLETAS);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState('');
   const [mostrarDisponiveis, setMostrarDisponiveis] = useState(true);
   const [mostrarIndisponiveis, setMostrarIndisponiveis] = useState(true);
 
-  const atletasFiltrados = ATLETAS.filter((a) => {
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarAtletas() {
+      setCarregando(true);
+      setErro('');
+
+      try {
+        const rota = usuarioId
+          ? `/homepage/nutricionista?usuarioId=${encodeURIComponent(usuarioId)}`
+          : '/homepage/nutricionista';
+        const response = await fetch(getUrl(rota));
+        const data = await response.json();
+
+        if (!response.ok || !data.sucesso) {
+          throw new Error(data.mensagem ?? 'Nao foi possivel carregar os atletas');
+        }
+
+        if (ativo && Array.isArray(data.atletas)) {
+          setAtletas(data.atletas.map((atleta: AtletaApi, index: number) => ({
+            id: Number(atleta.id ?? index + 1),
+            nome: atleta.nome ?? 'Atleta',
+            disponivel: Boolean(atleta.disponivel ?? atleta.ativo),
+            foto: null,
+          })));
+        }
+      } catch (error) {
+        if (ativo) {
+          setErro('Usando dados locais. Verifique se o servidor esta rodando.');
+          console.error(error);
+        }
+      } finally {
+        if (ativo) setCarregando(false);
+      }
+    }
+
+    carregarAtletas();
+
+    return () => {
+      ativo = false;
+    };
+  }, [usuarioId]);
+
+  const atletasFiltrados = atletas.filter((a) => {
     const nomeOk = a.nome.toLowerCase().includes(busca.toLowerCase());
     const statusOk =
       (mostrarDisponiveis && a.disponivel) ||
@@ -71,7 +133,7 @@ export default function HomepageNutricionista() {
             </View>
           </View>
           <Text style={styles.data}>{dataAtual()}</Text>
-          <Text style={styles.funcao}>Olá, Nutricionista</Text>
+          <Text style={styles.funcao}>Olá, {nome || 'Nutricionista'}</Text>
         </View>
 
         <ScrollView
@@ -81,6 +143,9 @@ export default function HomepageNutricionista() {
           keyboardShouldPersistTaps="handled"
         >
           {/* ── Barra de pesquisa ── */}
+          {carregando && <Text style={styles.infoTexto}>Carregando atletas...</Text>}
+          {erro ? <Text style={styles.erroTexto}>{erro}</Text> : null}
+
           <View style={styles.searchRow}>
             <Text style={styles.searchIcone}>🔍</Text>
             <TextInput
@@ -200,6 +265,9 @@ const styles = StyleSheet.create({
   // Scroll
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 24, gap: 10 },
+
+  infoTexto: { fontSize: 12, color: '#555' },
+  erroTexto: { fontSize: 12, color: RED },
 
   // Search
   searchRow: {

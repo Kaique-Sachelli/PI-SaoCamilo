@@ -42,18 +42,24 @@ export default function LoginScreen() {
         return;
       }
 
-      const papel = data.usuario[0]?.tipo_perfil;
-      // redireiciona o usuário de acordo com seu papel no aplicativo
+      const usuario = data.usuario[0];
+      const papel = usuario?.tipo_perfil;
+      const params = {
+        usuarioId: String(usuario?.id_usuario ?? ''),
+        nome: usuario?.nome ?? '',
+      };
+
+      // redireciona o usuario de acordo com seu papel no aplicativo
       if (papel === 'Atleta') {
-        router.push('/homepage_atleta');
+        router.push({ pathname: '/homepage_atleta', params } as any);
       } else if (papel === 'Nutricionista') {
-        router.push('/homepage_nutricionista');
+        router.push({ pathname: '/homepage_nutricionista', params } as any);
       } else if (papel === 'Treinador') {
-        router.push('/homepage_treinador');
+        router.push({ pathname: '/homepage_treinador', params } as any);
       } else if (papel === 'Medico') {
-        router.push('/homepage_medico');
+        router.push({ pathname: '/homepage_medico', params } as any);
       } else {
-        router.push('/homepage_adm');
+        router.push({ pathname: '/homepage_adm', params } as any);
       }
     } catch (error) {
       alert('Não foi possível conectar ao servidor');

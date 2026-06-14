@@ -9,8 +9,24 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { NavbarADM } from './Navbar_ADM';
+import { getUrl } from '../constants/url';
+
+type ResumoAdm = {
+  usuariosPendentes: number;
+  usuariosAtivos: number;
+  atletasAtivos: number;
+  sessoesConcluidas: number;
+};
+
+const RESUMO_FALLBACK: ResumoAdm = {
+  usuariosPendentes: 0,
+  usuariosAtivos: 0,
+  atletasAtivos: 0,
+  sessoesConcluidas: 0,
+};
 
 const MENU = [
   { id: 1, icone: require('./assets/Img/solicitacoes.png'),  label: 'Solicitações de cadastro', rota: '/solicitacoes_cadastro'},
@@ -19,6 +35,45 @@ const MENU = [
 
 export default function HomepageAdm() {
   const router = useRouter();
+  const { nome } = useLocalSearchParams<{ nome?: string }>();
+  const [resumo, setResumo] = useState<ResumoAdm>(RESUMO_FALLBACK);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState('');
+
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarResumo() {
+      setCarregando(true);
+      setErro('');
+
+      try {
+        const response = await fetch(getUrl('/homepage/adm'));
+        const data = await response.json();
+
+        if (!response.ok || !data.sucesso) {
+          throw new Error(data.mensagem ?? 'Nao foi possivel carregar o resumo');
+        }
+
+        if (ativo) {
+          setResumo({ ...RESUMO_FALLBACK, ...data.resumo });
+        }
+      } catch (error) {
+        if (ativo) {
+          setErro('Usando dados locais. Verifique se o servidor esta rodando.');
+          console.error(error);
+        }
+      } finally {
+        if (ativo) setCarregando(false);
+      }
+    }
+
+    carregarResumo();
+
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   return (
     <ImageBackground
@@ -44,7 +99,7 @@ export default function HomepageAdm() {
             </TouchableOpacity>
 
           </View>
-          <Text style={styles.funcao}>Olá, Administrador</Text>
+          <Text style={styles.funcao}>Olá, {nome || 'Administrador'}</Text>
         </View>
 
         <ScrollView
@@ -60,6 +115,28 @@ export default function HomepageAdm() {
           <View style={styles.graficoCard}>
             <Image source={require('./assets/Img/grafico.png')} style={styles.grafico} />
           </View>
+
+          <View style={styles.resumoGrid}>
+            <View style={styles.resumoCard}>
+              <Text style={styles.resumoValor}>{resumo.usuariosPendentes}</Text>
+              <Text style={styles.resumoLabel}>Pendentes</Text>
+            </View>
+            <View style={styles.resumoCard}>
+              <Text style={styles.resumoValor}>{resumo.usuariosAtivos}</Text>
+              <Text style={styles.resumoLabel}>Usuarios</Text>
+            </View>
+            <View style={styles.resumoCard}>
+              <Text style={styles.resumoValor}>{resumo.atletasAtivos}</Text>
+              <Text style={styles.resumoLabel}>Atletas</Text>
+            </View>
+            <View style={styles.resumoCard}>
+              <Text style={styles.resumoValor}>{resumo.sessoesConcluidas}</Text>
+              <Text style={styles.resumoLabel}>Sessoes</Text>
+            </View>
+          </View>
+
+          {carregando && <Text style={styles.infoTexto}>Carregando dados...</Text>}
+          {erro ? <Text style={styles.erroTexto}>{erro}</Text> : null}
 
           {/* Painel */}
           <Text style={styles.painelLabel}>Painel</Text>
@@ -146,6 +223,28 @@ const styles = StyleSheet.create({
     }),
   },
   grafico: { width: 180, height: 170, resizeMode: 'contain' },
+
+  resumoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  resumoCard: {
+    flexBasis: '48%',
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    ...Platform.select({
+      ios: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' },
+      android: { elevation: 2 },
+      web: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' },
+    }),
+  },
+  resumoValor: { fontSize: 22, color: RED, fontWeight: '700' },
+  resumoLabel: { fontSize: 12, color: '#666', marginTop: 2 },
+  infoTexto: { fontSize: 12, color: '#555', marginLeft: 2 },
+  erroTexto: { fontSize: 12, color: RED, marginLeft: 2 },
 
   // Painel label
   painelLabel: { fontSize: 15, fontWeight: '600', color: '#333', marginLeft: 2 },

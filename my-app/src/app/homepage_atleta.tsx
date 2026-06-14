@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import {
   Text,
   View,
@@ -9,11 +10,32 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { NavbarAtleta } from './NavbarAtleta';
+import { getUrl } from '../constants/url';
 
 // Dados fictícios de clima
-const CLIMA = {
+type Clima = {
+  temp: number;
+  descricao: string;
+  chuva: string;
+  umidade: string;
+  vento: string;
+  diaSemana: string;
+  hora: string;
+};
+
+type UltimaSessao = {
+  dataResumo: string;
+  nome: string;
+  hidratacaoStatus: string;
+  taxaSudorese: string;
+  perdaPeso: string;
+  percentualVariacao: string;
+  percentualCor: string;
+};
+
+const CLIMA: Clima = {
   temp: 22,
   descricao: 'Nublado',
   chuva: '10%',
@@ -23,16 +45,78 @@ const CLIMA = {
   hora: '10:00',
 };
 
+const ULTIMA_SESSAO: UltimaSessao = {
+  dataResumo: 'Treino  Ontem, 18:30',
+  nome: 'Corrida intervalar',
+  hidratacaoStatus: 'Hidratação OK',
+  taxaSudorese: '1.2',
+  perdaPeso: '1.8',
+  percentualVariacao: '-1.5%',
+  percentualCor: '#22c55e',
+};
+
 // Pontos do gráfico de temperatura (simulado)
 const PONTOS_GRAFICO = [22, 21, 20, 19, 19, 19, 19, 19, 19, 19, 19, 19];
 const HORAS_GRAFICO  = ['11:00','14:00','17:00','20:00','23:00','02:00','05:00','08:00'];
 
 export default function HomepageAtleta() {
   const router = useRouter();
+  const { usuarioId, nome } = useLocalSearchParams<{ usuarioId?: string; nome?: string }>();
+  const [nomeAtleta, setNomeAtleta] = useState(nome || 'Erick Ken');
+  const [clima, setClima] = useState<Clima>(CLIMA);
+  const [ultimaSessao, setUltimaSessao] = useState<UltimaSessao>(ULTIMA_SESSAO);
+  const [pontosGrafico, setPontosGrafico] = useState<number[]>(PONTOS_GRAFICO);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState('');
+
+  useEffect(() => {
+    if (nome) setNomeAtleta(nome);
+  }, [nome]);
+
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarHomepage() {
+      setCarregando(true);
+      setErro('');
+
+      try {
+        const rota = usuarioId
+          ? `/homepage/atleta?usuarioId=${encodeURIComponent(usuarioId)}`
+          : '/homepage/atleta';
+        const response = await fetch(getUrl(rota));
+        const data = await response.json();
+
+        if (!response.ok || !data.sucesso) {
+          throw new Error(data.mensagem ?? 'Nao foi possivel carregar a homepage');
+        }
+
+        if (ativo) {
+          if (data.usuario?.nome) setNomeAtleta(data.usuario.nome);
+          if (data.clima) setClima({ ...CLIMA, ...data.clima });
+          if (data.ultimaSessao) setUltimaSessao({ ...ULTIMA_SESSAO, ...data.ultimaSessao });
+          if (Array.isArray(data.graficoTemperatura)) setPontosGrafico(data.graficoTemperatura);
+        }
+      } catch (error) {
+        if (ativo) {
+          setErro('Usando dados locais. Verifique se o servidor esta rodando.');
+          console.error(error);
+        }
+      } finally {
+        if (ativo) setCarregando(false);
+      }
+    }
+
+    carregarHomepage();
+
+    return () => {
+      ativo = false;
+    };
+  }, [usuarioId]);
 
   // Mini gráfico de linha como barras
-  const maxVal = Math.max(...PONTOS_GRAFICO);
-  const minVal = Math.min(...PONTOS_GRAFICO);
+  const maxVal = Math.max(...pontosGrafico);
+  const minVal = Math.min(...pontosGrafico);
   const range  = maxVal - minVal || 1;
 
   return (
@@ -57,7 +141,7 @@ export default function HomepageAtleta() {
               </View>
             </TouchableOpacity>
           </View>
-          <Text style={styles.funcao}>Olá, Erick Ken</Text>
+          <Text style={styles.funcao}>Olá, {nomeAtleta}</Text>
         </View>
 
         <ScrollView
@@ -66,30 +150,33 @@ export default function HomepageAtleta() {
           showsVerticalScrollIndicator={false}
         >
           {/* ── Última sessão ── */}
+          {carregando && <Text style={styles.infoTexto}>Carregando dados...</Text>}
+          {erro ? <Text style={styles.erroTexto}>{erro}</Text> : null}
+
           <Text style={styles.secaoLabel}>Última sessão</Text>
 
           <View style={styles.sessaoCard}>
             <View style={styles.sessaoTopo}>
-              <Text style={styles.sessaoData}>Treino  Ontem, 18:30</Text>
+              <Text style={styles.sessaoData}>{ultimaSessao.dataResumo}</Text>
               <View style={styles.hidratacaoOkBadge}>
-                <Text style={styles.hidratacaoOkTexto}>Hidratação OK</Text>
+                <Text style={styles.hidratacaoOkTexto}>{ultimaSessao.hidratacaoStatus}</Text>
               </View>
             </View>
 
-            <Text style={styles.sessaoNome}>Corrida intervalar</Text>
+            <Text style={styles.sessaoNome}>{ultimaSessao.nome}</Text>
 
             <View style={styles.metricasRow}>
               <View style={styles.metricaItem}>
                 <Text style={styles.metricaLabel}>Taxa de sudorese</Text>
-                <Text style={styles.metricaValor}>1.2 <Text style={styles.metricaUnidade}>L/h</Text></Text>
+                <Text style={styles.metricaValor}>{ultimaSessao.taxaSudorese} <Text style={styles.metricaUnidade}>L/h</Text></Text>
               </View>
               <View style={styles.metricaItem}>
                 <Text style={styles.metricaLabel}>Perda de peso</Text>
-                <Text style={styles.metricaValor}>1.8<Text style={styles.metricaUnidade}>kg</Text></Text>
+                <Text style={styles.metricaValor}>{ultimaSessao.perdaPeso}<Text style={styles.metricaUnidade}>kg</Text></Text>
               </View>
               <View style={styles.metricaItem}>
-                <Text style={styles.metricaLabel}>Perda de peso</Text>
-                <Text style={[styles.metricaValor, { color: '#22c55e' }]}>-1.5%</Text>
+                <Text style={styles.metricaLabel}>Variação</Text>
+                <Text style={[styles.metricaValor, { color: ultimaSessao.percentualCor }]}>{ultimaSessao.percentualVariacao}</Text>
               </View>
             </View>
           </View>
@@ -101,16 +188,16 @@ export default function HomepageAtleta() {
               <View style={styles.climaEsquerda}>
                 <Text style={styles.climaNuvem}>🌥</Text>
                 <View>
-                  <Text style={styles.climaTemp}>{CLIMA.temp}°C</Text>
-                  <Text style={styles.climaDetalhes}>Chuva: {CLIMA.chuva}</Text>
-                  <Text style={styles.climaDetalhes}>Umidade: {CLIMA.umidade}</Text>
-                  <Text style={styles.climaDetalhes}>Vento: {CLIMA.vento}</Text>
+                  <Text style={styles.climaTemp}>{clima.temp}°C</Text>
+                  <Text style={styles.climaDetalhes}>Chuva: {clima.chuva}</Text>
+                  <Text style={styles.climaDetalhes}>Umidade: {clima.umidade}</Text>
+                  <Text style={styles.climaDetalhes}>Vento: {clima.vento}</Text>
                 </View>
               </View>
               <View style={styles.climaDireita}>
                 <Text style={styles.climaTitulo}>Clima</Text>
-                <Text style={styles.climaDiaSemana}>{CLIMA.diaSemana}, {CLIMA.hora}</Text>
-                <Text style={styles.climaDescricao}>{CLIMA.descricao}</Text>
+                <Text style={styles.climaDiaSemana}>{clima.diaSemana}, {clima.hora}</Text>
+                <Text style={styles.climaDescricao}>{clima.descricao}</Text>
               </View>
             </View>
 
@@ -125,7 +212,7 @@ export default function HomepageAtleta() {
 
             {/* Gráfico de temperatura (barras como sparkline) */}
             <View style={styles.graficoWrap}>
-              {PONTOS_GRAFICO.map((v, i) => {
+              {pontosGrafico.map((v, i) => {
                 const altura = ((v - minVal) / range) * 28 + 8;
                 return (
                   <View key={i} style={styles.graficoColunaWrap}>
@@ -198,6 +285,8 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { padding: 16, gap: 14, paddingBottom: 24 },
 
+  infoTexto: { fontSize: 12, color: '#555' },
+  erroTexto: { fontSize: 12, color: RED },
   secaoLabel: { fontSize: 16, fontWeight: '600', color: '#222' },
 
   // Sessão card
