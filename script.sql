@@ -6,6 +6,9 @@
 --     nome         VARCHAR(100) NOT NULL,
 --     email        VARCHAR(100) NOT NULL UNIQUE,
 --     senha   VARCHAR(255) NOT NULL,
+--     data_nascimento DATE,
+--     telefone VARCHAR(20),
+--     registro VARCHAR(50),
 --     tipo_perfil  ENUM('Atleta', 'Nutricionista', 'Treinador', 'Medico', 'Suporte', 'Admin') NOT NULL,
 --     situacao ENUM ('Pendente', 'Ativo', 'Desativado') DEFAULT ('Pendente')
 -- );
@@ -80,9 +83,9 @@
 --     FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
 -- );
 
--- INSERT INTO usuario VALUES (null, 'Jose', 'Adm@teste.com', '123', 'Admin');
--- INSERT INTO usuario VALUES (null, 'Rodrigo', 'atleta@teste.com', '123', 'Atleta');
--- INSERT INTO usuario VALUES (null, 'Marcia', 'medico@teste.com', '123', 'Médico');
--- INSERT INTO usuario VALUES (null, 'Pedro', 'nutri@teste.com', '123', 'Nutricionista');
--- INSERT INTO usuario VALUES (null, 'Guilherme', 'treinador@teste.com', '123', 'Treinador');
+-- INSERT INTO usuario VALUES (null, 'Jose', 'Adm@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', 'Admin', 'Ativo');
+-- INSERT INTO usuario VALUES (null, 'Rodrigo', 'atleta@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', 'Atleta', 'Ativo');
+-- INSERT INTO usuario VALUES (null, 'Marcia', 'medico@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', 'Médico', 'Ativo');
+-- INSERT INTO usuario VALUES (null, 'Pedro', 'nutri@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', 'Nutricionista', 'Ativo');
+-- INSERT INTO usuario VALUES (null, 'Guilherme', 'treinador@teste.com', '$2b$10$qEFnKj..ohns..q7gUhkueY3Vn0ziRoB/YFKWyRJIZ0MbfDtHK8qK', 'Treinador', 'Ativo');
 
