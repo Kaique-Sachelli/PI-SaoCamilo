@@ -3,7 +3,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   Platform,
   View,
@@ -12,8 +11,8 @@ import {
   Text,
   KeyboardAvoidingView,
   ImageBackground,
-  BoxShadowValue,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 export default function CadastroScreen() {
@@ -31,7 +30,18 @@ export default function CadastroScreen() {
   const handleVoltar = () => {
     router.back();
   };
-  
+
+  const formatarData = (texto: string) => {
+    const digitos = texto.replace(/\D/g, '').slice(0, 8);
+    let formatado = digitos;
+    if (digitos.length > 4) {
+      formatado = digitos.slice(0, 2) + '/' + digitos.slice(2, 4) + '/' + digitos.slice(4);
+    } else if (digitos.length > 2) {
+      formatado = digitos.slice(0, 2) + '/' + digitos.slice(2);
+    }
+    setDataNascimento(formatado);
+  };
+
   const handleCriarConta = async () => {
     if (!nome || !dataNascimento || !telefone || !email || !senha) {
       alert('Por favor, preencha todos os campos');
@@ -55,8 +65,7 @@ export default function CadastroScreen() {
       style={styles.backgroundImage}
       resizeMode="cover"
     >
-      <View style={[styles.container, { backgroundColor: 'transparent' }]}>
-        <SafeAreaView style={{ flex: 1, width: '100%' }}>
+      <SafeAreaView style={styles.safeArea}>
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -119,10 +128,11 @@ export default function CadastroScreen() {
                     backgroundColor: '#ffffff',
                   },
                 ]}
-                placeholder="Data de nascimento:"
+                placeholder="Data de nascimento: DD/MM/AAAA"
                 value={dataNascimento}
-                onChangeText={setDataNascimento}
+                onChangeText={formatarData}
                 keyboardType="numeric"
+                maxLength={10}
                 editable={!loading}
               />
 
@@ -187,7 +197,7 @@ export default function CadastroScreen() {
                 onPress={() => setDropdownVisivel(true)}
               >
                 <Text style={{ color: genero ? '#747474' : '#747474', fontSize: 16, fontWeight: '500' }}>
-                  {genero || 'Selecione o Gênero:'}
+                  {genero || 'Selecione o login:'}
                 </Text>
               </TouchableOpacity>
 
@@ -239,7 +249,6 @@ export default function CadastroScreen() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </View>
     </ImageBackground>
   );
 }
@@ -250,10 +259,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  container: {
+  safeArea: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: 'transparent',
   },
   scrollContent: {
     flexGrow: 1,

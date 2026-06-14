@@ -3,13 +3,13 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   Text,
   View,
   ImageBackground,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 const MASSA_PRE = 72.5; // kg — viria de props/contexto em produção
@@ -51,7 +51,7 @@ export default function ChecklistPosSessaoScreen() {
 
   return (
     <ImageBackground
-      source={require('../app/assets/Img/Background.png')}
+      source={require('./assets/Img/Background.png')}
       style={styles.background}
       resizeMode="cover"
     >
@@ -155,12 +155,15 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+    backgroundColor: 'transparent',
   },
 
   // Header vermelho
   header: {
     backgroundColor: '#B3151F',
-    paddingTop: Platform.OS === 'android' ? 40 : 10,
+    paddingTop: 10,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
     paddingBottom: 18,
     paddingHorizontal: 16,
   },

@@ -184,22 +184,6 @@ export default function SessaoSelecionada() {
             </TouchableOpacity>
           </View>
         </ScrollView>
-
-        {/* ── Bottom Nav ── */}
-        <View style={styles.navbar}>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_treinador')}>
-            <Image source={require('./assets/Img/homepage.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/batimento3.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/documento.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/perfil2.png')} style={styles.navImg} />
-          </TouchableOpacity>
-        </View>
       </SafeAreaView>
     </ImageBackground>
   );

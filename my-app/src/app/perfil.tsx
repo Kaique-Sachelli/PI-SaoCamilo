@@ -5,11 +5,13 @@ import {
   Image,
   TouchableOpacity,
   ImageBackground,
+  ScrollView,
   Platform,
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { NavbarAtleta } from './NavbarAtleta';
 
 export default function Perfil() {
   const router = useRouter();
@@ -45,6 +47,12 @@ export default function Perfil() {
           <Text style={styles.nome}>Kacique</Text>
           <Text style={styles.posicao}>Vôlei  •  Arremessador</Text>
         </View>
+
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
 
         {/* ── Conteúdo ── */}
         <View style={styles.conteudo}>
@@ -103,26 +111,12 @@ export default function Perfil() {
             <Text style={styles.btnSairIcone}>↪</Text>
             <Text style={styles.btnSairTexto}>Sair</Text>
           </TouchableOpacity>
-
         </View>
-
-        {/* ── Bottom Nav ── */}
-        <View style={styles.navbar}>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_atleta')}>
-            <Image source={require('./assets/Img/homepage.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/historico_atleta')}>
-            <Image source={require('./assets/Img/batimento3.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/checklist-pre-sessao')}>
-            <Image source={require('./assets/Img/documento.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/perfil')}>
-            <Image source={require('./assets/Img/perfil2.png')} style={[styles.navImg, styles.navImgAtivo]} />
-          </TouchableOpacity>
-        </View>
-
+      </ScrollView>
       </SafeAreaView>
+
+      <NavbarAtleta active="perfil" />
+
     </ImageBackground>
   );
 }
@@ -197,6 +191,10 @@ const styles = StyleSheet.create({
   },
   cardTitulo: { fontSize: 17, fontWeight: '700', color: '#111', marginBottom: 2 },
 
+  // Scroll
+  scroll: { flex: 1 },
+  scrollContent: { padding: 16, gap: 14, paddingBottom: 24 },
+  
   // Linhas informações
   linhaInfo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   icone: { width: 28, height: 28, resizeMode: 'contain' },
@@ -215,19 +213,6 @@ const styles = StyleSheet.create({
   atleticoIcone: { width: 28, height: 18, resizeMode: 'contain', marginBottom: 4 },
   atleticoLabel: { fontSize: 13, color: '#555', fontWeight: '500' },
   atleticoValor: { fontSize: 17, fontWeight: '700', color: '#111' },
-
-  // Navbar
-  navbar: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-  },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navImg: { width: 26, height: 26, resizeMode: 'contain' },
-  navImgAtivo: { tintColor: RED },
 
   // Botão sair
   btnSair: {

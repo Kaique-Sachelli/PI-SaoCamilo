@@ -6,8 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  ImageBackground,
 } from 'react-native';
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 // import {
@@ -21,7 +22,12 @@ export default function TelaDetalhesTreino() {
   const router = useRouter();
 // como nao temos banco, coloquei informacoes fixas apenas para mostrar como deve ficar
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require('./assets/Img/Background.png')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+    <SafeAreaView style={styles.container}>
 
       <View style={styles.header}>
 
@@ -336,20 +342,22 @@ export default function TelaDetalhesTreino() {
 
       </View>
 
-    </View>
+    </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
 
+  background: { flex: 1 },
   container: {
     flex: 1,
-    backgroundColor: '#F4F4F4',
+    backgroundColor: 'transparent',
   },
 
   header: {
     backgroundColor: '#D91C23',
-    paddingTop: 60,
+    paddingTop: 10,
     paddingHorizontal: 22,
     paddingBottom: 30,
     borderBottomLeftRadius: 35,

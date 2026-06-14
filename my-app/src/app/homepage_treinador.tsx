@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { NavbarTreinador } from './Navbar_Treinador';
 
 const ATLETAS = [
   { id: 1, nome: 'Marcus Silva',      esporte: 'Vôlei',   ativo: true,  foto: require('./assets/Img/marcus.jpg') },
@@ -50,10 +51,12 @@ export default function HomepageTreinador() {
               <Text style={styles.titulo}>São Camilo</Text>
               <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
             </View>
-            <View style={styles.sinoWrap}>
-              <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
-              <View style={styles.sinoDot} />
-            </View>
+            <TouchableOpacity>
+              <View style={styles.sinoWrap}>
+                <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
+                <View style={styles.sinoDot} />
+              </View>
+            </TouchableOpacity>
           </View>
           <Text style={styles.funcao}>Olá, Treinador</Text>
         </View>
@@ -118,22 +121,8 @@ export default function HomepageTreinador() {
             </TouchableOpacity>
           ))}
         </ScrollView>
-
         {/* ── Bottom Nav ── */}
-        <View style={styles.navbar}>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_treinador')}>
-            <Image source={require('./assets/Img/homepage.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/batimento3.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/documento.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/perfil2.png')} style={styles.navImg} />
-          </TouchableOpacity>
-        </View>
+        <NavbarTreinador active="home"/>
       </SafeAreaView>
     </ImageBackground>
   );

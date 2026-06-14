@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { NavbarAtleta } from './NavbarAtleta';
 
 // Dados fictícios de clima
 const CLIMA = {
@@ -49,10 +50,12 @@ export default function HomepageAtleta() {
               <Text style={styles.titulo}>São Camilo</Text>
               <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
             </View>
-            <View style={styles.sinoWrap}>
-              <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
-              <View style={styles.sinoDot} />
-            </View>
+            <TouchableOpacity>
+              <View style={styles.sinoWrap}>
+                <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
+                <View style={styles.sinoDot} />
+              </View>
+            </TouchableOpacity>
           </View>
           <Text style={styles.funcao}>Olá, Erick Ken</Text>
         </View>
@@ -151,20 +154,7 @@ export default function HomepageAtleta() {
         </ScrollView>
 
         {/* ── Bottom Nav ── */}
-        <View style={styles.navbar}>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_atleta')}>
-            <Image source={require('./assets/Img/homepage.png')} style={[styles.navImg, styles.navImgAtivo]} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/historico_atleta')}>
-            <Image source={require('./assets/Img/batimento3.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/checklist-pre-sessao')}>
-            <Image source={require('./assets/Img/documento.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/perfil')}>
-            <Image source={require('./assets/Img/perfil2.png')} style={styles.navImg} />
-          </TouchableOpacity>
-        </View>
+        <NavbarAtleta active="home" />
 
       </SafeAreaView>
     </ImageBackground>
@@ -301,16 +291,4 @@ const styles = StyleSheet.create({
   },
   btnTreinarTexto: { color: '#fff', fontSize: 18, fontWeight: '700', letterSpacing: 1 },
 
-  // Navbar
-  navbar: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-  },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navImg: { width: 26, height: 26, resizeMode: 'contain' },
-  navImgAtivo: { tintColor: RED },
 });

@@ -3,7 +3,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   Platform,
   Text,
@@ -11,9 +10,10 @@ import {
   ImageBackground,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
-const API_URL = 'http://ip do computador';
+const API_URL = 'http://192.168.0.200';
 
 
 export default function LoginScreen() {
@@ -23,55 +23,55 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      alert('Por favor, preencha todos os campos');
-      return;
-    }
+  // const handleLogin = async () => {
+  //   if (!email || !password) {
+  //     alert('Por favor, preencha todos os campos');
+  //     return;
+  //   }
 
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, senha: password }),
-      });
+  //   setLoading(true);
+  //   try {
+  //     const response = await fetch(`${API_URL}/login`, {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ email, senha: password }),
+  //     });
 
-      const data = await response.json();
+  //     const data = await response.json();
 
-      if (!response.ok || !data.sucesso) {
-        alert(data.mensagem ?? 'Credenciais inválidas');
-        return;
-      }
+  //     if (!response.ok || !data.sucesso) {
+  //       alert(data.mensagem ?? 'Credenciais inválidas');
+  //       return;
+  //     }
 
-      const papel = data.usuario[0]?.tipo_perfil;
-      // redireiciona o usuário de acordo com seu papel no aplicativo
-      if (papel === 'Atleta') {
-        router.push('/homepage_atleta');
-      } else if (papel === 'Nutricionista') {
-        router.push('/homepage_nutricionista');
-      } else if (papel === 'Treinador') {
-        router.push('/homepage_treinador');
-      } else if (papel === 'Medico') {
-        router.push('/homepage_medico');
-      } else {
-        router.push('/homepage_adm');
-      }
-    } catch (error) {
-      alert('Não foi possível conectar ao servidor');
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     const papel = data.usuario[0]?.tipo_perfil;
+  //     // redireiciona o usuário de acordo com seu papel no aplicativo
+  //     if (papel === 'Atleta') {
+  //       router.push('/homepage_atleta');
+  //     } else if (papel === 'Nutricionista') {
+  //       router.push('/homepage_nutricionista');
+  //     } else if (papel === 'Treinador') {
+  //       router.push('/homepage_treinador');
+  //     } else if (papel === 'Medico') {
+  //       router.push('/homepage_medico');
+  //     } else {
+  //       router.push('/homepage_adm');
+  //     }
+  //   } catch (error) {
+  //     alert('Não foi possível conectar ao servidor');
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  const handleForgotPassword = () => {
-    alert('Funcionalidade de recuperação de senha em desenvolvimento');
-  };
+  // const handleForgotPassword = () => {
+  //   alert('Funcionalidade de recuperação de senha em desenvolvimento');
+  // };
 
-  const handleCreateAccount = () => {
-    alert('Funcionalidade de cadastro em desenvolvimento');
-  };
+  // const handleCreateAccount = () => {
+  //   alert('Funcionalidade de cadastro em desenvolvimento');
+  // };
 
   return (
     <ImageBackground
@@ -79,9 +79,7 @@ export default function LoginScreen() {
       style={styles.backgroundImage}
       resizeMode="cover"
     >
-      {/* Trocado ThemedView por View */}
-      <View style={styles.container}>
-        <SafeAreaView style={{ flex: 1, width: '100%' }}>
+      <SafeAreaView style={styles.safeArea}>
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
@@ -145,7 +143,7 @@ export default function LoginScreen() {
 
             {/* Forgot Password Link */}
             <TouchableOpacity
-              onPress={handleForgotPassword}
+              // onPress={handleForgotPassword}
               disabled={loading}
               style={styles.forgotPasswordContainer}
             >
@@ -157,7 +155,8 @@ export default function LoginScreen() {
             {/* Login Button */}
             <TouchableOpacity
               style={[styles.loginButton, loading && styles.loginButtonDisabled]}
-              onPress={handleLogin}
+              // onPress={handleLogin}
+              onPress={() => router.push('/homepage_treinador')}
               disabled={loading}
               activeOpacity={0.8}
             >
@@ -198,7 +197,6 @@ export default function LoginScreen() {
           </View>
         </ScrollView>
       </SafeAreaView>
-    </View>
     </ImageBackground>
   );
 }
@@ -209,8 +207,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  container: {
+  safeArea: {
     flex: 1,
+    backgroundColor: 'transparent',
   },
   logo: {
     width: 200,
