@@ -159,7 +159,7 @@ export default function SessoesMedico() {
           <View style={styles.headerNomeRow}>
             <Text style={styles.nomeAtleta}>Atleta (Kacique)</Text>
             <TouchableOpacity 
-            onPress={() => router.push('/perfil_atleta')} 
+            onPress={() => router.push('/perfil_atleta_medico')} 
             activeOpacity={0.8}>
               <Image
                 source={require('./assets/Img/marcus.jpg')}
