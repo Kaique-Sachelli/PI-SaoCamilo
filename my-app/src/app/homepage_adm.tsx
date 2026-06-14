@@ -15,7 +15,6 @@ import { NavbarADM } from './Navbar_ADM';
 const MENU = [
   { id: 1, icone: require('./assets/Img/solicitacoes.png'),  label: 'Solicitações de cadastro', rota: '/solicitacoes_cadastro'},
   { id: 2, icone: require('./assets/Img/gerenciar.png'),     label: 'Gerenciar Usuários',        rota: '/gerenciar_usuarios'},
-  { id: 3, icone: require('./assets/Img/batimento2.png'),    label: 'Ver Atletas',               rota: '/lista_atletas'},
 ];
 
 export default function HomepageAdm() {
@@ -43,7 +42,7 @@ export default function HomepageAdm() {
                 <View style={styles.sinoDot} />
               </View>
             </TouchableOpacity>
-            
+
           </View>
           <Text style={styles.funcao}>Olá, Administrador</Text>
         </View>
