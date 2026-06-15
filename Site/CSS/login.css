@@ -1,11 +1,18 @@
-body {      
-  min-height: 100vh;        
-  margin: 0;                
+html {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
   width: 100%;
-  height: 100%;
   display: flex;
   place-items: center;
-  background-image: url('../Img/Background.png');
+  background-image: url('../img/Background.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
 }
 
 /* Começo do código do logo */
