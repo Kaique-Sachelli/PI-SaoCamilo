@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { API_URL } from '../constants/url';
 import {
   Text,
   View,
@@ -15,7 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 type Categoria = 'Atletas' | 'Treinadores' | 'Médicos' | 'Nutricionistas';
-
+/** 
 type Usuario = {
   id: number;
   nome: string;
@@ -23,9 +24,8 @@ type Usuario = {
   especialidade: string;
   categoria: Categoria;
   foto: any;
-};
-
-const USUARIOS: Usuario[] = [
+};//*mentando placebo
+/**const USUARIOS: Usuario[] = [
   { id: 1, nome: 'Marcus Silva',     email: 'Marcus@gmail.com',  especialidade: 'Vôlei',   categoria: 'Atletas',        foto: require('./assets/Img/marcus.jpg') },
   { id: 2, nome: 'Eurico Miranda',   email: 'Eurico@gmail.com',  especialidade: 'Boxe',    categoria: 'Atletas',        foto: null },
   { id: 3, nome: 'Ricardo Gomes',    email: 'Ricardo@gmail.com', especialidade: 'Natação', categoria: 'Atletas',        foto: null },
@@ -35,6 +35,7 @@ const USUARIOS: Usuario[] = [
   { id: 7, nome: 'Ana Paula',        email: 'Ana@gmail.com',     especialidade: 'CRM 12345', categoria: 'Médicos',      foto: null },
   { id: 8, nome: 'Beatriz Lima',     email: 'Beatriz@gmail.com', especialidade: 'CRN 45.221', categoria: 'Nutricionistas', foto: null },
 ];
+/** */
 
 const CATEGORIAS: Categoria[] = ['Atletas', 'Treinadores', 'Médicos', 'Nutricionistas'];
 
@@ -43,12 +44,45 @@ const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9', '#6
 function iniciais(nome: string) {
   return nome.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
 }
+function converterCategoria(tipo: string) {
+  switch (tipo) {
+    case 'Atleta':
+      return 'Atletas';
 
+    case 'Treinador':
+      return 'Treinadores';
+
+    case 'Medico':
+      return 'Médicos';
+
+    case 'Nutricionista':
+      return 'Nutricionistas';
+
+    default:
+      return 'Atletas';
+  }
+}
 export default function GerenciarUsuarios() {
   const router = useRouter();
   const [busca, setBusca] = useState('');
   const [categoria, setCategoria] = useState<Categoria>('Atletas');
   const [removidos, setRemovidoss] = useState<number[]>([]);
+  const [usuarios, setUsuarios] = useState<any[]>([]);
+
+  useEffect(() => {
+    carregarUsuarios();
+  }, []);
+
+  async function carregarUsuarios() {
+    try {
+      const response = await fetch(`${API_URL}/usuarios`);
+      const dados = await response.json();
+
+      setUsuarios(dados);
+    } catch (erro) {
+      console.log('Erro ao carregar usuários:', erro);
+    }
+  }
 
   const handleRemover = (id: number, nome: string) => {
     Alert.alert(
@@ -60,14 +94,24 @@ export default function GerenciarUsuarios() {
       ]
     );
   };
-
-  const lista = USUARIOS.filter(
+  const lista = usuarios.filter(
     (u) =>
-      !removidos.includes(u.id) &&
-      u.categoria === categoria &&
-      (u.nome.toLowerCase().includes(busca.toLowerCase()) ||
-        u.email.toLowerCase().includes(busca.toLowerCase()))
+      !removidos.includes(u.id_usuario) &&
+      converterCategoria(u.tipo_perfil) === categoria &&
+      (
+        u.nome.toLowerCase().includes(busca.toLowerCase()) ||
+        u.email.toLowerCase().includes(busca.toLowerCase())
+      )
   );
+
+  /**  const lista = USUARIOS.filter(
+      (u) =>
+        !removidos.includes(u.id) &&
+        u.categoria === categoria &&
+        (u.nome.toLowerCase().includes(busca.toLowerCase()) ||
+          u.email.toLowerCase().includes(busca.toLowerCase()))
+    );
+  /* */
 
   return (
     <ImageBackground
@@ -82,7 +126,7 @@ export default function GerenciarUsuarios() {
           <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
             <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitulo}>Usuários</Text>
+          <Text style={styles.headerTitulo}>TESTE PEDRO2</Text>
         </View>
 
         {/* ── Busca ── */}
@@ -125,7 +169,7 @@ export default function GerenciarUsuarios() {
           )}
 
           {lista.map((u, idx) => (
-            <View key={u.id} style={styles.card}>
+            <View key={u.id_usuario} style={styles.card}>
               <View style={styles.cardEsquerda}>
                 {u.foto ? (
                   <Image source={u.foto} style={styles.avatar} />
@@ -137,13 +181,13 @@ export default function GerenciarUsuarios() {
                 <View style={styles.usuarioInfo}>
                   <Text style={styles.usuarioNome}>{u.nome}</Text>
                   <Text style={styles.usuarioEmail}>{u.email}</Text>
-                  <Text style={styles.usuarioEspecialidade}>{u.especialidade}</Text>
+                  <Text style={styles.usuarioEspecialidade}>{u.registro || u.tipo_perfil}</Text>
                 </View>
               </View>
 
               <TouchableOpacity
                 style={styles.btnLixo}
-                onPress={() => handleRemover(u.id, u.nome)}
+                onPress={() => handleRemover(u.id_usuario, u.nome)}
               >
                 <Text style={styles.lixoIcone}>🗑</Text>
               </TouchableOpacity>
