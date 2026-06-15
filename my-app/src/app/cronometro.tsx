@@ -18,7 +18,12 @@ export default function CronometroScreen() {
   const [quantidade, setQuantidade] = useState('');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const router = useRouter();
-  const { massa_pre, clima_temp, clima_umidade } = useLocalSearchParams<{ massa_pre: string; clima_temp: string; clima_umidade: string }>();
+  const { massa_pre, clima_temp, clima_umidade, urina_pre_cor } = useLocalSearchParams<{
+    massa_pre: string;
+    clima_temp: string;
+    clima_umidade: string;
+    urina_pre_cor: string;
+  }>();
 
   useEffect(() => {
     if (running) {
@@ -58,7 +63,9 @@ export default function CronometroScreen() {
 
   const handleEncerrar = () => {
     setRunning(false);
-    router.push(`/checklist-pos-sessao?massa_pre=${massa_pre}&clima_temp=${clima_temp}&clima_umidade=${clima_umidade}&ml_ingerido=${mlIngeridos}&duracao_segundos=${seconds}`);
+    router.push(
+      `/checklist-pos-sessao?massa_pre=${massa_pre}&clima_temp=${clima_temp}&clima_umidade=${clima_umidade}&ml_ingerido=${mlIngeridos}&duracao_segundos=${seconds}&urina_pre_cor=${urina_pre_cor ?? ''}`
+    );
   };
 
   return (
@@ -78,7 +85,7 @@ export default function CronometroScreen() {
             <View style={styles.dotVerde} />
             <Text style={styles.headerTextLeft}>SESSÃO ATIVA</Text>
           </View>
-          <Text style={styles.headerTextRight}>Corrida intervalar</Text>
+          <Text style={styles.headerTextRight}>Sessão ativa</Text>
         </View>
 
         {/* Timer */}
