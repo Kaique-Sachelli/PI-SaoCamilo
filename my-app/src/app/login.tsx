@@ -15,11 +15,13 @@ import { useRouter } from 'expo-router';
 import { getUrl } from '../constants/url';
 import { useUser } from '../context/UserContext';
 import { SenhaInput } from './visualizar_senha';
+import { PoliticaPrivacidadeModal } from './politica_privacidade';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [politicaVisivel, setPoliticaVisivel] = useState(false);
   const router = useRouter();
   const { login } = useUser();
 
@@ -163,6 +165,7 @@ export default function LoginScreen() {
             {/* Privacy Policy Link */}
             <TouchableOpacity
               style={styles.privacyContainer}
+              onPress={() => setPoliticaVisivel(true)}
               disabled={loading}
             >
               <Text style={styles.privacyText}>
@@ -189,6 +192,10 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
+        <PoliticaPrivacidadeModal
+          visible={politicaVisivel}
+          onClose={() => setPoliticaVisivel(false)}
+        />
       </SafeAreaView>
     </ImageBackground>
   );

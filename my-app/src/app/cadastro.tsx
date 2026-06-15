@@ -34,8 +34,24 @@ export default function CadastroScreen() {
   const [senha, setSenha] = useState('');
   const [registro, setRegistro] = useState('');
   const [tipoPerfil, setTipoPerfil] = useState<TipoPerfil>('Atleta');
+  const [idade, setIdade] = useState('');
+  const [altura, setAltura] = useState('');
+  const [peso, setPeso] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const formatarTelefone = (texto: string) => {
+    const digitos = texto.replace(/\D/g, '').slice(0, 11);
+    let formatado = digitos;
+    if (digitos.length > 7) {
+      formatado = `(${digitos.slice(0, 2)}) ${digitos.slice(2, 7)}-${digitos.slice(7)}`;
+    } else if (digitos.length > 2) {
+      formatado = `(${digitos.slice(0, 2)}) ${digitos.slice(2)}`;
+    } else if (digitos.length > 0) {
+      formatado = `(${digitos}`;
+    }
+    setTelefone(formatado);
+  };
 
   const formatarData = (texto: string) => {
     const digitos = texto.replace(/\D/g, '').slice(0, 8);
@@ -50,7 +66,8 @@ export default function CadastroScreen() {
 
   const handleCriarConta = async () => {
     const label = registroLabel(tipoPerfil);
-    if (!nome || !dataNascimento || !telefone || !email || !senha || (label && !registro)) {
+    const isAtleta = tipoPerfil === 'Atleta';
+    if (!nome || !dataNascimento || !telefone || !email || !senha || (label && !registro) || (isAtleta && (!idade || !altura || !peso))) {
       alert('Por favor, preencha todos os campos');
       return;
     }
@@ -68,6 +85,7 @@ export default function CadastroScreen() {
           data_nascimento: dataNascimento,
           telefone,
           registro,
+          ...(tipoPerfil === 'Atleta' && { idade, altura, peso }),
         }),
       });
 
@@ -122,7 +140,7 @@ export default function CadastroScreen() {
                   <TouchableOpacity
                     key={tipo}
                     style={[styles.chip, tipoPerfil === tipo && styles.chipAtivo]}
-                    onPress={() => { setTipoPerfil(tipo); setRegistro(''); }}
+                    onPress={() => { setTipoPerfil(tipo); setRegistro(''); setIdade(''); setAltura(''); setPeso(''); }}
                     disabled={loading}
                   >
                     <Text style={[styles.chipText, tipoPerfil === tipo && styles.chipTextAtivo]}>
@@ -151,10 +169,11 @@ export default function CadastroScreen() {
               />
               <TextInput
                 style={inputStyle}
-                placeholder="Telefone:"
+                placeholder="Telefone: (XX) XXXXX-XXXX"
                 value={telefone}
-                onChangeText={setTelefone}
+                onChangeText={formatarTelefone}
                 keyboardType="phone-pad"
+                maxLength={16}
                 editable={!loading}
               />
               <TextInput
@@ -182,6 +201,38 @@ export default function CadastroScreen() {
                   autoCapitalize="characters"
                   editable={!loading}
                 />
+              )}
+
+              {tipoPerfil === 'Atleta' && (
+                <>
+                  <TextInput
+                    style={inputStyle}
+                    placeholder="Idade:"
+                    value={idade}
+                    onChangeText={setIdade}
+                    keyboardType="numeric"
+                    maxLength={3}
+                    editable={!loading}
+                  />
+                  <TextInput
+                    style={inputStyle}
+                    placeholder="Altura (cm):"
+                    value={altura}
+                    onChangeText={setAltura}
+                    keyboardType="numeric"
+                    maxLength={3}
+                    editable={!loading}
+                  />
+                  <TextInput
+                    style={inputStyle}
+                    placeholder="Peso (kg):"
+                    value={peso}
+                    onChangeText={setPeso}
+                    keyboardType="numeric"
+                    maxLength={6}
+                    editable={!loading}
+                  />
+                </>
               )}
 
               <TouchableOpacity
