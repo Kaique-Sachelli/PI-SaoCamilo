@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   Text,
   View,
@@ -11,6 +12,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { NavbarAtleta } from './NavbarAtleta';
+import { useUser } from '../context/UserContext';
+import { getUrl } from '../constants/url';
 
 // Dados fictícios de clima
 const CLIMA = {
@@ -27,8 +30,58 @@ const CLIMA = {
 const PONTOS_GRAFICO = [22, 21, 20, 19, 19, 19, 19, 19, 19, 19, 19, 19];
 const HORAS_GRAFICO  = ['11:00','14:00','17:00','20:00','23:00','02:00','05:00','08:00'];
 
+type UltimaSessao = {
+  data_hora_inicio: string;
+  duracao_minutos: number;
+  massa_pre: number;
+  massa_pos: number;
+  taxa_sudorese: number;
+  perda_massa_ajustada: number;
+  percentual_variacao: number;
+  status_color: 'Verde' | 'Amarelo' | 'Vermelho';
+  alerta_seguranca: string | null;
+};
+
 export default function HomepageAtleta() {
   const router = useRouter();
+  const { usuario } = useUser();
+  const [ultimaSessao, setUltimaSessao] = useState<UltimaSessao | null>(null);
+
+  useEffect(() => {
+    if (!usuario?.id_usuario) return;
+    fetch(getUrl(`/atleta/${usuario.id_usuario}/ultima-sessao`))
+      .then(r => r.json())
+      .then(data => {
+        console.log('ultima-sessao resposta:', JSON.stringify(data));
+        if (data.sucesso && data.sessao) {
+          const s = data.sessao;
+          setUltimaSessao({
+            ...s,
+            taxa_sudorese: parseFloat(s.taxa_sudorese ?? 0),
+            perda_massa_ajustada: parseFloat(s.perda_massa_ajustada ?? 0),
+            percentual_variacao: parseFloat(s.percentual_variacao ?? 0),
+          });
+        }
+      })
+      .catch(err => console.error('ultima-sessao erro:', err));
+  }, [usuario?.id_usuario]);
+
+  const formatarData = (iso: string) => {
+    const data = new Date(iso);
+    const hoje = new Date();
+    const ontem = new Date();
+    ontem.setDate(hoje.getDate() - 1);
+    const hora = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    if (data.toDateString() === hoje.toDateString()) return `Hoje, ${hora}`;
+    if (data.toDateString() === ontem.toDateString()) return `Ontem, ${hora}`;
+    return data.toLocaleDateString('pt-BR') + `, ${hora}`;
+  };
+
+  const badgeSessao = {
+    Verde:    { texto: 'Hidratação OK',  cor: '#22c55e' },
+    Amarelo:  { texto: 'Atenção',        cor: '#f59e0b' },
+    Vermelho: { texto: 'Alerta',         cor: '#ef4444' },
+  };
 
   // Mini gráfico de linha como barras
   const maxVal = Math.max(...PONTOS_GRAFICO);
@@ -57,7 +110,7 @@ export default function HomepageAtleta() {
               </View>
             </TouchableOpacity>
           </View>
-          <Text style={styles.funcao}>Olá, Erick Ken</Text>
+            <Text style={styles.funcao}>Olá, {usuario?.nome}</Text>
         </View>
 
         <ScrollView
@@ -68,31 +121,41 @@ export default function HomepageAtleta() {
           {/* ── Última sessão ── */}
           <Text style={styles.secaoLabel}>Última sessão</Text>
 
-          <View style={styles.sessaoCard}>
-            <View style={styles.sessaoTopo}>
-              <Text style={styles.sessaoData}>Treino  Ontem, 18:30</Text>
-              <View style={styles.hidratacaoOkBadge}>
-                <Text style={styles.hidratacaoOkTexto}>Hidratação OK</Text>
+          {ultimaSessao ? (
+            <View style={styles.sessaoCard}>
+              <View style={styles.sessaoTopo}>
+                <Text style={styles.sessaoData}>Treino  {formatarData(ultimaSessao.data_hora_inicio)}</Text>
+                <View style={[styles.hidratacaoOkBadge, { backgroundColor: badgeSessao[ultimaSessao.status_color].cor + '22', borderColor: badgeSessao[ultimaSessao.status_color].cor }]}>
+                  <Text style={[styles.hidratacaoOkTexto, { color: badgeSessao[ultimaSessao.status_color].cor }]}>
+                    {badgeSessao[ultimaSessao.status_color].texto}
+                  </Text>
+                </View>
+              </View>
+
+              <Text style={styles.sessaoNome}>Sessão de Treino</Text>
+
+              <View style={styles.metricasRow}>
+                <View style={styles.metricaItem}>
+                  <Text style={styles.metricaLabel}>Taxa de sudorese</Text>
+                  <Text style={styles.metricaValor}>{ultimaSessao.taxa_sudorese?.toFixed(1)} <Text style={styles.metricaUnidade}>L/h</Text></Text>
+                </View>
+                <View style={styles.metricaItem}>
+                  <Text style={styles.metricaLabel}>Perda de peso</Text>
+                  <Text style={styles.metricaValor}>{ultimaSessao.perda_massa_ajustada?.toFixed(2)}<Text style={styles.metricaUnidade}>L</Text></Text>
+                </View>
+                <View style={styles.metricaItem}>
+                  <Text style={styles.metricaLabel}>Variação de massa</Text>
+                  <Text style={[styles.metricaValor, { color: ultimaSessao.percentual_variacao > 3 ? '#ef4444' : '#22c55e' }]}>
+                    {ultimaSessao.percentual_variacao?.toFixed(1)}%
+                  </Text>
+                </View>
               </View>
             </View>
-
-            <Text style={styles.sessaoNome}>Corrida intervalar</Text>
-
-            <View style={styles.metricasRow}>
-              <View style={styles.metricaItem}>
-                <Text style={styles.metricaLabel}>Taxa de sudorese</Text>
-                <Text style={styles.metricaValor}>1.2 <Text style={styles.metricaUnidade}>L/h</Text></Text>
-              </View>
-              <View style={styles.metricaItem}>
-                <Text style={styles.metricaLabel}>Perda de peso</Text>
-                <Text style={styles.metricaValor}>1.8<Text style={styles.metricaUnidade}>kg</Text></Text>
-              </View>
-              <View style={styles.metricaItem}>
-                <Text style={styles.metricaLabel}>Perda de peso</Text>
-                <Text style={[styles.metricaValor, { color: '#22c55e' }]}>-1.5%</Text>
-              </View>
+          ) : (
+            <View style={styles.sessaoCard}>
+              <Text style={{ color: '#888', textAlign: 'center', paddingVertical: 16 }}>Nenhuma sessão registrada ainda</Text>
             </View>
-          </View>
+          )}
 
           {/* ── Card Clima ── */}
           <View style={styles.climaCard}>

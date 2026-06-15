@@ -3,19 +3,19 @@ import { useRouter } from 'expo-router';
 
 const RED = '#B3151F';
 
-export type NavTabADM = 'home'| 'perfil';
+export type NavTabNutricionista = 'home'| 'perfil';
 
 type Props = {
-  active: NavTabADM;
+  active: NavTabNutricionista;
 };
 
-export function NavbarADM({ active }: Props) {
+export function NavbarNutricionista({ active }: Props) {
   const router = useRouter();
 
   return (
     <View style={styles.navbar}>
       {/* Home */}
-      <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_adm')}>
+      <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_nutricionista')}>
         <Image
           source={require('./assets/Img/homepage.png')}
           style={[styles.navImg, active === 'home' && styles.navImgAtivo]}
@@ -23,7 +23,7 @@ export function NavbarADM({ active }: Props) {
       </TouchableOpacity>
 
       {/* Perfil */}
-      <TouchableOpacity style={styles.navItem} onPress={() => router.push('/perfil_adm')}>
+      <TouchableOpacity style={styles.navItem} onPress={() => router.push('/perfil_nutricionista')}>
         <Image
           source={require('./assets/Img/perfil2.png')}
           style={[styles.navImg, active === 'perfil' && styles.navImgAtivo]}

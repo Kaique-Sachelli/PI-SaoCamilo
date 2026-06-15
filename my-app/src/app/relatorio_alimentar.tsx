@@ -16,13 +16,12 @@ export default function RelatorioAlimentar() {
   const [arquivoAdicionado, setArquivoAdicionado] = useState(false);
 
   const handleAdicionarArquivo = () => {
-    // Em produção: usar expo-document-picker ou expo-image-picker
     Alert.alert(
       'Adicionar arquivo',
       'Escolha uma opção',
       [
-        { text: 'Galeria de fotos',   onPress: () => setArquivoAdicionado(true) },
-        { text: 'Documentos (PDF)',    onPress: () => setArquivoAdicionado(true) },
+        { text: 'Galeria de fotos',  onPress: () => setArquivoAdicionado(true) },
+        { text: 'Documentos (PDF)', onPress: () => setArquivoAdicionado(true) },
         { text: 'Cancelar', style: 'cancel' },
       ]
     );
@@ -44,27 +43,22 @@ export default function RelatorioAlimentar() {
       style={styles.background}
       resizeMode="cover"
     >
-      {/* Overlay rosa suave */}
-      <View style={styles.overlay} />
-
       <SafeAreaView style={styles.safeArea}>
 
         {/* ── Barra superior ── */}
         <View style={styles.topBar}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.topBtn}>
             <Text style={styles.voltarIcone}>‹</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.downloadBtn}>
+          <TouchableOpacity style={styles.topBtn}>
             <Text style={styles.downloadIcone}>⬇</Text>
           </TouchableOpacity>
         </View>
 
         {/* ── Conteúdo central ── */}
         <View style={styles.conteudo}>
-          <Text style={styles.titulo}>Adicione seu relatório aqui:</Text>
+          <Text style={styles.titulo}>Adicione a dieta aqui:</Text>
 
-          {/* Área de upload */}
           <TouchableOpacity
             style={[styles.uploadCard, arquivoAdicionado && styles.uploadCardOk]}
             activeOpacity={0.8}
@@ -85,7 +79,7 @@ export default function RelatorioAlimentar() {
         {/* ── Botão Enviar ── */}
         <View style={styles.rodape}>
           <TouchableOpacity
-            style={[styles.btnEnviar, !arquivoAdicionado && styles.btnEnviarDisabled]}
+            style={styles.btnEnviar}
             activeOpacity={0.85}
             onPress={handleEnviar}
           >
@@ -102,11 +96,7 @@ const AZUL = '#0A3D91';
 
 const styles = StyleSheet.create({
   background: { flex: 1 },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(220, 100, 100, 0.25)',
-  },
-  safeArea: { flex: 1, backgroundColor: 'transparent' },
+  safeArea: { flex: 1, backgroundColor: 'rgba(220, 100, 100, 0.25)' },
 
   // Barra topo
   topBar: {
@@ -117,9 +107,8 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 4,
   },
-  voltarBtn: { padding: 6 },
+  topBtn: { padding: 6 },
   voltarIcone: { fontSize: 32, color: '#fff', fontWeight: '300', lineHeight: 36 },
-  downloadBtn: { padding: 6 },
   downloadIcone: { fontSize: 22, color: '#fff' },
 
   // Conteúdo
@@ -133,23 +122,20 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#fff',
+    color: '#ffffff',
     textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.15)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
   },
 
   // Card de upload
   uploadCard: {
     width: '100%',
-    aspectRatio: 1.1,
+    aspectRatio: 1,
     backgroundColor: '#fff',
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: AZUL,
     ...Platform.select({
       ios: { boxshadow: '0px 4px 16px rgba(0,0,0,0.12)' },
       android: { elevation: 4 },
@@ -157,8 +143,7 @@ const styles = StyleSheet.create({
     }),
   },
   uploadCardOk: {
-    borderColor: AZUL,
-    borderWidth: 2,
+    borderColor: '#22c55e',
   },
   maisIcone: {
     fontSize: 72,
@@ -178,7 +163,7 @@ const styles = StyleSheet.create({
   },
   btnEnviar: {
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 20,
     paddingVertical: 18,
     alignItems: 'center',
     ...Platform.select({
@@ -187,7 +172,6 @@ const styles = StyleSheet.create({
       web: { boxshadow: '0px 4px 12px rgba(0,0,0,0.12)' },
     }),
   },
-  btnEnviarDisabled: { opacity: 0.55 },
   btnEnviarTexto: {
     fontSize: 18,
     fontWeight: '700',

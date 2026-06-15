@@ -7,23 +7,13 @@ import {
   ScrollView,
   ImageBackground,
   Platform,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { NavbarTreinador } from './Navbar_Treinador';
-import { useUser } from '../context/UserContext';
+import { NavbarMedico } from './Navbar_Medico';
 
 export default function PerfilTreinador() {
   const router = useRouter();
-  const { logout } = useUser();
-
-  const handleSair = () => {
-    Alert.alert('Sair', 'Deseja encerrar a sessão?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sair', style: 'destructive', onPress: () => { logout(); router.replace('/login'); } },
-    ]);
-  };
 
   return (
     <ImageBackground
@@ -96,7 +86,7 @@ export default function PerfilTreinador() {
           <TouchableOpacity
             style={styles.btnSair}
             activeOpacity={0.85}
-            onPress={handleSair}
+            onPress={() => router.push('/login')}
           >
             <Text style={styles.btnSairIcone}>⎋</Text>
             <Text style={styles.btnSairTexto}>Sair</Text>
@@ -104,7 +94,7 @@ export default function PerfilTreinador() {
         </ScrollView>
 
         {/* ── Bottom Nav ── */}
-        <NavbarTreinador active="perfil" />
+        <NavbarMedico active="perfil" />
 
       </SafeAreaView>
     </ImageBackground>

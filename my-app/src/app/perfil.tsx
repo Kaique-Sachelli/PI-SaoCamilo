@@ -12,14 +12,16 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { NavbarAtleta } from './NavbarAtleta';
+import { useUser } from '../context/UserContext';
 
 export default function Perfil() {
   const router = useRouter();
+  const { logout } = useUser();
 
   const handleSair = () => {
     Alert.alert('Sair', 'Deseja encerrar a sessão?', [
       { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sair', style: 'destructive', onPress: () => router.replace('/login') },
+      { text: 'Sair', style: 'destructive', onPress: () => { logout(); router.replace('/login'); } },
     ]);
   };
 
