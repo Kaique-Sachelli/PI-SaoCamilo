@@ -56,7 +56,7 @@
 --     id_resultado         INT          PRIMARY KEY AUTO_INCREMENT,
 --     id_sessao            INT          NOT NULL,
 --     perda_massa_ajustada DECIMAL(5,2),
---     taxa_sudorese        DECIMAL(5,2),
+--     taxa_sudorese        DECIMAL(8,2),
 --     percentual_variacao  DECIMAL(5,2),
 --     recomendacao_texto   VARCHAR(255),
 --     alerta_seguranca     TEXT,
