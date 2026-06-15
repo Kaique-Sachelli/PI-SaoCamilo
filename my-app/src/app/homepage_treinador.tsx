@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Text,
   View,
@@ -15,14 +15,15 @@ import { useRouter } from 'expo-router';
 import { useUser } from '../context/UserContext';
 import { NavbarTreinador } from './Navbar_Treinador';
 import { NotificacaoPopup } from './notificacao';
+import { getUrl } from '../constants/url';
 
-const ATLETAS = [
-  { id: 1, nome: 'Marcus Silva',      esporte: 'Vôlei',   ativo: true,  foto: require('./assets/Img/marcus.jpg') },
-  { id: 2, nome: 'Jéssica do Santos', esporte: 'Tênis',   ativo: false, foto: null },
-  { id: 3, nome: 'Eurico Miranda',    esporte: 'Boxe',    ativo: false, foto: null },
-  { id: 4, nome: 'Ricardo Gomes',     esporte: 'Natação', ativo: true,  foto: null },
-  { id: 5, nome: 'Márcia Figueiras',  esporte: 'Natação', ativo: true,  foto: null },
-];
+interface Atleta {
+  id: number;
+  nome: string;
+  esporte: string;
+  ativo: string;
+  foto: null;
+}
 
 function iniciais(nome: string) {
   return nome.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
@@ -35,11 +36,38 @@ export default function HomepageTreinador() {
   const { usuario } = useUser();
   const [busca, setBusca] = useState('');
   const [notifVisivel, setNotifVisivel] = useState(false);
+  const [atletas, setAtletas] = useState<Atleta[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const atletasFiltrados = ATLETAS.filter((a) =>
-    a.nome.toLowerCase().includes(busca.toLowerCase()) ||
-    a.esporte.toLowerCase().includes(busca.toLowerCase())
-  );
+  useEffect(() => {
+    fetchAtletas();
+  }, []);
+
+async function fetchAtletas() { 
+  try { 
+    const resposta = await fetch(getUrl(`/atletas`)); 
+    
+    if (!resposta.ok) { 
+      throw new Error('Erro ao buscar a lista de atletas');
+    } 
+    
+    const dados: Atleta[] = await resposta.json();
+    setAtletas(dados);
+  } catch (err) { 
+    setError(err instanceof Error ? err.message : 'Erro desconhecido'); 
+  } finally { 
+    setLoading(false); 
+  } 
+}
+
+const atletasFiltrados = atletas.filter((a) => {
+  const termoBusca = busca ? busca.toLowerCase() : "";
+  const nomeMatch = a.nome ? a.nome.toLowerCase().includes(termoBusca) : false;
+  const esporteMatch = a.esporte ? a.esporte.toLowerCase().includes(termoBusca) : false;
+
+  return nomeMatch || esporteMatch;
+});
 
   return (
     <ImageBackground

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Text,
   View,
@@ -15,14 +15,15 @@ import { useRouter } from 'expo-router';
 import { useUser } from '../context/UserContext';
 import { NavbarNutricionista } from './Navbar_nutricionista';
 import { NotificacaoPopup } from './notificacao';
+import { getUrl } from '../constants/url';
 
-const ATLETAS = [
-  { id: 1, nome: 'Marcus Silva',      esporte: 'Vôlei',   ativo: true,  foto: require('./assets/Img/marcus.jpg') },
-  { id: 2, nome: 'Jéssica do Santos', esporte: 'Tênis',   ativo: false, foto: null },
-  { id: 3, nome: 'Eurico Miranda',    esporte: 'Boxe',    ativo: false, foto: null },
-  { id: 4, nome: 'Ricardo Gomes',     esporte: 'Natação', ativo: true,  foto: null },
-  { id: 5, nome: 'Márcia Figueiras',  esporte: 'Natação', ativo: true,  foto: null },
-];
+interface Atleta {
+  id: number;
+  nome: string;
+  esporte: string;
+  ativo: string;
+  foto: null;
+}
 
 function iniciais(nome: string) {
   return nome.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
@@ -34,6 +35,39 @@ export default function HomepageNutricionista() {
   const router = useRouter();
   const { usuario } = useUser();
   const [notifVisivel, setNotifVisivel] = useState(false);
+  const [busca, setBusca] = useState('');
+  const [atletas, setAtletas] = useState<Atleta[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchAtletas();
+  }, []);
+
+async function fetchAtletas() { 
+  try { 
+    const resposta = await fetch(getUrl(`/atletas`)); 
+    
+    if (!resposta.ok) { 
+      throw new Error('Erro ao buscar a lista de atletas');
+    } 
+    
+    const dados: Atleta[] = await resposta.json();
+    setAtletas(dados);
+  } catch (err) { 
+    setError(err instanceof Error ? err.message : 'Erro desconhecido'); 
+  } finally { 
+    setLoading(false); 
+  } 
+}
+
+const atletasFiltrados = atletas.filter((a) => {
+  const termoBusca = busca ? busca.toLowerCase() : "";
+  const nomeMatch = a.nome ? a.nome.toLowerCase().includes(termoBusca) : false;
+  const esporteMatch = a.esporte ? a.esporte.toLowerCase().includes(termoBusca) : false;
+
+  return nomeMatch || esporteMatch;
+});
 
   return (
     <ImageBackground
@@ -71,8 +105,10 @@ export default function HomepageNutricionista() {
             <Text style={styles.searchIcone}>🔍</Text>
             <TextInput
               style={styles.searchInput}
-              placeholder="Pesquisar por nome ou categoria..."
+              placeholder="Pesquisar"
               placeholderTextColor="#aaa"
+              value={busca}
+              onChangeText={setBusca}
             />
           </View>
 
@@ -89,7 +125,7 @@ export default function HomepageNutricionista() {
           </View>
 
           {/* Lista de atletas */}
-          {ATLETAS.map((atleta, idx) => (
+          {atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
               key={atleta.id}
               style={styles.atletaCard}
