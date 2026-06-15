@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { getUrl } from '../constants/url';
 import { SenhaInput } from './visualizar_senha';
+import { PoliticaPrivacidadeModal } from './politica_privacidade';
 
 type TipoPerfil = 'Atleta' | 'Treinador' | 'Médico' | 'Nutricionista';
 
@@ -38,6 +39,8 @@ export default function CadastroScreen() {
   const [altura, setAltura] = useState('');
   const [peso, setPeso] = useState('');
   const [loading, setLoading] = useState(false);
+  const [termosAceitos, setTermosAceitos] = useState(false);
+  const [politicaVisivel, setPoliticaVisivel] = useState(false);
   const router = useRouter();
 
   const formatarTelefone = (texto: string) => {
@@ -69,6 +72,10 @@ export default function CadastroScreen() {
     const isAtleta = tipoPerfil === 'Atleta';
     if (!nome || !dataNascimento || !telefone || !email || !senha || (label && !registro) || (isAtleta && (!idade || !altura || !peso))) {
       alert('Por favor, preencha todos os campos');
+      return;
+    }
+    if (!termosAceitos) {
+      alert('Você precisa aceitar os Termos de Uso para continuar.');
       return;
     }
 
@@ -235,10 +242,36 @@ export default function CadastroScreen() {
                 </>
               )}
 
+              {/* Termos de uso */}
+              <View style={styles.termosContainer}>
+                <TouchableOpacity
+                  onPress={() => setPoliticaVisivel(true)}
+                  style={styles.termosLink}
+                >
+                  <Text style={styles.termosLinkTexto}>
+                    Leia nossos Termos de Uso e Política de Privacidade
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.checkboxRow}
+                  onPress={() => setTermosAceitos((v) => !v)}
+                  activeOpacity={0.7}
+                  disabled={loading}
+                >
+                  <View style={[styles.checkbox, termosAceitos && styles.checkboxAtivo]}>
+                    {termosAceitos && <Text style={styles.checkboxMarca}>✓</Text>}
+                  </View>
+                  <Text style={styles.checkboxLabel}>
+                    Li e aceito os Termos de Uso e a Política de Privacidade
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
               <TouchableOpacity
-                style={[styles.criarContaButton, loading && styles.buttonDisabled]}
+                style={[styles.criarContaButton, (loading || !termosAceitos) && styles.buttonDisabled]}
                 onPress={handleCriarConta}
-                disabled={loading}
+                disabled={loading || !termosAceitos}
                 activeOpacity={0.8}
               >
                 <Text style={[styles.criarContaButtonText, { color: '#ffffff' }]}>
@@ -247,6 +280,11 @@ export default function CadastroScreen() {
               </TouchableOpacity>
             </View>
           </ScrollView>
+
+          <PoliticaPrivacidadeModal
+            visible={politicaVisivel}
+            onClose={() => setPoliticaVisivel(false)}
+          />
         </KeyboardAvoidingView>
       </SafeAreaView>
     </ImageBackground>
@@ -335,6 +373,52 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     minHeight: 44,
+  },
+  termosContainer: {
+    width: '90%',
+    alignSelf: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  termosLink: {
+    alignSelf: 'flex-start',
+  },
+  termosLinkTexto: {
+    fontSize: 13,
+    color: '#B3151F',
+    textDecorationLine: 'underline',
+    fontWeight: '500',
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderWidth: 2,
+    borderColor: '#747474',
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  checkboxAtivo: {
+    backgroundColor: '#B3151F',
+    borderColor: '#B3151F',
+  },
+  checkboxMarca: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 16,
+  },
+  checkboxLabel: {
+    flex: 1,
+    fontSize: 13,
+    color: '#444',
+    lineHeight: 18,
   },
   criarContaButton: {
     backgroundColor: '#B3151F',
