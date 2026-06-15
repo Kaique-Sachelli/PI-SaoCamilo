@@ -194,23 +194,6 @@ export default function GerenciarUsuarios() {
             </View>
           ))}
         </ScrollView>
-
-        {/* ── Bottom Nav ── */}
-        <View style={styles.navbar}>
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push('/homepage_adm')}>
-            <Image source={require('./assets/Img/homepage.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/batimento3.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/documento.png')} style={styles.navImg} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image source={require('./assets/Img/perfil2.png')} style={styles.navImg} />
-          </TouchableOpacity>
-        </View>
-
       </SafeAreaView>
     </ImageBackground>
   );
@@ -316,16 +299,4 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   lixoIcone: { fontSize: 20 },
-
-  // Navbar
-  navbar: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-  },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navImg: { width: 26, height: 26, resizeMode: 'contain' },
 });
