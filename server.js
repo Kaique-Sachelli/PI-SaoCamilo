@@ -19,7 +19,7 @@ app.post('/login', async (req, res) => {
 
   try {
     const [rows] = await db.query(
-      'SELECT id_usuario, nome, tipo_perfil, situacao, senha, data_nascimento, telefone, registro FROM Usuario WHERE email = ?',
+      'SELECT id_usuario, nome, email, tipo_perfil, situacao, senha, data_nascimento, telefone, registro FROM Usuario WHERE email = ?',
       [email]
     );
     if (rows.length === 0) {

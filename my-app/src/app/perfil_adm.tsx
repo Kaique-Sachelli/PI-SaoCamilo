@@ -15,7 +15,7 @@ import { NavbarADM } from './Navbar_ADM';
 
 export default function PerfilTreinador() {
   const router = useRouter();
-  const { logout } = useUser();
+  const { usuario, logout } = useUser();
 
   return (
     <ImageBackground
@@ -37,7 +37,7 @@ export default function PerfilTreinador() {
             />
           </View>
 
-          <Text style={styles.nomeTexto}>Kacique</Text>
+          <Text style={styles.nomeTexto}>{usuario?.nome}</Text>
           <Text style={styles.funcaoTexto}>Administrador</Text>
         </View>
 
@@ -56,7 +56,7 @@ export default function PerfilTreinador() {
               <Text style={styles.infoIcone}>✉</Text>
               <View>
                 <Text style={styles.infoLabel}>E-mail:</Text>
-                <Text style={styles.infoValor}>carlinmaia@gmail.com</Text>
+                <Text style={styles.infoValor}>{usuario?.email}</Text>
               </View>
             </View>
 
@@ -64,7 +64,7 @@ export default function PerfilTreinador() {
               <Text style={styles.infoIcone}>📞</Text>
               <View>
                 <Text style={styles.infoLabel}>Telefone:</Text>
-                <Text style={styles.infoValor}>(55)11 4002-8922</Text>
+                <Text style={styles.infoValor}>+55 {usuario?.telefone}</Text>
               </View>
             </View>
 
@@ -72,7 +72,7 @@ export default function PerfilTreinador() {
               <Text style={styles.infoIcone}>📅</Text>
               <View>
                 <Text style={styles.infoLabel}>Idade:</Text>
-                <Text style={styles.infoValor}>45 anos</Text>
+                <Text style={styles.infoValor}>{usuario?.data_nascimento}</Text>
               </View>
             </View>
           </View>

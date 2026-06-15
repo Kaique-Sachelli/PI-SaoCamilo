@@ -16,7 +16,7 @@ import { useUser } from '../context/UserContext';
 
 export default function Perfil() {
   const router = useRouter();
-  const { logout } = useUser();
+  const { usuario, logout } = useUser();
 
   const handleSair = () => {
     Alert.alert('Sair', 'Deseja encerrar a sessão?', [
@@ -40,7 +40,7 @@ export default function Perfil() {
             <Image source={require('./assets/Img/marcus.jpg')} style={styles.avatar} />
           </View>
 
-          <Text style={styles.nome}>Kacique</Text>
+          <Text style={styles.nome}>{usuario?.nome}</Text>
           <Text style={styles.posicao}>Vôlei  •  Arremessador</Text>
         </View>
 
@@ -61,7 +61,7 @@ export default function Perfil() {
               <Image source={require('./assets/Img/email.png')} style={styles.icone} />
               <View>
                 <Text style={styles.linhaLabel}>E-mail:</Text>
-                <Text style={styles.linhaValor}>carlinmaia@gmail.com</Text>
+                <Text style={styles.linhaValor}>{usuario?.email}</Text>
               </View>
             </View>
 
@@ -69,7 +69,7 @@ export default function Perfil() {
               <Image source={require('./assets/Img/telefone.png')} style={styles.icone} />
               <View>
                 <Text style={styles.linhaLabel}>Telefone:</Text>
-                <Text style={styles.linhaValor}>(55)11 4002-8922</Text>
+                <Text style={styles.linhaValor}>+55 {usuario?.telefone}</Text>
               </View>
             </View>
 
@@ -77,7 +77,7 @@ export default function Perfil() {
               <Image source={require('./assets/Img/idade.png')} style={styles.icone} />
               <View>
                 <Text style={styles.linhaLabel}>Idade:</Text>
-                <Text style={styles.linhaValor}>45 anos</Text>
+                <Text style={styles.linhaValor}>{usuario?.data_nascimento} anos</Text>
               </View>
             </View>
           </View>
