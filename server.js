@@ -186,6 +186,37 @@ app.get('/dashboard/usuarios-por-perfil', async (req, res) => {
     });
   }
 });
+//rota para desativar usuario
+app.patch('/usuario/:id/desativar', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await db.query(
+      'UPDATE Usuario SET situacao = "Desativado" WHERE id_usuario = ?',
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: 'Usuário não encontrado'
+      });
+    }
+
+    res.json({
+      sucesso: true,
+      mensagem: 'Usuário desativado com sucesso'
+    });
+
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+});
 // rota de salvar sessão completa
 app.post('/sessao/completa', async (req, res) => {
   const {
