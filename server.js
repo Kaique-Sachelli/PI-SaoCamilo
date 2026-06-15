@@ -86,6 +86,49 @@ app.patch('/usuario/:id/aprovar', async (req, res) => {
   }
 });
 
+// rota de salvar sessão completa
+app.post('/sessao/completa', async (req, res) => {
+  const {
+    id_atleta,
+    massa_pre, massa_pos,
+    clima_temp, clima_umidade,
+    duracao_minutos, volume_ml,
+    perda_massa_ajustada, taxa_sudorese, percentual_variacao,
+    alerta_seguranca, status_color,
+  } = req.body;
+
+  try {
+    await db.query(
+      'INSERT IGNORE INTO Atleta_Perfil (id_atleta) VALUES (?)',
+      [id_atleta]
+    );
+
+    const [sessao] = await db.query(
+      `INSERT INTO Sessao_Treino (id_atleta, data_hora_inicio, duracao_minutos, massa_pre, massa_pos, clima_temp, clima_umidade, status_sessao)
+       VALUES (?, NOW(), ?, ?, ?, ?, ?, 'Concluída')`,
+      [id_atleta, duracao_minutos, massa_pre, massa_pos, clima_temp || null, clima_umidade || null]
+    );
+
+    const id_sessao = sessao.insertId;
+
+    await db.query(
+      'INSERT INTO Registro_Hidratacao (id_sessao, volume_ml) VALUES (?, ?)',
+      [id_sessao, volume_ml]
+    );
+
+    await db.query(
+      `INSERT INTO Resultado_Calculo (id_sessao, perda_massa_ajustada, taxa_sudorese, percentual_variacao, alerta_seguranca, status_color)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [id_sessao, perda_massa_ajustada, taxa_sudorese, percentual_variacao, alerta_seguranca || null, status_color]
+    );
+
+    res.status(201).json({ sucesso: true, id_sessao });
+  } catch (err) {
+    console.error('Erro ao salvar sessão:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
+  }
+});
+
 app.listen(3000, () => {
   console.log('rodando na porta 3000');
 });
