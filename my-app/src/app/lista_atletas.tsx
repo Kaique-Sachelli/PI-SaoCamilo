@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { API_URL } from '../constants/url';
 import {
   Text,
   View,
@@ -13,13 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
-const ATLETAS = [
-  { id: 1, nome: 'Marcus Silva',      esporte: 'Vôlei',   ativo: true,  foto: require('./assets/Img/marcus.jpg') },
-  { id: 2, nome: 'Jéssica do Santos', esporte: 'Tênis',   ativo: false, foto: null },
-  { id: 3, nome: 'Eurico Miranda',    esporte: 'Boxe',    ativo: false, foto: null },
-  { id: 4, nome: 'Ricardo Gomes',     esporte: 'Natação', ativo: true,  foto: null },
-  { id: 5, nome: 'Márcia Figueiras',  esporte: 'Natação', ativo: true,  foto: null },
-];
+// const ATLETAS = [];
 
 const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9'];
 
@@ -28,12 +23,30 @@ function iniciais(nome: string) {
 }
 
 export default function ListaAtletas() {
+  console.log('TELA LISTA_ATLETAS CARREGADA');
   const router = useRouter();
   const [busca, setBusca] = useState('');
 
-  const atletasFiltrados = ATLETAS.filter((a) =>
-    a.nome.toLowerCase().includes(busca.toLowerCase()) ||
-    a.esporte.toLowerCase().includes(busca.toLowerCase())
+  const [atletas, setAtletas] = useState<any[]>([]);
+  useEffect(() => {
+    carregarAtletas();
+  }, []);
+
+  async function carregarAtletas() {
+    try {
+      console.log('Buscando atletas...');
+      const response = await fetch(`${API_URL}/atletas`);
+      console.log('Status:', response.status);
+      const dados = await response.json();
+      console.log('Dados recebidos:', dados);
+      
+      setAtletas(dados);
+    } catch (erro) {
+      console.log('Erro ao carregar atletas:', erro);
+    }
+  }
+  const atletasFiltrados = atletas.filter((a) =>
+    a.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
   return (
@@ -49,7 +62,7 @@ export default function ListaAtletas() {
           <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
             <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitulo}>Atletas</Text>
+          <Text style={styles.headerTitulo}>TESTE PEDRO</Text>
         </View>
 
         <ScrollView
@@ -85,7 +98,7 @@ export default function ListaAtletas() {
           {/* ── Lista de atletas ── */}
           {atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
-              key={atleta.id}
+              key={atleta.id_usuario}
               style={styles.atletaCard}
               activeOpacity={0.75}
               onPress={() => router.push('/TelaAtleta')}
@@ -100,12 +113,19 @@ export default function ListaAtletas() {
                 )}
                 <View style={styles.atletaInfo}>
                   <Text style={styles.atletaNome}>{atleta.nome}</Text>
-                  <Text style={styles.atletaEsporte}>{atleta.esporte}</Text>
+                  <Text style={styles.atletaEsporte}>Atleta</Text>
                 </View>
               </View>
 
               <View style={styles.atletaRight}>
-                <View style={[styles.statusDot, atleta.ativo ? styles.dotVerde : styles.dotVermelho]} />
+                <View
+                  style={[
+                    styles.statusDot,
+                    atleta.situacao === 'Ativo'
+                      ? styles.dotVerde
+                      : styles.dotVermelho,
+                  ]}
+                />
                 <Text style={styles.atletaSeta}>›</Text>
               </View>
             </TouchableOpacity>

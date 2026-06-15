@@ -86,6 +86,52 @@ app.patch('/usuario/:id/aprovar', async (req, res) => {
   }
 });
 
+
+//rota para listar usuarios
+/**app.get('/atletas', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        id_usuario,
+        nome,
+        email,
+        situacao
+      FROM Usuario
+      WHERE tipo_perfil = 'Atleta'
+    `);
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+});
+/** */
+app.get('/usuarios', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        id_usuario,
+        nome,
+        email,
+        registro,
+        tipo_perfil,
+        situacao
+      FROM Usuario
+      ORDER BY nome
+    `);
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+
 // rota de salvar sessão completa
 app.post('/sessao/completa', async (req, res) => {
   const {
@@ -164,6 +210,7 @@ app.get('/atleta/:id/ultima-sessao', async (req, res) => {
   } catch (err) {
     console.error('Erro ao buscar última sessão:', err.message);
     res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
+
   }
 });
 
