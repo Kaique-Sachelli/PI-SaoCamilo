@@ -145,6 +145,8 @@ app.post('/sessao/completa', async (req, res) => {
     duracao_minutos, volume_ml,
     perda_massa_ajustada, taxa_sudorese, percentual_variacao,
     alerta_seguranca, status_color,
+    intensidade_percebida, roupas_encharcadas, urina_pre_cor,
+    nivel_fadiga, sintomas_gastrointestinais,
   } = req.body;
 
   try {
@@ -154,9 +156,18 @@ app.post('/sessao/completa', async (req, res) => {
     );
 
     const [sessao] = await db.query(
-      `INSERT INTO Sessao_Treino (id_atleta, data_hora_inicio, duracao_minutos, massa_pre, massa_pos, clima_temp, clima_umidade, status_sessao)
-       VALUES (?, NOW(), ?, ?, ?, ?, ?, 'Concluída')`,
-      [id_atleta, duracao_minutos, massa_pre, massa_pos, clima_temp || null, clima_umidade || null]
+      `INSERT INTO Sessao_Treino
+         (id_atleta, data_hora_inicio, duracao_minutos, massa_pre, massa_pos,
+          clima_temp, clima_umidade, status_sessao,
+          intensidade_percebida, roupas_encharcadas, urina_pre_cor)
+       VALUES (?, NOW(), ?, ?, ?, ?, ?, 'Concluída', ?, ?, ?)`,
+      [
+        id_atleta, duracao_minutos, massa_pre, massa_pos,
+        clima_temp || null, clima_umidade || null,
+        intensidade_percebida || null,
+        roupas_encharcadas != null ? roupas_encharcadas : 0,
+        urina_pre_cor || null,
+      ]
     );
 
     const id_sessao = sessao.insertId;
@@ -171,6 +182,14 @@ app.post('/sessao/completa', async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?)`,
       [id_sessao, perda_massa_ajustada, taxa_sudorese, percentual_variacao, alerta_seguranca || null, status_color]
     );
+
+    if (nivel_fadiga || sintomas_gastrointestinais) {
+      await db.query(
+        `INSERT INTO Saude_Sintomas (id_sessao, nivel_fadiga, sintomas_gastrointestinais)
+         VALUES (?, ?, ?)`,
+        [id_sessao, nivel_fadiga || null, sintomas_gastrointestinais || null]
+      );
+    }
 
     res.status(201).json({ sucesso: true, id_sessao });
   } catch (err) {
