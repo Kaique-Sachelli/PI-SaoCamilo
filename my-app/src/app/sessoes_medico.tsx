@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Text,
   View,
@@ -18,62 +18,156 @@ type Aba = 'Sessões' | 'Dieta' | 'Exames';
 // ─── Aba Sessões ──────────────────────────────────────────────────────────────
 function AbaSessoes() {
   const router = useRouter();
+
+  const [sessoes, setSessoes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    buscarSessoes();
+  }, []);
+
+  async function buscarSessoes() {
+    try {
+      const response = await fetch(
+        'http://192.168.1.7:3000/atleta/1/sessoes'
+      );
+
+      const data = await response.json();
+
+      if (data.sucesso) {
+        setSessoes(data.sessoes);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar sessões:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <View style={{ padding: 20 }}>
+        <Text>Carregando sessões...</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView contentContainerStyle={styles.abaContent} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      contentContainerStyle={styles.abaContent}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Métricas */}
       <View style={styles.metricasRow}>
         <View style={styles.metricaCard}>
           <Text style={[styles.metricaIcone, { color: '#e53935' }]}>⚡</Text>
-          <Text style={styles.metricaValor}>5</Text>
-          <Text style={styles.metricaLabel}>Sessões/Semana</Text>
+          <Text style={styles.metricaValor}>
+            {sessoes.length}
+          </Text>
+          <Text style={styles.metricaLabel}>Sessões</Text>
         </View>
+
         <View style={styles.metricaCard}>
           <Text style={[styles.metricaIcone, { color: '#1565c0' }]}>💧</Text>
-          <Text style={styles.metricaValor}>2.4</Text>
-          <Text style={styles.metricaLabel}>L médio</Text>
+          <Text style={styles.metricaValor}>
+            {sessoes.length > 0
+              ? (sessoes[0].volume_ml / 1000).toFixed(1)
+              : '0'}
+          </Text>
+          <Text style={styles.metricaLabel}>Líquidos (L)</Text>
         </View>
+
         <View style={styles.metricaCard}>
           <Text style={[styles.metricaIcone, { color: '#333' }]}>📊</Text>
-          <Text style={styles.metricaValor}>1.8%</Text>
-          <Text style={styles.metricaLabel}>Perda média</Text>
+          <Text style={styles.metricaValor}>
+            {sessoes.length > 0
+              ? sessoes[0].percentual_variacao
+              : '0'}
+            %
+          </Text>
+          <Text style={styles.metricaLabel}>Última perda</Text>
         </View>
       </View>
 
-      {/* Sessões */}
-      {[
-        { label: 'Última sessão', data: '22/04/2026, 10:02', duracao: '90 min', liquidos: '1.8L', perda: '1.5%' },
-        { label: 'Sessão 4',      data: '05/04/2026, 12:56', duracao: '87 min', liquidos: '1.8L', perda: '1.5%' },
-        { label: 'Sessão 3',      data: '22/03/2026, 18:02', duracao: '30 min', liquidos: '500ml', perda: '1.5%' },
-      ].map((s, i) => (
+      {sessoes.map((s, i) => (
         <TouchableOpacity
-          key={i}
+          key={s.id_sessao}
           style={styles.sessaoCard}
           activeOpacity={0.75}
-          onPress={() => router.push('/sessao_selecionada')}
+          onPress={() =>
+            router.push({
+              pathname: '/sessao_selecionada',
+              params: {
+                idSessao: s.id_sessao,
+              },
+            })
+          }
         >
           <View style={styles.sessaoTopo}>
-            <Text style={styles.sessaoLabel}>{s.label}</Text>
+            <Text style={styles.sessaoLabel}>
+              {i === 0
+                ? 'Última sessão'
+                : `Sessão ${s.id_sessao}`}
+            </Text>
+
             <Text style={styles.sessaoSeta}>›</Text>
           </View>
+
           <View style={styles.divisor} />
+
           <View style={styles.detalheRow}>
             <Text style={styles.detalheChave}>Data</Text>
-            <Text style={styles.detalheValor}>{s.data}</Text>
+
+            <Text style={styles.detalheValor}>
+              {new Date(
+                s.data_hora_inicio
+              ).toLocaleString('pt-BR')}
+            </Text>
           </View>
+
           <View style={styles.detalheRow}>
             <Text style={styles.detalheChave}>Duração</Text>
-            <Text style={styles.detalheValor}>{s.duracao}</Text>
+
+            <Text style={styles.detalheValor}>
+              {s.duracao_minutos} min
+            </Text>
           </View>
+
           <View style={styles.detalheRow}>
-            <Text style={styles.detalheChave}>Ingestão de líquidos</Text>
-            <Text style={styles.detalheValor}>{s.liquidos}</Text>
+            <Text style={styles.detalheChave}>
+              Ingestão de líquidos
+            </Text>
+
+            <Text style={styles.detalheValor}>
+              {s.volume_ml} ml
+            </Text>
           </View>
+
           <View style={styles.detalheRow}>
-            <Text style={styles.detalheChave}>Perda de peso</Text>
-            <Text style={[styles.detalheValor, { color: '#2e7d32', fontWeight: '600' }]}>{s.perda}</Text>
+            <Text style={styles.detalheChave}>
+              Perda de peso
+            </Text>
+
+            <Text
+              style={[
+                styles.detalheValor,
+                {
+                  color: '#2e7d32',
+                  fontWeight: '600',
+                },
+              ]}
+            >
+              {s.percentual_variacao}%
+            </Text>
           </View>
         </TouchableOpacity>
       ))}
+
+      {sessoes.length === 0 && (
+        <Text style={{ textAlign: 'center' }}>
+          Nenhuma sessão encontrada.
+        </Text>
+      )}
     </ScrollView>
   );
 }
