@@ -170,7 +170,11 @@ export default function GerenciarUsuarios() {
 
           {lista.map((u, idx) => (
             <View key={u.id_usuario} style={styles.card}>
-              <View style={styles.cardEsquerda}>
+              <TouchableOpacity
+                style={styles.cardEsquerda}
+                activeOpacity={0.7}
+                onPress={() => router.push({ pathname: '/perfil_atleta_adm', params: { id: u.id_usuario } })}
+              >
                 {u.foto ? (
                   <Image source={u.foto} style={styles.avatar} />
                 ) : (
@@ -183,7 +187,7 @@ export default function GerenciarUsuarios() {
                   <Text style={styles.usuarioEmail}>{u.email}</Text>
                   <Text style={styles.usuarioEspecialidade}>{u.registro || u.tipo_perfil}</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.btnLixo}
