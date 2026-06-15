@@ -8,6 +8,7 @@ import {
   ScrollView,
   ImageBackground,
   Platform,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -111,7 +112,7 @@ function AbaDieta() {
 }
 
 // ─── Aba Exames ───────────────────────────────────────────────────────────────
-function AbaExames() {
+function AbaExames({ onBaixar }: { onBaixar: (nome: string) => void }) {
   return (
     <ScrollView contentContainerStyle={styles.abaContent} showsVerticalScrollIndicator={false}>
       <Text style={styles.secaoTitulo}>Exames Recentes</Text>
@@ -122,7 +123,7 @@ function AbaExames() {
         { nome: 'Ferritina',          data: '22/04/2026', status: 'Baixo',   cor: '#c62828' },
         { nome: 'Vitamina D',         data: '01/04/2026', status: 'Normal',  cor: '#2e7d32' },
       ].map((e, i) => (
-        <View key={i} style={styles.exameCard}>
+        <TouchableOpacity key={i} style={styles.exameCard} activeOpacity={0.75} onPress={() => onBaixar(e.nome)}>
           <View style={styles.exameInfo}>
             <Text style={styles.exameNome}>{e.nome}</Text>
             <Text style={styles.exameData}>📅 {e.data}</Text>
@@ -130,7 +131,7 @@ function AbaExames() {
           <View style={[styles.statusBadge, { backgroundColor: e.cor + '18', borderColor: e.cor }]}>
             <Text style={[styles.statusText, { color: e.cor }]}>{e.status}</Text>
           </View>
-        </View>
+        </TouchableOpacity>
       ))}
     </ScrollView>
   );
@@ -142,6 +143,7 @@ export default function SessoesMedico() {
   const params = useLocalSearchParams<{ tab?: string }>();
   const tabInicial = (params.tab as Aba) || 'Sessões';
   const [abaAtiva, setAbaAtiva] = useState<Aba>(tabInicial);
+  const [exameSelecionado, setExameSelecionado] = useState<string | null>(null);
 
   return (
     <ImageBackground
@@ -156,7 +158,17 @@ export default function SessoesMedico() {
           <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
             <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
           </TouchableOpacity>
-          <Text style={styles.nomeAtleta}>Atleta (Kacique)</Text>
+          <View style={styles.headerNomeRow}>
+            <Text style={styles.nomeAtleta}>Atleta (Kacique)</Text>
+            <TouchableOpacity 
+            onPress={() => router.push('/perfil_atleta_medico')} 
+            activeOpacity={0.8}>
+              <Image
+                source={require('./assets/Img/marcus.jpg')}
+                style={styles.avatarImg}
+              />
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.tabsContainer}>
             {(['Sessões', 'Dieta', 'Exames'] as Aba[]).map((aba) => (
@@ -177,8 +189,47 @@ export default function SessoesMedico() {
         <View style={styles.content}>
           {abaAtiva === 'Sessões' && <AbaSessoes />}
           {abaAtiva === 'Dieta'   && <AbaDieta />}
-          {abaAtiva === 'Exames'  && <AbaExames />}
+          {abaAtiva === 'Exames'  && <AbaExames onBaixar={(nome) => setExameSelecionado(nome)} />}
         </View>
+
+        {/* ── Modal de confirmação de download ── */}
+        <Modal
+          visible={exameSelecionado !== null}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setExameSelecionado(null)}
+        >
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setExameSelecionado(null)}
+          >
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitulo}>Baixar Exame</Text>
+              <Text style={styles.modalMensagem}>
+                Deseja baixar o exame{'\n'}
+                <Text style={styles.modalNomeExame}>{exameSelecionado}</Text>?
+              </Text>
+              <View style={styles.modalBotoes}>
+                <TouchableOpacity
+                  style={styles.modalBtnCancelar}
+                  onPress={() => setExameSelecionado(null)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.modalBtnCancelarTexto}>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalBtnBaixar}
+                  onPress={() => setExameSelecionado(null)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.modalBtnBaixarTexto}>Baixar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
       </SafeAreaView>
     </ImageBackground>
   );
@@ -201,7 +252,9 @@ const styles = StyleSheet.create({
   },
   voltarBtn: { marginBottom: 6 },
   voltarTexto: { color: 'rgba(255,255,255,0.8)', fontSize: 14 },
-  nomeAtleta: { color: '#fff', fontSize: 26, fontWeight: '700', marginBottom: 18 },
+  headerNomeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 },
+  nomeAtleta: { color: '#fff', fontSize: 26, fontWeight: '700' },
+  avatarImg: { width: 46, height: 46, borderRadius: 23, borderWidth: 2, borderColor: '#fff' },
 
   // Tabs
   tabsContainer: {
@@ -257,6 +310,38 @@ const styles = StyleSheet.create({
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   itemDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: RED },
   itemTexto: { fontSize: 13, color: '#444' },
+
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    width: '80%',
+    borderRadius: 16,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    gap: 16,
+    ...Platform.select({ ios: { boxshadow: '0px 4px 12px rgba(0,0,0,0.2)' }, android: { elevation: 8 }, web: { boxshadow: '0px 4px 12px rgba(0,0,0,0.2)' } }),
+  },
+  modalTitulo: { fontSize: 18, fontWeight: '700', color: '#111' },
+  modalMensagem: { fontSize: 14, color: '#555', textAlign: 'center', lineHeight: 22 },
+  modalNomeExame: { fontWeight: '700', color: '#111' },
+  modalBotoes: { flexDirection: 'row', gap: 12, width: '100%' },
+  modalBtnCancelar: {
+    flex: 1, borderWidth: 1, borderColor: '#ccc', borderRadius: 20,
+    paddingVertical: 10, alignItems: 'center',
+  },
+  modalBtnCancelarTexto: { fontSize: 14, fontWeight: '600', color: '#555' },
+  modalBtnBaixar: {
+    flex: 1, backgroundColor: RED, borderRadius: 20,
+    paddingVertical: 10, alignItems: 'center',
+  },
+  modalBtnBaixarTexto: { fontSize: 14, fontWeight: '700', color: '#fff' },
 
   // Exames
   exameCard: {

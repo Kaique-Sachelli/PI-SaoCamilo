@@ -23,7 +23,7 @@ export function NavbarADM({ active }: Props) {
       </TouchableOpacity>
 
       {/* Perfil */}
-      <TouchableOpacity style={styles.navItem} onPress={() => router.push('/perfil')}>
+      <TouchableOpacity style={styles.navItem} onPress={() => router.push('/perfil_adm')}>
         <Image
           source={require('./assets/Img/perfil2.png')}
           style={[styles.navImg, active === 'perfil' && styles.navImgAtivo]}
