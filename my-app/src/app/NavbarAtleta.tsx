@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 
 const RED = '#B3151F';
 
-export type NavTabAtleta = 'home' | 'historico' | 'checklist' | 'perfil';
+export type NavTabAtleta = 'home' | 'historico' | 'dieta' | 'perfil';
 
 type Props = {
   active: NavTabAtleta;
@@ -31,8 +31,8 @@ export function NavbarAtleta({ active }: Props) {
       </TouchableOpacity>
 
       {/* Nutrição / Checklist (bowl emoji) */}
-      <TouchableOpacity style={styles.navItem} onPress={() => router.push('/checklist-pre-sessao')}>
-        <Text style={[styles.navEmoji, active === 'checklist' && styles.navEmojiAtivo]}>
+      <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dieta_atleta')}>
+        <Text style={[styles.navEmoji, active === 'dieta' && styles.navEmojiAtivo]}>
           🥗
         </Text>
       </TouchableOpacity>
