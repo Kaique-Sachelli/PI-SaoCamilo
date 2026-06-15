@@ -129,6 +129,44 @@ app.post('/sessao/completa', async (req, res) => {
   }
 });
 
+// rota de buscar última sessão do atleta
+app.get('/atleta/:id/ultima-sessao', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    console.log('Buscando ultima sessao para id_atleta:', id);
+    const [rows] = await db.query(
+      `SELECT
+         st.data_hora_inicio,
+         st.duracao_minutos,
+         st.massa_pre,
+         st.massa_pos,
+         rc.taxa_sudorese,
+         rc.perda_massa_ajustada,
+         rc.percentual_variacao,
+         rc.status_color,
+         rc.alerta_seguranca
+       FROM Sessao_Treino st
+       LEFT JOIN Resultado_Calculo rc ON rc.id_sessao = st.id_sessao
+       WHERE st.id_atleta = ? AND st.status_sessao = 'Concluída'
+       ORDER BY st.data_hora_inicio DESC
+       LIMIT 1`,
+      [id]
+    );
+
+    console.log('Rows encontradas:', rows.length, rows[0] ?? 'nenhuma');
+
+    if (rows.length === 0) {
+      return res.json({ sucesso: true, sessao: null });
+    }
+
+    res.json({ sucesso: true, sessao: rows[0] });
+  } catch (err) {
+    console.error('Erro ao buscar última sessão:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
+  }
+});
+
 app.listen(3000, () => {
   console.log('rodando na porta 3000');
 });
