@@ -146,6 +146,7 @@ app.post('/sessao/completa', async (req, res) => {
     perda_massa_ajustada, taxa_sudorese, percentual_variacao,
     alerta_seguranca, status_color,
     intensidade_percebida, roupas_encharcadas, urina_pre_cor,
+    volume_urina_ml,
     nivel_fadiga, sintomas_gastrointestinais,
   } = req.body;
 
@@ -159,14 +160,15 @@ app.post('/sessao/completa', async (req, res) => {
       `INSERT INTO Sessao_Treino
          (id_atleta, data_hora_inicio, duracao_minutos, massa_pre, massa_pos,
           clima_temp, clima_umidade, status_sessao,
-          intensidade_percebida, roupas_encharcadas, urina_pre_cor)
-       VALUES (?, NOW(), ?, ?, ?, ?, ?, 'Concluída', ?, ?, ?)`,
+          intensidade_percebida, roupas_encharcadas, urina_pre_cor, volume_urina_ml)
+       VALUES (?, NOW(), ?, ?, ?, ?, ?, 'Concluída', ?, ?, ?, ?)`,
       [
         id_atleta, duracao_minutos, massa_pre, massa_pos,
         clima_temp || null, clima_umidade || null,
         intensidade_percebida || null,
         roupas_encharcadas != null ? roupas_encharcadas : 0,
         urina_pre_cor || null,
+        volume_urina_ml || null,
       ]
     );
 
