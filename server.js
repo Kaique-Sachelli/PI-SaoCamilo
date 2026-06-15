@@ -19,7 +19,7 @@ app.post('/login', async (req, res) => {
 
   try {
     const [rows] = await db.query(
-      'SELECT id_usuario, nome, tipo_perfil, situacao, senha, data_nascimento, telefone, registro FROM Usuario WHERE email = ?',
+      'SELECT id_usuario, nome, email, tipo_perfil, situacao, senha, data_nascimento, telefone, registro FROM Usuario WHERE email = ?',
       [email]
     );
     if (rows.length === 0) {
@@ -239,6 +239,7 @@ app.get('/atleta/:id/ultima-sessao', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // rota de buscar todas as sessões do atleta (mais recente → mais antiga)
 app.get('/atleta/:id/sessoes', async (req, res) => {
   const { id } = req.params;
@@ -323,6 +324,19 @@ app.get('/sessao/:id', async (req, res) => {
     console.error('Erro ao buscar sessão:', err.message);
     res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
   }
+=======
+app.get('/peso/:id', async (req, res) => {
+  const { id } = req.params;
+
+  const [rows] = await db.query(
+    `SELECT peso
+     FROM Atleta_Perfil
+     WHERE id_atleta = ?`,
+    [id]
+  );
+
+    res.json({ peso: rows[0] });
+>>>>>>> Notificaçoes
 });
 
 app.listen(3000, () => {

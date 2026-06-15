@@ -143,7 +143,7 @@ export default function LoginScreen() {
               style={styles.forgotPasswordContainer}
             >
               <Text style={styles.forgotPasswordText}>
-                Esqueci minha senha?
+                Esqueci minha senha
               </Text>
             </TouchableOpacity>
 
@@ -178,7 +178,7 @@ export default function LoginScreen() {
           {/* Register Section - Trocado ThemedView por View */}
           <View style={styles.registerSection}>
             <Text style={styles.registerQuestion}>
-              Não possuo conta?
+              Não possuo conta
             </Text>
             <TouchableOpacity
               style={styles.registerButton}

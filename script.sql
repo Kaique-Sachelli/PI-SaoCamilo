@@ -18,6 +18,7 @@
 --     idade                INT,
 --     sexo                 ENUM('M', 'F'),
 --     altura               DECIMAL(3,2),
+--     peso                 DECIMAL(5,2),
 --     modalidade_esportiva VARCHAR(50),
 --     id_nutricionista     INT,
 --     id_treinador         INT,

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useUser } from '../context/UserContext';
 import { NavbarADM } from './Navbar_ADM';
 import { NotificacaoPopup } from './notificacao';
 
@@ -21,6 +22,7 @@ const MENU = [
 
 export default function HomepageAdm() {
   const router = useRouter();
+  const { usuario } = useUser();
   const [notifVisivel, setNotifVisivel] = useState(false);
 
   return (
@@ -47,7 +49,7 @@ export default function HomepageAdm() {
             </TouchableOpacity>
 
           </View>
-          <Text style={styles.funcao}>Olá, Administrador</Text>
+          <Text style={styles.funcao}>Olá, {usuario?.nome}</Text>
         </View>
 
         <ScrollView

@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import {
   Text,
   View,
@@ -13,10 +14,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { NavbarAtleta } from './NavbarAtleta';
 import { useUser } from '../context/UserContext';
+import { getUrl } from '../constants/url';
+
+interface PesoData {
+  peso: number;
+}
 
 export default function Perfil() {
   const router = useRouter();
-  const { logout } = useUser();
+  const { usuario, logout } = useUser();
+  const [peso, setPeso] = useState<number | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSair = () => {
     Alert.alert('Sair', 'Deseja encerrar a sessão?', [
@@ -24,6 +33,28 @@ export default function Perfil() {
       { text: 'Sair', style: 'destructive', onPress: () => { logout(); router.replace('/login'); } },
     ]);
   };
+
+  useEffect(() => {
+    fetchPeso();
+  }, []);
+
+  async function fetchPeso() {
+    try {
+      const response = await fetch(getUrl(`/peso/${usuario?.id_usuario}`));
+        
+      if (!response.ok) {
+        throw new Error('Erro ao buscar o peso do atleta');
+      }
+
+      const data: PesoData = await response.json();
+
+      setPeso(data.peso);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <ImageBackground
@@ -40,7 +71,7 @@ export default function Perfil() {
             <Image source={require('./assets/Img/marcus.jpg')} style={styles.avatar} />
           </View>
 
-          <Text style={styles.nome}>Kacique</Text>
+          <Text style={styles.nome}>{usuario?.nome}</Text>
           <Text style={styles.posicao}>Vôlei  •  Arremessador</Text>
         </View>
 
@@ -61,7 +92,7 @@ export default function Perfil() {
               <Image source={require('./assets/Img/email.png')} style={styles.icone} />
               <View>
                 <Text style={styles.linhaLabel}>E-mail:</Text>
-                <Text style={styles.linhaValor}>carlinmaia@gmail.com</Text>
+                <Text style={styles.linhaValor}>{usuario?.email}</Text>
               </View>
             </View>
 
@@ -69,7 +100,7 @@ export default function Perfil() {
               <Image source={require('./assets/Img/telefone.png')} style={styles.icone} />
               <View>
                 <Text style={styles.linhaLabel}>Telefone:</Text>
-                <Text style={styles.linhaValor}>(55)11 4002-8922</Text>
+                <Text style={styles.linhaValor}>+55 {usuario?.telefone}</Text>
               </View>
             </View>
 
@@ -77,7 +108,7 @@ export default function Perfil() {
               <Image source={require('./assets/Img/idade.png')} style={styles.icone} />
               <View>
                 <Text style={styles.linhaLabel}>Idade:</Text>
-                <Text style={styles.linhaValor}>45 anos</Text>
+                <Text style={styles.linhaValor}>{usuario?.data_nascimento} anos</Text>
               </View>
             </View>
           </View>
@@ -94,7 +125,7 @@ export default function Perfil() {
               <View style={styles.atleticoItem}>
                 <Image source={require('./assets/Img/batimento.png')} style={styles.atleticoIcone} />
                 <Text style={styles.atleticoLabel}>Peso</Text>
-                <Text style={styles.atleticoValor}>78 kg</Text>
+                <Text style={styles.atleticoValor}>{peso ? `${peso} kg` : 'Peso não registrado'}</Text>
               </View>
             </View>
           </View>
@@ -103,7 +134,11 @@ export default function Perfil() {
           <View style={{ flex: 1 }} />
 
           {/* Botão Sair */}
-          <TouchableOpacity style={styles.btnSair} onPress={handleSair} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.btnSair} 
+            onPress={() => { logout(); router.push('/login')}} 
+            activeOpacity={0.8}
+          >
             <Text style={styles.btnSairIcone}>↪</Text>
             <Text style={styles.btnSairTexto}>Sair</Text>
           </TouchableOpacity>
