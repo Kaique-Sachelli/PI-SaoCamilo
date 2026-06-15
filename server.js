@@ -289,7 +289,6 @@ app.get('/atleta/:id/ultima-sessao', async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 // rota de buscar todas as sessões do atleta (mais recente → mais antiga)
 app.get('/atleta/:id/sessoes', async (req, res) => {
   const { id } = req.params;
@@ -374,7 +373,8 @@ app.get('/sessao/:id', async (req, res) => {
     console.error('Erro ao buscar sessão:', err.message);
     res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
   }
-=======
+});
+
 app.get('/peso/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -386,7 +386,6 @@ app.get('/peso/:id', async (req, res) => {
   );
 
     res.json({ peso: rows[0] });
->>>>>>> Notificaçoes
 });
 
 app.listen(3000, () => {
