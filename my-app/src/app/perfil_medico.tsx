@@ -89,7 +89,7 @@ export default function PerfilTreinador() {
           <TouchableOpacity
             style={styles.btnSair}
             activeOpacity={0.85}
-            onPress={handleSair}
+            onPress={() => router.push('/login')}
           >
             <Text style={styles.btnSairIcone}>⎋</Text>
             <Text style={styles.btnSairTexto}>Sair</Text>

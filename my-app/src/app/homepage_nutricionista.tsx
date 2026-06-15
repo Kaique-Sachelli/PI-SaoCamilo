@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useUser } from '../context/UserContext';
 import { NavbarNutricionista } from './Navbar_nutricionista';
 import { NotificacaoPopup } from './notificacao';
 
@@ -31,6 +32,7 @@ const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9'];
 
 export default function HomepageNutricionista() {
   const router = useRouter();
+  const { usuario } = useUser();
   const [notifVisivel, setNotifVisivel] = useState(false);
 
   return (
@@ -54,7 +56,7 @@ export default function HomepageNutricionista() {
               </View>
             </TouchableOpacity>
           </View>
-          <Text style={styles.funcao}>Olá, Nutricionista</Text>
+          <Text style={styles.funcao}>Olá, {usuario?.nome}</Text>
         </View>
 
         {/* ── Conteúdo ── */}
