@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import {
   Text,
   View,
@@ -13,10 +14,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { NavbarAtleta } from './NavbarAtleta';
 import { useUser } from '../context/UserContext';
+import { getUrl } from '../constants/url';
+
+interface PesoData {
+  peso: number;
+}
 
 export default function Perfil() {
   const router = useRouter();
   const { usuario, logout } = useUser();
+  const [peso, setPeso] = useState<number | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSair = () => {
     Alert.alert('Sair', 'Deseja encerrar a sessão?', [
@@ -24,6 +33,28 @@ export default function Perfil() {
       { text: 'Sair', style: 'destructive', onPress: () => { logout(); router.replace('/login'); } },
     ]);
   };
+
+  useEffect(() => {
+    fetchPeso();
+  }, []);
+
+  async function fetchPeso() {
+    try {
+      const response = await fetch(getUrl(`/peso/${usuario?.id_usuario}`));
+        
+      if (!response.ok) {
+        throw new Error('Erro ao buscar o peso do atleta');
+      }
+
+      const data: PesoData = await response.json();
+
+      setPeso(data.peso);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <ImageBackground
@@ -94,7 +125,7 @@ export default function Perfil() {
               <View style={styles.atleticoItem}>
                 <Image source={require('./assets/Img/batimento.png')} style={styles.atleticoIcone} />
                 <Text style={styles.atleticoLabel}>Peso</Text>
-                <Text style={styles.atleticoValor}>78 kg</Text>
+                <Text style={styles.atleticoValor}>{peso ? `${peso} kg` : 'Peso não registrado'}</Text>
               </View>
             </View>
           </View>

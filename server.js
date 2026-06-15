@@ -218,6 +218,19 @@ app.get('/atleta/:id/ultima-sessao', async (req, res) => {
   }
 });
 
+app.get('/peso/:id', async (req, res) => {
+  const { id } = req.params;
+
+  const [rows] = await db.query(
+    `SELECT peso
+     FROM Atleta_Perfil
+     WHERE id_atleta = ?`,
+    [id]
+  );
+
+    res.json({ peso: rows[0] });
+});
+
 app.listen(3000, () => {
   console.log('rodando na porta 3000');
 });
