@@ -7,12 +7,51 @@ import {
   ScrollView,
   ImageBackground,
   Platform,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+
+function textoParam(valor?: string | string[]) {
+  return Array.isArray(valor) ? valor[0] : valor;
+}
 
 export default function PerfilAtleta() {
   const router = useRouter();
+  const params = useLocalSearchParams<{
+    id_atleta?: string;
+    nome?: string;
+    email?: string;
+    telefone?: string;
+    idade?: string;
+    altura?: string;
+    peso?: string;
+    modalidade_esportiva?: string;
+  }>();
+
+  const idAtleta = textoParam(params.id_atleta);
+  const nomeAtleta = textoParam(params.nome) || 'Atleta';
+  const emailAtleta = textoParam(params.email) || 'E-mail não informado';
+  const telefoneAtleta = textoParam(params.telefone) || 'Telefone não informado';
+  const modalidade = textoParam(params.modalidade_esportiva) || 'Atleta';
+  const peso = textoParam(params.peso);
+  const altura = textoParam(params.altura);
+  const idade = textoParam(params.idade);
+
+  const abrirRelatorioAlimentar = () => {
+    if (!idAtleta) {
+      Alert.alert('Atenção', 'Selecione um atleta antes de adicionar uma dieta.');
+      return;
+    }
+
+    router.push({
+      pathname: '/relatorio_alimentar',
+      params: {
+        id_atleta: idAtleta,
+        nome: nomeAtleta,
+      },
+    });
+  };
 
   return (
     <ImageBackground
@@ -28,10 +67,10 @@ export default function PerfilAtleta() {
             <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
               <Text style={styles.voltarIcone}>‹</Text>
             </TouchableOpacity>
-            <Text style={styles.nomeAtleta}>Kacique da Silva</Text>
+            <Text style={styles.nomeAtleta}>{nomeAtleta}</Text>
           </View>
 
-          <Text style={styles.posicao}>Vôlei  •  Arremessador</Text>
+          <Text style={styles.posicao}>{modalidade}</Text>
         </View>
 
         <ScrollView
@@ -61,7 +100,7 @@ export default function PerfilAtleta() {
                 <Text style={styles.dadoIcone}>🏋</Text>
                 <View>
                   <Text style={styles.dadoLabel}>Peso</Text>
-                  <Text style={styles.dadoValor}>78 kg</Text>
+                  <Text style={styles.dadoValor}>{peso ? `${peso} kg` : 'Não informado'}</Text>
                 </View>
               </View>
 
@@ -69,7 +108,7 @@ export default function PerfilAtleta() {
                 <Text style={styles.dadoIcone}>⚡</Text>
                 <View>
                   <Text style={styles.dadoLabel}>Altura</Text>
-                  <Text style={styles.dadoValor}>177 cm</Text>
+                  <Text style={styles.dadoValor}>{altura ? `${altura} m` : 'Não informado'}</Text>
                 </View>
               </View>
 
@@ -77,7 +116,7 @@ export default function PerfilAtleta() {
                 <Text style={styles.dadoIcone}>📅</Text>
                 <View>
                   <Text style={styles.dadoLabel}>Idade</Text>
-                  <Text style={styles.dadoValor}>20 anos</Text>
+                  <Text style={styles.dadoValor}>{idade ? `${idade} anos` : 'Não informado'}</Text>
                 </View>
               </View>
             </View>
@@ -103,7 +142,7 @@ export default function PerfilAtleta() {
               <Text style={styles.contatoIcone}>✉</Text>
               <View>
                 <Text style={styles.contatoLabel}>E-mail:</Text>
-                <Text style={styles.contatoValor}>carlinmaia@gmail.com</Text>
+                <Text style={styles.contatoValor}>{emailAtleta}</Text>
               </View>
             </View>
 
@@ -111,7 +150,7 @@ export default function PerfilAtleta() {
               <Text style={styles.contatoIcone}>📞</Text>
               <View>
                 <Text style={styles.contatoLabel}>Telefone:</Text>
-                <Text style={styles.contatoValor}>(55)11 4002-8922</Text>
+                <Text style={styles.contatoValor}>{telefoneAtleta}</Text>
               </View>
             </View>
           </View>
@@ -120,7 +159,7 @@ export default function PerfilAtleta() {
           <TouchableOpacity
             style={styles.btnAzulOutline}
             activeOpacity={0.85}
-            onPress={() => router.push('/relatorio_alimentar')}
+            onPress={abrirRelatorioAlimentar}
           >
             <Text style={styles.btnAzulOutlineTexto}>Adicionar Relatório alimentar</Text>
           </TouchableOpacity>

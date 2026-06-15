@@ -27,6 +27,19 @@
 --     FOREIGN KEY (id_treinador)     REFERENCES Usuario(id_usuario)
 -- );
 
+-- CREATE TABLE Dieta (
+--     id_dieta          INT          PRIMARY KEY AUTO_INCREMENT,
+--     id_atleta         INT          NOT NULL,
+--     id_nutricionista  INT,
+--     titulo            VARCHAR(120) NOT NULL,
+--     descricao         TEXT         NOT NULL,
+--     nome_arquivo      VARCHAR(255),
+--     tipo_arquivo      VARCHAR(50),
+--     data_envio        TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (id_atleta)        REFERENCES Atleta_Perfil(id_atleta),
+--     FOREIGN KEY (id_nutricionista) REFERENCES Usuario(id_usuario)
+-- );
+
 -- CREATE TABLE Sessao_Treino (
 --     id_sessao        INT           PRIMARY KEY AUTO_INCREMENT,
 --     id_atleta        INT           NOT NULL,

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+  Alert,
   Text,
   View,
   StyleSheet,
@@ -15,14 +16,19 @@ import { useRouter } from 'expo-router';
 import { useUser } from '../context/UserContext';
 import { NavbarNutricionista } from './Navbar_nutricionista';
 import { NotificacaoPopup } from './notificacao';
+import { getUrl } from '../constants/url';
 
-const ATLETAS = [
-  { id: 1, nome: 'Marcus Silva',      esporte: 'Vôlei',   ativo: true,  foto: require('./assets/Img/marcus.jpg') },
-  { id: 2, nome: 'Jéssica do Santos', esporte: 'Tênis',   ativo: false, foto: null },
-  { id: 3, nome: 'Eurico Miranda',    esporte: 'Boxe',    ativo: false, foto: null },
-  { id: 4, nome: 'Ricardo Gomes',     esporte: 'Natação', ativo: true,  foto: null },
-  { id: 5, nome: 'Márcia Figueiras',  esporte: 'Natação', ativo: true,  foto: null },
-];
+type Atleta = {
+  id_usuario: number;
+  nome: string;
+  email?: string;
+  telefone?: string;
+  situacao?: string;
+  idade?: number | string | null;
+  altura?: number | string | null;
+  peso?: number | string | null;
+  modalidade_esportiva?: string | null;
+};
 
 function iniciais(nome: string) {
   return nome.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
@@ -34,6 +40,61 @@ export default function HomepageNutricionista() {
   const router = useRouter();
   const { usuario } = useUser();
   const [notifVisivel, setNotifVisivel] = useState(false);
+  const [busca, setBusca] = useState('');
+  const [atletas, setAtletas] = useState<Atleta[]>([]);
+  const [carregandoAtletas, setCarregandoAtletas] = useState(true);
+
+  useEffect(() => {
+    carregarAtletas();
+  }, []);
+
+  async function carregarAtletas() {
+    try {
+      setCarregandoAtletas(true);
+
+      const response = await fetch(getUrl('/atletas'));
+      const dados = await response.json();
+
+      if (!response.ok) {
+        throw new Error(dados.mensagem || 'Não foi possível carregar os atletas.');
+      }
+
+      setAtletas(dados);
+    } catch (err) {
+      const mensagem = err instanceof Error ? err.message : 'Não foi possível carregar os atletas.';
+      console.log('Erro ao carregar atletas:', mensagem);
+      Alert.alert('Erro', mensagem);
+    } finally {
+      setCarregandoAtletas(false);
+    }
+  }
+
+  const atletasFiltrados = atletas.filter((atleta) => {
+    const termo = busca.trim().toLowerCase();
+    if (!termo) return true;
+
+    return [
+      atleta.nome,
+      atleta.email,
+      atleta.modalidade_esportiva,
+    ].some((valor) => (valor || '').toLowerCase().includes(termo));
+  });
+
+  const abrirPerfilAtleta = (atleta: Atleta) => {
+    router.push({
+      pathname: '/perfil_atleta_nutricionista',
+      params: {
+        id_atleta: String(atleta.id_usuario),
+        nome: atleta.nome,
+        email: atleta.email || '',
+        telefone: atleta.telefone || '',
+        idade: atleta.idade != null ? String(atleta.idade) : '',
+        altura: atleta.altura != null ? String(atleta.altura) : '',
+        peso: atleta.peso != null ? String(atleta.peso) : '',
+        modalidade_esportiva: atleta.modalidade_esportiva || '',
+      },
+    });
+  };
 
   return (
     <ImageBackground
@@ -73,6 +134,8 @@ export default function HomepageNutricionista() {
               style={styles.searchInput}
               placeholder="Pesquisar por nome ou categoria..."
               placeholderTextColor="#aaa"
+              value={busca}
+              onChangeText={setBusca}
             />
           </View>
 
@@ -89,29 +152,33 @@ export default function HomepageNutricionista() {
           </View>
 
           {/* Lista de atletas */}
-          {ATLETAS.map((atleta, idx) => (
+          {carregandoAtletas && (
+            <Text style={styles.estadoTexto}>Carregando atletas...</Text>
+          )}
+
+          {!carregandoAtletas && atletasFiltrados.length === 0 && (
+            <Text style={styles.estadoTexto}>Nenhum atleta encontrado.</Text>
+          )}
+
+          {!carregandoAtletas && atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
-              key={atleta.id}
+              key={atleta.id_usuario}
               style={styles.atletaCard}
               activeOpacity={0.75}
-              onPress={() => router.push('/perfil_atleta_nutricionista')}
+              onPress={() => abrirPerfilAtleta(atleta)}
             >
               <View style={styles.atletaLeft}>
-                {atleta.foto ? (
-                  <Image source={atleta.foto} style={styles.atletaAvatar} />
-                ) : (
-                  <View style={[styles.atletaAvatar, styles.atletaAvatarPlaceholder, { backgroundColor: CORES_AVATAR[idx % CORES_AVATAR.length] }]}>
-                    <Text style={styles.atletaIniciais}>{iniciais(atleta.nome)}</Text>
-                  </View>
-                )}
+                <View style={[styles.atletaAvatar, styles.atletaAvatarPlaceholder, { backgroundColor: CORES_AVATAR[idx % CORES_AVATAR.length] }]}>
+                  <Text style={styles.atletaIniciais}>{iniciais(atleta.nome)}</Text>
+                </View>
                 <View style={styles.atletaInfo}>
                   <Text style={styles.atletaNome}>{atleta.nome}</Text>
-                  <Text style={styles.atletaEsporte}>{atleta.esporte}</Text>
+                  <Text style={styles.atletaEsporte}>{atleta.modalidade_esportiva || 'Atleta'}</Text>
                 </View>
               </View>
 
               <View style={styles.atletaRight}>
-                <View style={[styles.statusDot, atleta.ativo ? styles.dotVerde : styles.dotVermelho]} />
+                <View style={[styles.statusDot, atleta.situacao === 'Ativo' ? styles.dotVerde : styles.dotVermelho]} />
                 <Text style={styles.atletaSeta}>›</Text>
               </View>
             </TouchableOpacity>
@@ -196,6 +263,14 @@ const styles = StyleSheet.create({
   gerenciarBtn: { flexDirection: 'row', alignItems: 'center' },
   gerenciarTexto: { fontSize: 15, color: RED, fontWeight: '600' },
   gerenciarIcone: { width: 18, height: 16, tintColor: RED },
+  estadoTexto: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 14,
+    color: '#555',
+    fontSize: 14,
+    textAlign: 'center',
+  },
 
   // Athlete cards
   atletaCard: {

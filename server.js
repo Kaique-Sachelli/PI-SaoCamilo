@@ -13,6 +13,28 @@ function parseDateBR(str) {
   return str;
 }
 
+function campoTexto(valor) {
+  const texto = typeof valor === 'string' ? valor.trim() : '';
+  return texto || null;
+}
+
+async function inicializarBanco() {
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS Dieta (
+      id_dieta INT PRIMARY KEY AUTO_INCREMENT,
+      id_atleta INT NOT NULL,
+      id_nutricionista INT,
+      titulo VARCHAR(120) NOT NULL,
+      descricao TEXT NOT NULL,
+      nome_arquivo VARCHAR(255),
+      tipo_arquivo VARCHAR(50),
+      data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (id_atleta) REFERENCES Atleta_Perfil(id_atleta),
+      FOREIGN KEY (id_nutricionista) REFERENCES Usuario(id_usuario)
+    )
+  `);
+}
+
 // rota de login
 app.post('/login', async (req, res) => {
   const { email, senha } = req.body;
@@ -96,23 +118,31 @@ app.get('/atletas', async (req, res) => {
   try {
     let sql = `
       SELECT
-        id_usuario,
-        nome,
-        email,
-        registro,
-        tipo_perfil,
-        situacao
-      FROM Usuario
-      WHERE tipo_perfil = 'Atleta'
+        u.id_usuario,
+        u.nome,
+        u.email,
+        u.telefone,
+        u.data_nascimento,
+        u.registro,
+        u.tipo_perfil,
+        u.situacao,
+        ap.idade,
+        ap.sexo,
+        ap.altura,
+        ap.peso,
+        ap.modalidade_esportiva
+      FROM Usuario u
+      LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = u.id_usuario
+      WHERE u.tipo_perfil = 'Atleta'
     `;
     const params = [];
 
     if (busca) {
-      sql += ' AND (nome LIKE ? OR email LIKE ? OR registro LIKE ?)';
-      params.push(busca, busca, busca);
+      sql += ' AND (u.nome LIKE ? OR u.email LIKE ? OR u.registro LIKE ? OR ap.modalidade_esportiva LIKE ?)';
+      params.push(busca, busca, busca, busca);
     }
 
-    sql += ' ORDER BY nome';
+    sql += ' ORDER BY u.nome';
 
     const [rows] = await db.query(sql, params);
 
@@ -123,6 +153,137 @@ app.get('/atletas', async (req, res) => {
       sucesso: false,
       mensagem: err.message
     });
+  }
+});
+
+// rota para enviar dieta do nutricionista para um atleta
+app.post('/dietas', async (req, res) => {
+  const {
+    id_atleta,
+    id_nutricionista,
+    titulo,
+    descricao,
+    nome_arquivo,
+    tipo_arquivo,
+  } = req.body;
+
+  const idAtleta = Number(id_atleta);
+  const idNutricionista = Number(id_nutricionista);
+  const tituloNormalizado = campoTexto(titulo) || 'Plano alimentar';
+  const descricaoNormalizada = campoTexto(descricao);
+  const nomeArquivoNormalizado = campoTexto(nome_arquivo);
+  const tipoArquivoNormalizado = campoTexto(tipo_arquivo);
+
+  if (!Number.isInteger(idAtleta) || idAtleta <= 0) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Atleta inválido' });
+  }
+
+  if (!Number.isInteger(idNutricionista) || idNutricionista <= 0) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Nutricionista inválido' });
+  }
+
+  if (!descricaoNormalizada) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Descreva a dieta antes de enviar' });
+  }
+
+  let conn;
+
+  try {
+    conn = await db.getConnection();
+    await conn.beginTransaction();
+
+    const [atleta] = await conn.query(
+      'SELECT id_usuario FROM Usuario WHERE id_usuario = ? AND tipo_perfil = "Atleta"',
+      [idAtleta]
+    );
+
+    if (atleta.length === 0) {
+      await conn.rollback();
+      return res.status(404).json({ sucesso: false, mensagem: 'Atleta não encontrado' });
+    }
+
+    const [nutricionista] = await conn.query(
+      'SELECT id_usuario FROM Usuario WHERE id_usuario = ? AND tipo_perfil = "Nutricionista"',
+      [idNutricionista]
+    );
+
+    if (nutricionista.length === 0) {
+      await conn.rollback();
+      return res.status(404).json({ sucesso: false, mensagem: 'Nutricionista não encontrado' });
+    }
+
+    await conn.query(
+      'INSERT IGNORE INTO Atleta_Perfil (id_atleta, id_nutricionista) VALUES (?, ?)',
+      [idAtleta, idNutricionista]
+    );
+
+    await conn.query(
+      'UPDATE Atleta_Perfil SET id_nutricionista = COALESCE(id_nutricionista, ?) WHERE id_atleta = ?',
+      [idNutricionista, idAtleta]
+    );
+
+    const [resultado] = await conn.query(
+      `INSERT INTO Dieta
+        (id_atleta, id_nutricionista, titulo, descricao, nome_arquivo, tipo_arquivo)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        idAtleta,
+        idNutricionista,
+        tituloNormalizado,
+        descricaoNormalizada,
+        nomeArquivoNormalizado,
+        tipoArquivoNormalizado,
+      ]
+    );
+
+    await conn.commit();
+
+    res.status(201).json({
+      sucesso: true,
+      mensagem: 'Dieta enviada com sucesso',
+      id_dieta: resultado.insertId,
+    });
+  } catch (err) {
+    if (conn) await conn.rollback();
+    console.error('Erro ao enviar dieta:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
+  } finally {
+    if (conn) conn.release();
+  }
+});
+
+// rota para buscar a dieta mais recente de um atleta
+app.get('/atleta/:id/dieta', async (req, res) => {
+  const idAtleta = Number(req.params.id);
+
+  if (!Number.isInteger(idAtleta) || idAtleta <= 0) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Atleta inválido' });
+  }
+
+  try {
+    const [rows] = await db.query(
+      `SELECT
+         d.id_dieta,
+         d.id_atleta,
+         d.id_nutricionista,
+         d.titulo,
+         d.descricao,
+         d.nome_arquivo,
+         d.tipo_arquivo,
+         d.data_envio,
+         u.nome AS nutricionista_nome
+       FROM Dieta d
+       LEFT JOIN Usuario u ON u.id_usuario = d.id_nutricionista
+       WHERE d.id_atleta = ?
+       ORDER BY d.data_envio DESC
+       LIMIT 1`,
+      [idAtleta]
+    );
+
+    res.json({ sucesso: true, dieta: rows[0] || null });
+  } catch (err) {
+    console.error('Erro ao buscar dieta:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
   }
 });
 
@@ -388,6 +549,13 @@ app.get('/peso/:id', async (req, res) => {
     res.json({ peso: rows[0] });
 });
 
-app.listen(3000, () => {
-  console.log('rodando na porta 3000');
-});
+inicializarBanco()
+  .then(() => {
+    app.listen(3000, () => {
+      console.log('rodando na porta 3000');
+    });
+  })
+  .catch((err) => {
+    console.error('Erro ao inicializar banco:', err.message);
+    process.exit(1);
+  });
