@@ -133,6 +133,8 @@ app.get('/usuarios', async (req, res) => {
       sucesso: false,
       mensagem: err.message
     });
+  }
+});
 
 // rota de salvar sessão completa
 app.post('/sessao/completa', async (req, res) => {
