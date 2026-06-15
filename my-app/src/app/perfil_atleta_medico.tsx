@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { NavbarAtleta } from './NavbarAtleta';
 
 export default function PerfilAtleta() {
   const router = useRouter();
@@ -29,13 +28,7 @@ export default function PerfilAtleta() {
             <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
               <Text style={styles.voltarIcone}>‹</Text>
             </TouchableOpacity>
-
             <Text style={styles.nomeAtleta}>Kacique da Silva</Text>
-
-            <View style={styles.chatWrap}>
-              <Text style={styles.chatIcone}>💬</Text>
-              <View style={styles.chatDot} />
-            </View>
           </View>
 
           <Text style={styles.posicao}>Vôlei  •  Arremessador</Text>
@@ -96,7 +89,7 @@ export default function PerfilAtleta() {
             <TouchableOpacity
               style={styles.btnAzul}
               activeOpacity={0.85}
-              onPress={() => router.push('/historico_atleta')}
+              onPress={() => router.push('/historico_longitudional_medico')}
             >
               <Text style={styles.btnAzulTexto}>Histórico Longitudinal</Text>
             </TouchableOpacity>
@@ -122,22 +115,8 @@ export default function PerfilAtleta() {
               </View>
             </View>
           </View>
-
-          {/* ── Botão Relatório alimentar ── */}
-          <TouchableOpacity
-            style={styles.btnAzulOutline}
-            activeOpacity={0.85}
-            onPress={() => router.push('/relatorio_alimentar')}
-          >
-            <Text style={styles.btnAzulOutlineTexto}>Adicionar Relatório alimentar</Text>
-          </TouchableOpacity>
         </ScrollView>
-
       </SafeAreaView>
-
-      {/* ── Bottom Nav ── */}
-      <NavbarAtleta active="historico" />
-
     </ImageBackground>
   );
 }
@@ -167,14 +146,6 @@ const styles = StyleSheet.create({
   voltarBtn: { padding: 4 },
   voltarIcone: { color: '#fff', fontSize: 30, fontWeight: '300', lineHeight: 34 },
   nomeAtleta: { color: '#fff', fontSize: 22, fontWeight: '700', flex: 1, textAlign: 'center' },
-  chatWrap: { position: 'relative' },
-  chatIcone: { fontSize: 24 },
-  chatDot: {
-    position: 'absolute', top: 0, right: 0,
-    width: 9, height: 9, borderRadius: 5,
-    backgroundColor: '#4CAF50',
-    borderWidth: 1.5, borderColor: RED,
-  },
   posicao: {
     color: 'rgba(255,255,255,0.85)',
     fontSize: 15,
