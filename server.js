@@ -174,6 +174,7 @@ app.get('/dashboard/usuarios-por-perfil', async (req, res) => {
         tipo_perfil,
         COUNT(*) AS quantidade
       FROM Usuario
+      WHERE situacao = 'Ativo'
       GROUP BY tipo_perfil
     `);
 
