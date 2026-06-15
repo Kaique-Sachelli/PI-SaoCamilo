@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { NavbarMedico } from './Navbar_Medico';
+import { NotificacaoPopup } from './notificacao';
 
 const ATLETAS = [
   { id: 1, nome: 'Marcus Silva',      esporte: 'Vôlei',   ativo: true,  foto: require('./assets/Img/marcus.jpg') },
@@ -31,6 +32,7 @@ const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9'];
 export default function HomepageTreinador() {
   const router = useRouter();
   const [busca, setBusca] = useState('');
+  const [notifVisivel, setNotifVisivel] = useState(false);
 
   const atletasFiltrados = ATLETAS.filter((a) =>
     a.nome.toLowerCase().includes(busca.toLowerCase()) ||
@@ -51,7 +53,7 @@ export default function HomepageTreinador() {
               <Text style={styles.titulo}>São Camilo</Text>
               <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setNotifVisivel(true)}>
               <View style={styles.sinoWrap}>
                 <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
                 <View style={styles.sinoDot} />
@@ -123,6 +125,12 @@ export default function HomepageTreinador() {
         </ScrollView>
         {/* ── Bottom Nav ── */}
         <NavbarMedico active="home"/>
+
+        {/* ── Popup de Notificações ── */}
+        <NotificacaoPopup
+          visible={notifVisivel}
+          onClose={() => setNotifVisivel(false)}
+        />
       </SafeAreaView>
     </ImageBackground>
   );

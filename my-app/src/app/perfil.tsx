@@ -35,12 +35,6 @@ export default function Perfil() {
 
         {/* ── Header ── */}
         <View style={styles.header}>
-          {/* Sino */}
-          <View style={styles.sinoWrap}>
-            <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
-            <View style={styles.sinoDot} />
-          </View>
-
           {/* Avatar centralizado */}
           <View style={styles.avatarWrap}>
             <Image source={require('./assets/Img/marcus.jpg')} style={styles.avatar} />
@@ -138,18 +132,6 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     alignItems: 'center',
-  },
-  sinoWrap: {
-    position: 'absolute',
-    top: 14,
-    right: 20,
-  },
-  sino: { width: 26, height: 26, tintColor: '#fff' },
-  sinoDot: {
-    position: 'absolute', top: 0, right: 0,
-    width: 8, height: 8, borderRadius: 4,
-    backgroundColor: '#FF9800',
-    borderWidth: 1.5, borderColor: RED,
   },
   avatarWrap: {
     marginTop: 16,

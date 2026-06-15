@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Text,
   View,
@@ -12,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { NavbarNutricionista } from './Navbar_nutricionista';
+import { NotificacaoPopup } from './notificacao';
 
 const ATLETAS = [
   { id: 1, nome: 'Marcus Silva',      esporte: 'Vôlei',   ativo: true,  foto: require('./assets/Img/marcus.jpg') },
@@ -29,6 +31,7 @@ const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9'];
 
 export default function HomepageNutricionista() {
   const router = useRouter();
+  const [notifVisivel, setNotifVisivel] = useState(false);
 
   return (
     <ImageBackground
@@ -44,7 +47,7 @@ export default function HomepageNutricionista() {
               <Text style={styles.titulo}>São Camilo</Text>
               <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setNotifVisivel(true)}>
               <View style={styles.sinoWrap}>
                 <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
                 <View style={styles.sinoDot} />
@@ -114,6 +117,12 @@ export default function HomepageNutricionista() {
         </ScrollView>
       {/* ── Bottom Nav ── */}
       <NavbarNutricionista active="home"/>
+
+      {/* ── Popup de Notificações ── */}
+      <NotificacaoPopup
+        visible={notifVisivel}
+        onClose={() => setNotifVisivel(false)}
+      />
       </SafeAreaView>
     </ImageBackground>
   );
