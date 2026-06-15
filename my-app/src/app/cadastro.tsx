@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { getUrl } from '../constants/url';
+import { SenhaInput } from './visualizar_senha';
 
 type TipoPerfil = 'Atleta' | 'Treinador' | 'Médico' | 'Nutricionista';
 
@@ -165,12 +166,10 @@ export default function CadastroScreen() {
                 autoCapitalize="none"
                 editable={!loading}
               />
-              <TextInput
-                style={inputStyle}
+              <SenhaInput
                 placeholder="Senha:"
                 value={senha}
                 onChangeText={setSenha}
-                secureTextEntry
                 editable={!loading}
               />
 

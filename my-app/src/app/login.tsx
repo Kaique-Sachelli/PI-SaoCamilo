@@ -14,11 +14,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { getUrl } from '../constants/url';
 import { useUser } from '../context/UserContext';
+import { SenhaInput } from './visualizar_senha';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { login } = useUser();
@@ -127,19 +127,10 @@ export default function LoginScreen() {
             />
 
             {/* Password Input */}
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  color: '#747474',
-                  borderColor: '#747474',
-                  backgroundColor: '#ffffff',
-                },
-              ]}
+            <SenhaInput
               placeholder="Senha:"
               value={password}
               onChangeText={setPassword}
-              secureTextEntry={!showPassword}
               editable={!loading}
             />
 
