@@ -10,43 +10,104 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-
-const MASSA_PRE = 72.5; // kg — viria de props/contexto em produção
-const ML_INGERIDO = 7.0; // litros
-const TEMPO_SESSAO = '00:47:22';
-const HORAS_SESSAO = 0.787; // ~47 min em horas, para cálculo de sudorese
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { getUrl } from '../constants/url';
+import { useUser } from '../context/UserContext';
 
 export default function ChecklistPosSessaoScreen() {
   const [massaPos, setMassaPos] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { usuario } = useUser();
+  const { massa_pre, clima_temp, clima_umidade, ml_ingerido, duracao_segundos } = useLocalSearchParams<{
+    massa_pre: string;
+    clima_temp: string;
+    clima_umidade: string;
+    ml_ingerido: string;
+    duracao_segundos: string;
+  }>();
+
+  const massaPreNum = parseFloat((massa_pre ?? '0').replace(',', '.'));
+  const mlIngeridoLitros = parseFloat(ml_ingerido ?? '0') / 1000;
+  const horasSessao = parseFloat(duracao_segundos ?? '0') / 3600;
 
   const massaPosNum = parseFloat(massaPos.replace(',', '.')) || 0;
 
+  // fórmulas do motor_calculo.py
   const perdaTotal = massaPosNum > 0
-    ? Math.max(0, MASSA_PRE - massaPosNum + ML_INGERIDO)
-    : 3.1; // valor demonstrativo
+    ? (massaPreNum - massaPosNum) + mlIngeridoLitros
+    : 0;
 
-  const taxaSudorese = HORAS_SESSAO > 0
-    ? perdaTotal / HORAS_SESSAO
+  const taxaSudorese = horasSessao > 0 && massaPosNum > 0
+    ? perdaTotal / horasSessao
     : 0;
 
   const variacaoMassa = massaPosNum > 0
-    ? ((massaPosNum - MASSA_PRE) / MASSA_PRE) * 100
-    : -3.3; // valor demonstrativo
+    ? ((massaPreNum - massaPosNum) / massaPreNum) * 100
+    : 0;
+
+  const alerta = massaPosNum > massaPreNum
+    ? 'ALERTA: Ganho de peso! Risco de hiponatremia (excesso de hidratação).'
+    : variacaoMassa > 2
+      ? 'ALERTA: Desidratação superior a 2%. Queda de performance provável.'
+      : '';
 
   const avaliacaoVariacao = (v: number) => {
-    if (v >= -2 && v <= 0) return { label: 'Ótimo', color: '#2e7d32' };
-    if (v < -2 && v >= -4) return { label: 'Adequado', color: '#388e3c' };
-    if (v < -4) return { label: 'Atenção', color: '#c62828' };
-    return { label: 'Normal', color: '#1565c0' };
+    if (v < 0)  return { label: 'Atenção', color: '#c62828', statusColor: 'Vermelho' as const };
+    if (v < 2)  return { label: 'Ótimo',   color: '#2e7d32', statusColor: 'Verde'    as const };
+    if (v <= 3) return { label: 'Moderado',color: '#f57f17', statusColor: 'Amarelo'  as const };
+    return        { label: 'Crítico',  color: '#c62828', statusColor: 'Vermelho' as const };
   };
 
   const avaliacao = avaliacaoVariacao(variacaoMassa);
 
-  const handleSalvar = () => {
-    // Lógica de salvar aqui
-    router.back();
+  const formatTime = (totalSeconds: number) => {
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    return [h, m, s].map((v) => String(v).padStart(2, '0')).join(':');
+  };
+
+  const handleSalvar = async () => {
+    if (!massaPos) {
+      alert('Informe a massa corporal pós-exercício');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(getUrl('/sessao/completa'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_atleta: usuario?.id_usuario,
+          massa_pre: massaPreNum,
+          massa_pos: massaPosNum,
+          clima_temp: parseFloat(clima_temp ?? '0'),
+          clima_umidade: parseFloat(clima_umidade ?? '0'),
+          duracao_minutos: Math.round(parseFloat(duracao_segundos ?? '0') / 60),
+          volume_ml: parseFloat(ml_ingerido ?? '0'),
+          perda_massa_ajustada: parseFloat(perdaTotal.toFixed(2)),
+          taxa_sudorese: parseFloat(taxaSudorese.toFixed(1)),
+          percentual_variacao: parseFloat(variacaoMassa.toFixed(1)),
+          alerta_seguranca: alerta || null,
+          status_color: avaliacao.statusColor,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.sucesso) {
+        alert(data.mensagem ?? 'Erro ao salvar sessão');
+        return;
+      }
+
+      router.push('/homepage_atleta');
+    } catch {
+      alert('Não foi possível conectar ao servidor');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -86,8 +147,8 @@ export default function ChecklistPosSessaoScreen() {
               <Text style={styles.massaUnidade}>Kg</Text>
             </View>
             <View style={styles.massaSubRow}>
-              <Text style={styles.massaSubTexto}>Pré: {MASSA_PRE} Kg</Text>
-              <Text style={styles.massaSubTexto}>Ingerido: {ML_INGERIDO}L</Text>
+              <Text style={styles.massaSubTexto}>Pré: {massaPreNum} Kg</Text>
+              <Text style={styles.massaSubTexto}>Ingerido: {mlIngeridoLitros.toFixed(2)}L</Text>
             </View>
           </View>
 
@@ -126,22 +187,30 @@ export default function ChecklistPosSessaoScreen() {
             </View>
           </View>
 
+          {/* Card: Alerta */}
+          {alerta !== '' && (
+            <View style={[styles.card, { borderLeftWidth: 4, borderLeftColor: '#c62828' }]}>
+              <Text style={styles.alertaTexto}>{alerta}</Text>
+            </View>
+          )}
+
           {/* Card: Tempo de Sessão */}
           <View style={styles.card}>
             <View style={styles.metricaHeader}>
               <Text style={styles.metricaIcone}>🕐</Text>
               <Text style={styles.metricaRotulo}>Tempo de Sessão</Text>
             </View>
-            <Text style={styles.tempoValor}>{TEMPO_SESSAO}</Text>
+            <Text style={styles.tempoValor}>{formatTime(parseFloat(duracao_segundos ?? '0'))}</Text>
           </View>
 
           {/* Botão Salvar */}
-          <TouchableOpacity 
-          style={styles.btnSalvar} 
-          onPress={() => router.push('/homepage_atleta')} 
+          <TouchableOpacity
+          style={[styles.btnSalvar, loading && { opacity: 0.6 }]}
+          onPress={handleSalvar}
           activeOpacity={0.85}
+          disabled={loading}
           >
-            <Text style={styles.btnSalvarTexto}>Salvar e encerrar</Text>
+            <Text style={styles.btnSalvarTexto}>{loading ? 'Salvando...' : 'Salvar e encerrar'}</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
@@ -317,5 +386,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     letterSpacing: 0.5,
+  },
+  alertaTexto: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#c62828',
   },
 });

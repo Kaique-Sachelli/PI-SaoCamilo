@@ -121,14 +121,17 @@ function EnvConditions({
 }
 
 export default function ChecklistPreSessao() {
-  const [weight, setWeight] = useState('72,5');
+  const [weight, setWeight] = useState('');
   const [selectedUrine, setSelectedUrine] = useState(2);
   const [temp] = useState('24');
   const [humidity] = useState('27');
 
   function handleStart() {
-
-    console.log('Sessão iniciada!', { weight, selectedUrine });
+    if (!weight) {
+      alert('Informe a massa corporal antes de iniciar');
+      return;
+    }
+    router.push(`/cronometro?massa_pre=${weight}&clima_temp=${temp}&clima_umidade=${humidity}`);
   }
 
   return (
@@ -157,10 +160,10 @@ export default function ChecklistPreSessao() {
 
         <EnvConditions temp={temp} humidity={humidity} />
 
-        <TouchableOpacity 
-        style={styles.startBtn} 
-        activeOpacity={0.85} 
-        onPress={() => router.push('/cronometro')}
+        <TouchableOpacity
+          style={styles.startBtn}
+          activeOpacity={0.85}
+          onPress={handleStart}
         >
           <Text style={styles.startBtnText}>Iniciar sessão  →</Text>
         </TouchableOpacity>

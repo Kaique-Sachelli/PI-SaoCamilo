@@ -1,7 +1,4 @@
 //troque pelo IP do computador que roda o backend (server.js).
-const IP_DO_COMPUTADOR = '192.168.15.129';
-const PORTA = 3000;
-
 export const API_URL = `http://192.168.15.129:3000`;
 
 export function getUrl(rota: string): string {

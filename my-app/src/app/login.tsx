@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { getUrl } from '../constants/url';
+import { useUser } from '../context/UserContext';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -20,6 +21,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login } = useUser();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -41,6 +43,8 @@ export default function LoginScreen() {
         alert(data.mensagem ?? 'Credenciais inválidas');
         return;
       }
+      //salva informações do usuário globalmente
+      login(data.usuario[0]);
 
       const papel = data.usuario[0]?.tipo_perfil;
       // redireiciona o usuário de acordo com seu papel no aplicativo
