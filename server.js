@@ -187,6 +187,39 @@ app.get('/dashboard/usuarios-por-perfil', async (req, res) => {
     });
   }
 });
+//rota perfil do usuario visao adm
+app.get('/usuarios/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [resultado] = await db.query(`
+      SELECT
+        u.*,
+        a.idade,
+        a.altura,
+        a.modalidade_esportiva
+      FROM Usuario u
+      LEFT JOIN Atleta_Perfil a
+        ON u.id_usuario = a.id_atleta
+      WHERE u.id_usuario = ?
+    `, [id]);
+
+    if (resultado.length === 0) {
+      return res.status(404).json({
+        erro: 'Usuário não encontrado'
+      });
+    }
+
+    res.json(resultado[0]);
+
+  } catch (erro) {
+  console.error('ERRO COMPLETO:', erro);
+
+  res.status(500).json({
+    erro: erro.message
+  });
+}
+});
 //rota para desativar usuario
 app.patch('/usuario/:id/desativar', async (req, res) => {
   const { id } = req.params;
