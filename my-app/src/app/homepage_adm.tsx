@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Text,
   View,
@@ -11,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { NavbarADM } from './Navbar_ADM';
+import { NotificationPopup } from './notificacao';
 
 const MENU = [
   { id: 1, icone: require('./assets/Img/solicitacoes.png'),  label: 'Solicitações de cadastro', rota: '/solicitacoes_cadastro'},
@@ -19,6 +21,7 @@ const MENU = [
 
 export default function HomepageAdm() {
   const router = useRouter();
+  const [notifVisivel, setNotifVisivel] = useState(false);
 
   return (
     <ImageBackground
@@ -36,7 +39,7 @@ export default function HomepageAdm() {
               <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
             </View>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setNotifVisivel(true)}>
               <View style={styles.sinoWrap}>
                 <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
                 <View style={styles.sinoDot} />
@@ -82,6 +85,12 @@ export default function HomepageAdm() {
         </ScrollView>
         {/* ── Bottom Nav ── */}
         <NavbarADM active="home"/>
+
+        {/* ── Popup de Notificações ── */}
+        <NotificationPopup
+          visible={notifVisivel}
+          onClose={() => setNotifVisivel(false)}
+        />
       </SafeAreaView>
     </ImageBackground>
   );
