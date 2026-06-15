@@ -72,7 +72,7 @@ export default function Perfil() {
 
       const data: AlturaData = await response.json();
 
-      setPeso(data.altura);
+      setAltura(data.altura);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {

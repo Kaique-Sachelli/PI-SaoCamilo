@@ -90,40 +90,26 @@ app.patch('/usuario/:id/aprovar', async (req, res) => {
 
 
 //rota para listar atletas
-app.get('/atletas', async (req, res) => {
-  const busca = req.query.busca ? `%${req.query.busca}%` : null;
-
-  try {
-    let sql = `
-      SELECT
-        id_usuario,
-        nome,
-        email,
-        registro,
-        tipo_perfil,
-        situacao
-      FROM Usuario
-      WHERE tipo_perfil = 'Atleta'
-    `;
-    const params = [];
-
-    if (busca) {
-      sql += ' AND (nome LIKE ? OR email LIKE ? OR registro LIKE ?)';
-      params.push(busca, busca, busca);
-    }
-
-    sql += ' ORDER BY nome';
-
-    const [rows] = await db.query(sql, params);
-
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      sucesso: false,
-      mensagem: err.message
-    });
-  }
+app.get('/atletas', async (req, res) => { 
+  const busca = req.query.busca ? `%${req.query.busca}%` : null; 
+  
+  try { 
+    let sql = `SELECT id_usuario, nome, email, registro, tipo_perfil, situacao FROM Usuario WHERE tipo_perfil = 'Atleta'`; 
+    const params = []; 
+    
+    if (busca) { 
+      sql += ' AND (nome LIKE ? OR email LIKE ? OR registro LIKE ?)'; 
+      params.push(busca, busca, busca); 
+    } 
+    
+    sql += ' ORDER BY nome'; 
+    
+    const [rows] = await db.query(sql, params); 
+    res.json(rows); 
+  } catch (err) { 
+    console.error(err); 
+    res.status(500).json({ sucesso: false, mensagem: err.message }); 
+  } 
 });
 
 app.get('/usuarios', async (req, res) => {
