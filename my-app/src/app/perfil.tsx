@@ -103,7 +103,11 @@ export default function Perfil() {
           <View style={{ flex: 1 }} />
 
           {/* Botão Sair */}
-          <TouchableOpacity style={styles.btnSair} onPress={() => router.push('/login')} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.btnSair} 
+            onPress={() => { logout(); router.push('/login')}} 
+            activeOpacity={0.8}
+          >
             <Text style={styles.btnSairIcone}>↪</Text>
             <Text style={styles.btnSairTexto}>Sair</Text>
           </TouchableOpacity>

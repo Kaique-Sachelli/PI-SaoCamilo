@@ -10,10 +10,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useUser } from '../context/UserContext';
 import { NavbarADM } from './Navbar_ADM';
 
 export default function PerfilTreinador() {
   const router = useRouter();
+  const { logout } = useUser();
 
   return (
     <ImageBackground
@@ -79,8 +81,7 @@ export default function PerfilTreinador() {
           <TouchableOpacity
             style={styles.btnSair}
             activeOpacity={0.85}
-            onPress={() => router.push('/login')}
-          >
+            onPress={() => { logout(); router.push('/login')}}>
             <Text style={styles.btnSairIcone}>⎋</Text>
             <Text style={styles.btnSairTexto}>Sair</Text>
           </TouchableOpacity>
