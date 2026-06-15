@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,36 +9,66 @@ import {
   Modal,
   Platform,
   ImageBackground,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { NavbarAtleta } from './NavbarAtleta';
+import { useUser } from '../context/UserContext';
+import { getUrl } from '../constants/url';
 
-const SESSOES = [
-  {
-    id: 1,
-    data: 'Ontem, 18:30',
-    tipo: 'Corrida intervalar',
-    status: 'Hidratação OK',
-    statusOk: true,
-    sudorese: '1.2 L/h',
-    perdaPeso: '1.8kg',
-    perdaPerc: '-1.5%',
-  },
-  {
-    id: 2,
-    data: '08/05, 17:00',
-    tipo: 'Treino de força',
-    status: 'Atenção',
-    statusOk: false,
-    sudorese: '0.9 L/h',
-    perdaPeso: '1.2kg',
-    perdaPerc: '-1.1%',
-  },
-];
+type Sessao = {
+  id_sessao: number;
+  data_hora_inicio: string;
+  duracao_minutos: number;
+  massa_pre: number;
+  massa_pos: number;
+  clima_temp: number | null;
+  clima_umidade: number | null;
+  taxa_sudorese: number | null;
+  perda_massa_ajustada: number | null;
+  percentual_variacao: number | null;
+  alerta_seguranca: string | null;
+  status_color: 'Verde' | 'Amarelo' | 'Vermelho' | null;
+  volume_ml: number | null;
+};
+
+function formatarData(dataStr: string): string {
+  const d = new Date(dataStr);
+  const hoje = new Date();
+  const ontem = new Date(hoje);
+  ontem.setDate(hoje.getDate() - 1);
+
+  const mesmaData = (a: Date, b: Date) =>
+    a.getDate() === b.getDate() &&
+    a.getMonth() === b.getMonth() &&
+    a.getFullYear() === b.getFullYear();
+
+  const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  if (mesmaData(d, hoje)) return `Hoje, ${hora}`;
+  if (mesmaData(d, ontem)) return `Ontem, ${hora}`;
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  return `${dia}/${mes}, ${hora}`;
+}
+
+function statusInfo(statusColor: string | null) {
+  if (statusColor === 'Verde') return { texto: 'Hidratação OK', cor: 'verde' as const };
+  if (statusColor === 'Vermelho') return { texto: 'Crítico', cor: 'vermelho' as const };
+  if (statusColor === 'Amarelo') return { texto: 'Atenção', cor: 'amarelo' as const };
+  return { texto: 'Sem dados', cor: 'amarelo' as const };
+}
+
+function intensidadeFlexes(taxa: number | string | null): [number, number, number] {
+  const t = Number(taxa);
+  if (!t || t <= 0) return [1, 0, 0];
+  if (t < 0.6) return [0.85, 0.12, 0.03];
+  if (t < 1.0) return [0.4, 0.45, 0.15];
+  if (t < 1.5) return [0.15, 0.5, 0.35];
+  return [0.05, 0.3, 0.65];
+}
 
 const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const ANOS = Array.from({ length: 10 }, (_, i) => 2020 + i);
 const DIAS_SEMANA = ['Do','Se','Te','Qu','Qu','Se','Sá'];
 
 function diasNoMes(mes: number, ano: number) {
@@ -89,12 +119,10 @@ function CalendarioModal({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={onClose}>
         <TouchableOpacity activeOpacity={1} style={styles.calCard}>
-          {/* Navegação mês/ano */}
           <View style={styles.calNav}>
             <TouchableOpacity onPress={() => navMes(-1)} style={styles.calNavBtn}>
               <Text style={styles.calNavArrow}>‹</Text>
             </TouchableOpacity>
-
             <View style={styles.calNavCenter}>
               <View style={styles.calSelect}>
                 <Text style={styles.calSelectText}>{MESES[mes]}</Text>
@@ -103,20 +131,17 @@ function CalendarioModal({
                 <Text style={styles.calSelectText}>{ano}</Text>
               </View>
             </View>
-
             <TouchableOpacity onPress={() => navMes(1)} style={styles.calNavBtn}>
               <Text style={styles.calNavArrow}>›</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Cabeçalho dias da semana */}
           <View style={styles.calWeekRow}>
             {DIAS_SEMANA.map((d, i) => (
               <Text key={i} style={styles.calWeekText}>{d}</Text>
             ))}
           </View>
 
-          {/* Grade de dias */}
           <View style={styles.calGrid}>
             {celulas.map((dia, i) => {
               if (!dia) return <View key={i} style={styles.calCell} />;
@@ -144,7 +169,6 @@ function CalendarioModal({
             })}
           </View>
 
-          {/* Botões */}
           <View style={styles.calFooter}>
             <TouchableOpacity style={styles.calBtnCancel} onPress={onClose}>
               <Text style={styles.calBtnCancelText}>Cancelar</Text>
@@ -165,9 +189,55 @@ function CalendarioModal({
 
 export default function HistoricoAtleta() {
   const router = useRouter();
+  const { usuario } = useUser();
   const [calVisible, setCalVisible] = useState(false);
   const [dataSel, setDataSel] = useState('');
   const [busca, setBusca] = useState('');
+  const [sessoes, setSessoes] = useState<Sessao[]>([]);
+  const [carregando, setCarregando] = useState(true);
+
+  const buscarSessoes = useCallback(async (data?: string) => {
+    if (!usuario?.id_usuario) return;
+    setCarregando(true);
+    try {
+      const params = data ? `?data=${data}` : '';
+      const resp = await fetch(getUrl(`/atleta/${usuario.id_usuario}/sessoes${params}`));
+      const json = await resp.json();
+      if (json.sucesso) setSessoes(json.sessoes);
+    } catch (e) {
+      console.error('Erro ao buscar sessões:', e);
+    } finally {
+      setCarregando(false);
+    }
+  }, [usuario?.id_usuario]);
+
+  useEffect(() => {
+    buscarSessoes(dataSel || undefined);
+  }, [buscarSessoes, dataSel]);
+
+  const sessoesComTaxa = sessoes.filter(s => s.taxa_sudorese !== null);
+  const sessoesComPerda = sessoes.filter(s => s.percentual_variacao !== null);
+
+  const taxaMedia = sessoesComTaxa.length > 0
+    ? sessoesComTaxa.reduce((sum, s) => sum + Number(s.taxa_sudorese ?? 0), 0) / sessoesComTaxa.length
+    : null;
+
+  const perdaMedia = sessoesComPerda.length > 0
+    ? sessoesComPerda.reduce((sum, s) => sum + Math.abs(Number(s.percentual_variacao ?? 0)), 0) / sessoesComPerda.length
+    : null;
+
+  const sessoesFiltradas = busca
+    ? sessoes.filter(s => {
+        const st = statusInfo(s.status_color);
+        const dateStr = formatarData(s.data_hora_inicio);
+        return (
+          st.texto.toLowerCase().includes(busca.toLowerCase()) ||
+          dateStr.toLowerCase().includes(busca.toLowerCase())
+        );
+      })
+    : sessoes;
+
+  const sessoesGrafico = sessoes.slice(0, 5).reverse();
 
   return (
     <ImageBackground
@@ -175,156 +245,207 @@ export default function HistoricoAtleta() {
       style={styles.background}
       resizeMode="cover"
     >
-    <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitulo}>Histórico Longitudinal</Text>
-      </View>
-
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Cards de métricas topo */}
-        <View style={styles.metricasRow}>
-          <View style={styles.metricaCard}>
-            <View style={styles.metricaHeader}>
-              <Text style={styles.metricaIcone}>📈</Text>
-              <Text style={styles.metricaRotulo}>Taxa média</Text>
-            </View>
-            <Text style={styles.metricaValorGrande}>1.09</Text>
-            <Text style={styles.metricaUnidade}>L/h</Text>
-          </View>
-          <View style={styles.metricaCard}>
-            <View style={styles.metricaHeader}>
-              <Text style={styles.metricaIcone}>📅</Text>
-              <Text style={styles.metricaRotulo}>Perda média</Text>
-            </View>
-            <Text style={styles.metricaValorGrande}>1.7%</Text>
-            <Text style={styles.metricaUnidade}>Peso corporal</Text>
-          </View>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitulo}>Histórico Longitudinal</Text>
         </View>
 
-        {/* Taxa de Sudorese & Intensidade */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitulo}>Taxa de Sudorese & Intensidade</Text>
-          <View style={styles.barraRow}>
-            <Text style={styles.barraData}>11/04</Text>
-            <View style={styles.barraTrack}>
-              <View style={[styles.barraBaixa, { flex: 0.3 }]} />
-              <View style={[styles.barraMedia, { flex: 0.4 }]} />
-              <View style={[styles.barraAlta, { flex: 0.3 }]} />
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Métricas médias */}
+          <View style={styles.metricasRow}>
+            <View style={styles.metricaCard}>
+              <View style={styles.metricaHeader}>
+                <Text style={styles.metricaIcone}>📈</Text>
+                <Text style={styles.metricaRotulo}>Taxa média</Text>
+              </View>
+              <Text style={styles.metricaValorGrande}>
+                {taxaMedia !== null ? taxaMedia.toFixed(2) : '--'}
+              </Text>
+              <Text style={styles.metricaUnidade}>L/h</Text>
             </View>
-            <Text style={styles.barraDur}>67min</Text>
-          </View>
-          <View style={styles.barraRow}>
-            <Text style={styles.barraData}>08/05</Text>
-            <View style={styles.barraTrack}>
-              <View style={[styles.barraBaixa, { flex: 0.5 }]} />
-              <View style={[styles.barraMedia, { flex: 0.35 }]} />
-              <View style={[styles.barraAlta, { flex: 0.15 }]} />
+            <View style={styles.metricaCard}>
+              <View style={styles.metricaHeader}>
+                <Text style={styles.metricaIcone}>📅</Text>
+                <Text style={styles.metricaRotulo}>Perda média</Text>
+              </View>
+              <Text style={styles.metricaValorGrande}>
+                {perdaMedia !== null ? perdaMedia.toFixed(1) + '%' : '--'}
+              </Text>
+              <Text style={styles.metricaUnidade}>Peso corporal</Text>
             </View>
-            <Text style={styles.barraDur}>53min</Text>
-          </View>
-          <View style={styles.legendaRow}>
-            <View style={styles.legendaItem}>
-              <View style={[styles.legendaDot, { backgroundColor: '#90caf9' }]} />
-              <Text style={styles.legendaText}>Baixa</Text>
-            </View>
-            <View style={styles.legendaItem}>
-              <View style={[styles.legendaDot, { backgroundColor: '#ffb74d' }]} />
-              <Text style={styles.legendaText}>Média</Text>
-            </View>
-            <View style={styles.legendaItem}>
-              <View style={[styles.legendaDot, { backgroundColor: '#e53935' }]} />
-              <Text style={styles.legendaText}>Alta</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Sessões Recentes */}
-        <View style={styles.card}>
-          <View style={styles.sessoesHeader}>
-            <Text style={styles.cardTitulo}>Sessões Recentes</Text>
-            <TouchableOpacity onPress={() => setCalVisible(true)} style={styles.calBtn}>
-              <Text style={styles.calBtnIcone}>📅</Text>
-            </TouchableOpacity>
           </View>
 
-          {/* Campo de busca */}
-          <View style={styles.buscaRow}>
-            <TextInput
-              style={styles.buscaInput}
-              placeholder="Nome:"
-              value={busca}
-              onChangeText={setBusca}
-              placeholderTextColor="#bbb"
-            />
-            {dataSel ? (
-              <TouchableOpacity onPress={() => setDataSel('')}>
-                <Text style={styles.dataSelTag}>📅 {dataSel}  ✕</Text>
+          {/* Gráfico de intensidade — últimas 5 sessões */}
+          {sessoesGrafico.length > 0 && (
+            <View style={styles.card}>
+              <Text style={styles.cardTitulo}>Taxa de Sudorese & Intensidade</Text>
+              {sessoesGrafico.map((s) => {
+                const d = new Date(s.data_hora_inicio);
+                const label = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+                const [fl, fm, fa] = intensidadeFlexes(s.taxa_sudorese);
+                return (
+                  <View key={s.id_sessao} style={styles.barraRow}>
+                    <Text style={styles.barraData}>{label}</Text>
+                    <View style={styles.barraTrack}>
+                      {fl > 0 && <View style={[styles.barraBaixa, { flex: fl }]} />}
+                      {fm > 0 && <View style={[styles.barraMedia, { flex: fm }]} />}
+                      {fa > 0 && <View style={[styles.barraAlta, { flex: fa }]} />}
+                    </View>
+                    <Text style={styles.barraDur}>{s.duracao_minutos}min</Text>
+                  </View>
+                );
+              })}
+              <View style={styles.legendaRow}>
+                <View style={styles.legendaItem}>
+                  <View style={[styles.legendaDot, { backgroundColor: '#90caf9' }]} />
+                  <Text style={styles.legendaText}>Baixa</Text>
+                </View>
+                <View style={styles.legendaItem}>
+                  <View style={[styles.legendaDot, { backgroundColor: '#ffb74d' }]} />
+                  <Text style={styles.legendaText}>Média</Text>
+                </View>
+                <View style={styles.legendaItem}>
+                  <View style={[styles.legendaDot, { backgroundColor: '#e53935' }]} />
+                  <Text style={styles.legendaText}>Alta</Text>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {/* Lista de sessões */}
+          <View style={styles.card}>
+            <View style={styles.sessoesHeader}>
+              <Text style={styles.cardTitulo}>Sessões Recentes</Text>
+              <TouchableOpacity onPress={() => setCalVisible(true)} style={styles.calBtn}>
+                <Text style={styles.calBtnIcone}>📅</Text>
               </TouchableOpacity>
-            ) : null}
-          </View>
-
-          <Text style={styles.ultimaSessaoLabel}>Última sessão</Text>
-
-          {SESSOES.map((s) => (
-            <View key={s.id} style={styles.sessaoCard}>
-              <View style={styles.sessaoTopRow}>
-                <Text style={styles.sessaoDataTexto}>{s.data}</Text>
-                <View style={[styles.statusBadge, s.statusOk ? styles.statusOk : styles.statusAtencao]}>
-                  <Text style={[styles.statusText, s.statusOk ? styles.statusOkText : styles.statusAtencaoText]}>
-                    {s.status}
-                  </Text>
-                </View>
-              </View>
-              <Text style={styles.sessaoNome}>{s.tipo}</Text>
-              <View style={styles.sessaoMetricasRow}>
-                <View style={styles.sessaoMetrica}>
-                  <Text style={styles.sessaoMetricaLabel}>Taxa de sudorese</Text>
-                  <Text style={styles.sessaoMetricaValor}>{s.sudorese}</Text>
-                </View>
-                <View style={styles.sessaoMetrica}>
-                  <Text style={styles.sessaoMetricaLabel}>Perda de peso</Text>
-                  <Text style={styles.sessaoMetricaValor}>{s.perdaPeso}</Text>
-                </View>
-                <View style={styles.sessaoMetrica}>
-                  <Text style={styles.sessaoMetricaLabel}>Perda de peso</Text>
-                  <Text style={[styles.sessaoMetricaValor, { color: '#e53935' }]}>{s.perdaPerc}</Text>
-                </View>
-              </View>
             </View>
-          ))}
-        </View>
 
-        {/* Exportar Relatório */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitulo}>Exportar Relatório</Text>
-          <View style={styles.exportRow}>
-            <TouchableOpacity style={styles.exportBtn}>
-              <Text style={styles.exportIcone}>⬇</Text>
-              <Text style={styles.exportTexto}>PDF</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.exportBtn}>
-              <Text style={styles.exportIcone}>⬇</Text>
-              <Text style={styles.exportTexto}>Planilha</Text>
-            </TouchableOpacity>
+            <View style={styles.buscaRow}>
+              <TextInput
+                style={styles.buscaInput}
+                placeholder="Filtrar por status ou data..."
+                value={busca}
+                onChangeText={setBusca}
+                placeholderTextColor="#bbb"
+              />
+              {dataSel ? (
+                <TouchableOpacity onPress={() => setDataSel('')}>
+                  <Text style={styles.dataSelTag}>📅 {dataSel}  ✕</Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
+
+            {carregando ? (
+              <ActivityIndicator color={RED} size="small" style={{ marginVertical: 20 }} />
+            ) : sessoesFiltradas.length === 0 ? (
+              <Text style={styles.semSessoes}>
+                {dataSel ? 'Nenhuma sessão nesta data.' : 'Nenhuma sessão encontrada.'}
+              </Text>
+            ) : (
+              <>
+                <Text style={styles.ultimaSessaoLabel}>
+                  {sessoesFiltradas.length} {sessoesFiltradas.length === 1 ? 'sessão' : 'sessões'} registradas
+                </Text>
+                {sessoesFiltradas.map((s, idx) => {
+                  const st = statusInfo(s.status_color);
+                  return (
+                    <TouchableOpacity
+                      key={s.id_sessao}
+                      style={styles.sessaoCard}
+                      onPress={() =>
+                        router.push({ pathname: '/sessao_selecionada', params: { id: s.id_sessao } })
+                      }
+                      activeOpacity={0.75}
+                    >
+                      {idx === 0 && (
+                        <Text style={styles.maisRecenteLabel}>Mais recente</Text>
+                      )}
+                      <View style={styles.sessaoTopRow}>
+                        <Text style={styles.sessaoDataTexto}>
+                          {formatarData(s.data_hora_inicio)}
+                        </Text>
+                        <View style={[
+                          styles.statusBadge,
+                          st.cor === 'verde' && styles.statusOk,
+                          st.cor === 'amarelo' && styles.statusAtencao,
+                          st.cor === 'vermelho' && styles.statusCritico,
+                        ]}>
+                          <Text style={[
+                            styles.statusText,
+                            st.cor === 'verde' && styles.statusOkText,
+                            st.cor === 'amarelo' && styles.statusAtencaoText,
+                            st.cor === 'vermelho' && styles.statusCriticoText,
+                          ]}>
+                            {st.texto}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={styles.sessaoNome}>{s.duracao_minutos} min de treino</Text>
+                      <View style={styles.sessaoMetricasRow}>
+                        <View style={styles.sessaoMetrica}>
+                          <Text style={styles.sessaoMetricaLabel}>Taxa de sudorese</Text>
+                          <Text style={styles.sessaoMetricaValor}>
+                            {s.taxa_sudorese !== null ? `${Number(s.taxa_sudorese).toFixed(2)} L/h` : '--'}
+                          </Text>
+                        </View>
+                        <View style={styles.sessaoMetrica}>
+                          <Text style={styles.sessaoMetricaLabel}>Perda de massa</Text>
+                          <Text style={styles.sessaoMetricaValor}>
+                            {s.perda_massa_ajustada !== null ? `${Number(s.perda_massa_ajustada).toFixed(2)} kg` : '--'}
+                          </Text>
+                        </View>
+                        <View style={styles.sessaoMetrica}>
+                          <Text style={styles.sessaoMetricaLabel}>Variação %</Text>
+                          <Text style={[
+                            styles.sessaoMetricaValor,
+                            {
+                              color:
+                                st.cor === 'verde' ? '#2e7d32' :
+                                st.cor === 'vermelho' ? '#b71c1c' : '#e65100',
+                            },
+                          ]}>
+                            {s.percentual_variacao !== null
+                              ? `${Number(s.percentual_variacao).toFixed(1)}%`
+                              : '--'}
+                          </Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </>
+            )}
           </View>
-        </View>
-      </ScrollView>
 
-      {/* ── Bottom Nav ── */}
-      <NavbarAtleta active="historico" />
+          {/* Exportar Relatório */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitulo}>Exportar Relatório</Text>
+            <View style={styles.exportRow}>
+              <TouchableOpacity style={styles.exportBtn}>
+                <Text style={styles.exportIcone}>⬇</Text>
+                <Text style={styles.exportTexto}>PDF</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.exportBtn}>
+                <Text style={styles.exportIcone}>⬇</Text>
+                <Text style={styles.exportTexto}>Planilha</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
 
-      {/* Modal calendário */}
-      <CalendarioModal
-        visible={calVisible}
-        onClose={() => setCalVisible(false)}
-        onSelectDate={(d) => setDataSel(d)}
-      />
-    </SafeAreaView>
+        <NavbarAtleta active="historico" />
+
+        <CalendarioModal
+          visible={calVisible}
+          onClose={() => setCalVisible(false)}
+          onSelectDate={(d) => setDataSel(d)}
+        />
+      </SafeAreaView>
     </ImageBackground>
   );
 }
@@ -338,7 +459,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
 
-  // Header
   header: {
     backgroundColor: RED,
     paddingTop: 10,
@@ -347,15 +467,11 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
-  voltarBtn: { marginBottom: 4 },
-  voltarTexto: { color: '#ffffff', fontSize: 14, opacity: 0.85 },
   headerTitulo: { color: '#ffffff', fontSize: 24, fontWeight: '700' },
 
-  // Scroll
   scroll: { flex: 1 },
   scrollContent: { padding: 16, gap: 14, paddingBottom: 20 },
 
-  // Cards métricas topo
   metricasRow: { flexDirection: 'row', gap: 12 },
   metricaCard: {
     flex: 1,
@@ -374,7 +490,6 @@ const styles = StyleSheet.create({
   metricaValorGrande: { fontSize: 28, fontWeight: '700', color: '#111' },
   metricaUnidade: { fontSize: 12, color: '#888', marginTop: 2 },
 
-  // Card base
   card: {
     backgroundColor: '#fff',
     borderRadius: 20,
@@ -388,7 +503,6 @@ const styles = StyleSheet.create({
   },
   cardTitulo: { fontSize: 15, fontWeight: '700', color: '#222' },
 
-  // Barras intensidade
   barraRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   barraData: { fontSize: 12, color: '#888', width: 36 },
   barraTrack: { flex: 1, flexDirection: 'row', height: 10, borderRadius: 5, overflow: 'hidden' },
@@ -401,7 +515,6 @@ const styles = StyleSheet.create({
   legendaDot: { width: 10, height: 10, borderRadius: 5 },
   legendaText: { fontSize: 12, color: '#555' },
 
-  // Sessões
   sessoesHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   calBtn: {
     width: 36, height: 36, borderRadius: 10,
@@ -418,6 +531,8 @@ const styles = StyleSheet.create({
   },
   dataSelTag: { fontSize: 12, color: RED, fontWeight: '600' },
   ultimaSessaoLabel: { fontSize: 13, color: '#888', fontWeight: '500' },
+  maisRecenteLabel: { fontSize: 11, color: RED, fontWeight: '700', marginBottom: 2 },
+  semSessoes: { fontSize: 14, color: '#aaa', textAlign: 'center', paddingVertical: 20 },
 
   sessaoCard: {
     borderWidth: 1, borderColor: '#f0f0f0', borderRadius: 12,
@@ -428,16 +543,17 @@ const styles = StyleSheet.create({
   statusBadge: { borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 },
   statusOk: { backgroundColor: '#e8f5e9' },
   statusAtencao: { backgroundColor: '#fff3e0' },
+  statusCritico: { backgroundColor: '#ffebee' },
   statusText: { fontSize: 11, fontWeight: '600' },
   statusOkText: { color: '#2e7d32' },
   statusAtencaoText: { color: '#e65100' },
+  statusCriticoText: { color: '#b71c1c' },
   sessaoNome: { fontSize: 16, fontWeight: '700', color: '#111' },
   sessaoMetricasRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
   sessaoMetrica: { gap: 2 },
   sessaoMetricaLabel: { fontSize: 10, color: '#999' },
   sessaoMetricaValor: { fontSize: 13, fontWeight: '600', color: '#222' },
 
-  // Exportar
   exportRow: { flexDirection: 'row', gap: 12 },
   exportBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
@@ -447,8 +563,6 @@ const styles = StyleSheet.create({
   exportIcone: { fontSize: 16, color: '#fff' },
   exportTexto: { fontSize: 15, fontWeight: '700', color: '#fff' },
 
-
-  // Modal calendário
   modalOverlay: {
     flex: 1, backgroundColor: 'rgba(0,0,0,0.35)',
     justifyContent: 'center', alignItems: 'center',
