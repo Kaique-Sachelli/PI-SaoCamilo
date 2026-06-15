@@ -11,46 +11,257 @@
     <title>Inicio</title>
 </head>
 <body>
-    <div class="container">
+    <main class="container faq-page">
+        <section class="busca">
+            <h1 class="titulo">Pesquise na nossa biblioteca de ajuda</h1>
+            <input type="text" id="faqSearch" placeholder="Use palavras-chave para melhor precisão">
+        </section>
 
-        <div class="row">
-            <div class="titulo">Pesquise na nossa biblioteca de ajuda</div>
-            <input type="text" placeholder="Use palavras-chave para melhor precisão">
-        </div>
+        <section class="faq-layout" aria-labelledby="topicosTitulo">
+            <aside class="categorias">
+                <h2 class="titulo" id="topicosTitulo">Todos os tópicos de ajuda</h2>
+                <nav class="menu-categorias" aria-label="Categorias de perguntas frequentes">
+                    <a class="botao" href="#primeiros-passos">Primeiros passos</a>
+                    <a class="botao" href="#sessoes-treino">Sessões de treino</a>
+                    <a class="botao" href="#resultados-alertas">Resultados e alertas</a>
+                    <a class="botao" href="#profissionais">Para profissionais</a>
+                    <a class="botao" href="#privacidade-suporte">Privacidade e suporte</a>
+                </nav>
+            </aside>
 
-        <div class="row">
-            <div class="titulo">Todos os tópicos de ajuda</div>
-            <div class="col-4">
-                <button class="botao">Placeholder</button>
-                <button class="botao">Placeholder</button>
-                <button class="botao">Placeholder</button>
-                <button class="botao">Placeholder</button>
-                <button class="botao">Placeholder</button>
+            <div class="topicos">
+                <section class="categoria-secao" id="primeiros-passos">
+                    <h2 class="categoria-titulo">Primeiros passos: conta e perfil</h2>
+                    <hr>
+                    <div class="cards-perguntas">
+                        <article class="topico">
+                            <h3 class="subtitulo">Como criar minha conta?</h3>
+                            <p class="texto">Na tela inicial, toque em "Cadastrar", informe nome, e-mail e senha e confirme. Sua conta é criada com um perfil de acesso (atleta, nutricionista, treinador, médico) definido pelo administrador. Se você é atleta, em geral o cadastro é feito ou liberado pela equipe técnica.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Esqueci minha senha. Como recupero?</h3>
+                            <p class="texto">Na tela de login, toque em "Esqueci minha senha" e informe o e-mail cadastrado. Você receberá um link de redefinição. Se não chegar em alguns minutos, verifique a caixa de spam ou peça ao suporte para acionar a redefinição manual.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como edito meu perfil (modalidade, vestimenta, dados físicos)?</h3>
+                            <p class="texto">Acesse "Perfil" e atualize idade, sexo, altura, massa corporal, modalidade esportiva e tipo de vestimenta padronizada. Esses dados alimentam o motor de cálculo, então mantê-los atualizados deixa as recomendações mais precisas.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Por que o app pede idade, sexo, altura e peso?</h3>
+                            <p class="texto">São variáveis de contexto usadas para individualizar os cálculos de balanço hídrico e as recomendações de hidratação. Sem elas, as estimativas ficam genéricas e menos confiáveis.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Qual a diferença entre os perfis (atleta, nutricionista, treinador, médico)?</h3>
+                            <p class="texto">Cada perfil enxerga apenas o que lhe compete: atletas registram e veem seus próprios dados; profissionais acompanham apenas os atletas vinculados a eles. Se você acha que está no perfil errado, peça ao administrador para ajustar sua categoria.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Sou menor de idade. Posso usar o app?</h3>
+                            <p class="texto">O uso por menores exige consentimento e acompanhamento de um responsável legal. Fale com a equipe técnica para fazer o cadastro com o consentimento do responsável antes de começar.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="categoria-secao" id="sessoes-treino">
+                    <h2 class="categoria-titulo">Sessões de treino e registro de dados</h2>
+                    <hr>
+                    <div class="cards-perguntas">
+                        <article class="topico">
+                            <h3 class="subtitulo">Como inicio uma sessão de treino?</h3>
+                            <p class="texto">Na tela inicial, toque em "Iniciar sessão" e siga o fluxo guiado: pré-sessão, durante e pós-sessão. O app conduz você passo a passo para garantir a padronização da coleta.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">O que é o checklist pré-sessão e por que ele é obrigatório?</h3>
+                            <p class="texto">Antes de começar, você precisa registrar massa corporal, cor da urina e condições ambientais (clima). O app bloqueia o início enquanto esses campos não forem preenchidos, porque eles são essenciais para a qualidade dos cálculos.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Não consigo iniciar o treino: os botões estão bloqueados. O que faço?</h3>
+                            <p class="texto">Isso acontece quando algum campo obrigatório do checklist (peso, escala de urina ou clima) está vazio. Volte ao checklist, complete os três e o botão de iniciar será liberado.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como funciona a escala de cor da urina?</h3>
+                            <p class="texto">Você seleciona, numa escala visual, a cor mais próxima da sua. É um indicador prático do estado de hidratação antes do treino: quanto mais escura, maior o sinal de desidratação. Faça a leitura sob luz natural para maior precisão.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como registro a ingestão de água durante o treino?</h3>
+                            <p class="texto">Use os atalhos de volume fixo na tela de treino (squeeze, copo ou garrafa). Cada toque registra a quantidade com horário automático, sem precisar interromper o treino. Você pode tocar várias vezes ao longo da sessão.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Posso registrar alimentos que contêm água?</h3>
+                            <p class="texto">Sim. Há um campo opcional para informar o consumo de alimentos com teor hídrico relevante. Esse valor é somado ao balanço total para deixar o cálculo mais completo.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como registro meu peso antes e depois do treino?</h3>
+                            <p class="texto">No início da sessão informe a massa corporal pré-treino e, ao encerrar, a massa pós-treino. A diferença, ajustada pela água ingerida e pela urina, é a base do cálculo da sudorese.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como registro sintomas, humor, fadiga e sono?</h3>
+                            <p class="texto">No checklist diário, use as escalas visuais (de baixo a alto) para humor, dor muscular e qualidade do sono. Esses registros ajudam o profissional a ajustar treino e hidratação.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como uso o diário alimentar?</h3>
+                            <p class="texto">Em "Diário alimentar", registre cada refeição com horário e uma descrição ou foto. Seu nutricionista visualiza esses registros em linha do tempo para acompanhar sua rotina.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como envio meus exames?</h3>
+                            <p class="texto">Na aba "Exames" do seu perfil, faça o upload do arquivo (PDF ou imagem). O exame fica visível apenas para o nutricionista responsável por você.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="categoria-secao" id="resultados-alertas">
+                    <h2 class="categoria-titulo">Resultados, cálculos e alertas</h2>
+                    <hr>
+                    <div class="cards-perguntas">
+                        <article class="topico">
+                            <h3 class="subtitulo">O que é a Taxa de Sudorese Estimada (L/h)?</h3>
+                            <p class="texto">É uma estimativa de quanto líquido você perde por hora de exercício, calculada a partir da variação de peso, da água ingerida e da urina eliminada. Ela aparece logo após o treino, junto ao percentual de variação de massa corporal.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como o app calcula o balanço hídrico?</h3>
+                            <p class="texto">Ele compara seu peso antes e depois do treino e ajusta esse valor pela quantidade de líquido ingerido e pela urina, resultando na perda real estimada. Por isso é importante preencher todos os campos com precisão.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Recebi um alerta de "variação de peso implausível". O que significa?</h3>
+                            <p class="texto">O app detectou uma diferença improvável entre o peso pré e pós-treino (por exemplo, ganho de peso ou perda muito alta). Confira se digitou os valores corretos ou repita a pesagem e registre novamente.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">O que são os alertas de hipo-hidratação ou ingestão excessiva?</h3>
+                            <p class="texto">São avisos automáticos de risco quando seus dados indicam perda elevada de líquidos ou consumo acima do recomendado. Use-os como sinal para ajustar a hidratação e, se necessário, conversar com seu profissional.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">O que é o painel longitudinal?</h3>
+                            <p class="texto">É a visão da sua evolução ao longo do tempo, com média, mediana e variabilidade da perda hídrica por tipo de treino e clima. Ajuda a entender como seu corpo reage a diferentes condições.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">As recomendações do app substituem um médico ou nutricionista?</h3>
+                            <p class="texto">Não. As estimativas e alertas têm finalidade informativa e de apoio à decisão. Decisões sobre hidratação, treino e saúde devem ser tomadas com acompanhamento profissional.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="categoria-secao" id="profissionais">
+                    <h2 class="categoria-titulo">Para profissionais (nutricionista, treinador, médico)</h2>
+                    <hr>
+                    <div class="cards-perguntas">
+                        <article class="topico">
+                            <h3 class="subtitulo">Por que vejo apenas alguns atletas?</h3>
+                            <p class="texto">O acesso é por perfil: você visualiza somente os atletas vinculados à sua supervisão. Para incluir um novo atleta na sua lista, solicite o vínculo ao administrador.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como envio uma estratégia ou plano para o atleta?</h3>
+                            <p class="texto">No painel do atleta, use o editor de "Plano de Estratégia", escreva as orientações e salve. O atleta recebe uma notificação e passa a visualizar o plano no app.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como deixo uma avaliação de consulta visível para o atleta?</h3>
+                            <p class="texto">Ao salvar a avaliação, marque a opção "Visível para o atleta". Sem essa marcação, a nota fica restrita ao seu acesso profissional.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como exporto relatórios?</h3>
+                            <p class="texto">No painel, aplique os filtros por atleta e período e use a opção de exportar. O sistema gera PDF (com cabeçalho, logotipo e data) ou planilha (.xlsx/.csv) com os dados brutos em colunas.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como comparo treinos diferentes (treinador)?</h3>
+                            <p class="texto">Selecione dois treinos para comparar; o sistema destaca as diferenças em cores (verde para evolução, vermelho para piora) e pode gerar gráficos para análise rápida.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como identifico atletas em risco?</h3>
+                            <p class="texto">O painel destaca em vermelho os atletas cujos dados indicam maior chance de problema de saúde ou lesão, para priorizar o acompanhamento.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Vejo o clima e a previsão para planejar treinos. Como funciona?</h3>
+                            <p class="texto">O sistema mostra temperatura atual e prevista e avisa quando há alta chance de chuva no horário e local do treino. A previsão é atualizada periodicamente.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="categoria-secao" id="privacidade-suporte">
+                    <h2 class="categoria-titulo">Privacidade, segurança e suporte</h2>
+                    <hr>
+                    <div class="cards-perguntas">
+                        <article class="topico">
+                            <h3 class="subtitulo">Meus dados de saúde estão seguros?</h3>
+                            <p class="texto">Sim. As senhas são protegidas por criptografia (hash) e os dados trafegam por conexão segura. O acesso é controlado por perfil, então cada pessoa só vê o que lhe é autorizado.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Quem pode ver meus dados?</h3>
+                            <p class="texto">Apenas você e os profissionais vinculados ao seu acompanhamento. Treinadores, por exemplo, têm acesso restrito aos dados de uso esportivo, sem exposição desnecessária de informações sensíveis.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como exerço meus direitos de privacidade (LGPD)?</h3>
+                            <p class="texto">Você pode solicitar acesso, correção, portabilidade ou exclusão dos seus dados pelo canal de contato do Encarregado, indicado na Política de Privacidade. A resposta segue os prazos da LGPD.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como excluo minha conta?</h3>
+                            <p class="texto">Solicite o encerramento pelo suporte ou pela opção de conta no app. Seus dados serão excluídos ou anonimizados, respeitadas as obrigações legais de guarda de registros.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">O app funciona offline?</h3>
+                            <p class="texto">Sim, o aplicativo móvel permite registrar dados sem internet; eles ficam salvos no aparelho e são sincronizados quando a conexão volta. Até sincronizar, os registros podem não aparecer no painel web.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Meus dados não estão sincronizando. O que fazer?</h3>
+                            <p class="texto">Verifique sua conexão e abra o app para forçar a sincronização. Se persistir, confirme que está logado na conta correta e, se necessário, acione o suporte.</p>
+                        </article>
+
+                        <article class="topico">
+                            <h3 class="subtitulo">Como falo com o suporte / abro um chamado?</h3>
+                            <p class="texto">Use o canal de suporte indicado no app (e-mail ou formulário). Informe seu e-mail cadastrado e descreva o problema; cada chamado recebe um número para acompanhamento até a solução.</p>
+                        </article>
+                    </div>
+                </section>
             </div>
-
-            <div class="topicos col-8">
-                <div class="row" style="margin-bottom: 0px;">
-                    <div class="topico">
-                        <div class="subtitulo">Placeholder</div>
-                        <div class="texto">Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis fugiat odit autem nesciunt assumenda aliquid repudiandae.</div>
-                    </div>
-                    <div class="topico">
-                        <div class="subtitulo">Placeholder</div>
-                        <div class="texto">Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis fugiat odit autem nesciunt assumenda aliquid repudiandae.</div>
-                    </div>
-                    <div class="topico">
-                        <div class="subtitulo">Placeholder</div>
-                        <div class="texto">Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis fugiat odit autem nesciunt assumenda aliquid repudiandae.</div>
-                    </div>
-                    <div class="topico">
-                        <div class="subtitulo">Placeholder</div>
-                        <div class="texto">Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis fugiat odit autem nesciunt assumenda aliquid repudiandae.</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const faqSearch = document.getElementById('faqSearch');
+        const cards = document.querySelectorAll('.topico');
+        const sections = document.querySelectorAll('.categoria-secao');
+
+        faqSearch.addEventListener('input', function () {
+            const termo = this.value.trim().toLowerCase();
+
+            cards.forEach(function (card) {
+                const texto = card.textContent.toLowerCase();
+                card.classList.toggle('oculto', termo !== '' && !texto.includes(termo));
+            });
+
+            sections.forEach(function (section) {
+                const cardsVisiveis = section.querySelectorAll('.topico:not(.oculto)').length;
+                section.classList.toggle('oculto', termo !== '' && cardsVisiveis === 0);
+            });
+        });
+    </script>
 </body>
 </html>
