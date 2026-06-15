@@ -49,6 +49,22 @@ export default function ListaAtletas() {
     a.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
+  const abrirPerfilAtleta = (atleta: any) => {
+    router.push({
+      pathname: '/perfil_atleta_nutricionista',
+      params: {
+        id_atleta: String(atleta.id_usuario),
+        nome: atleta.nome,
+        email: atleta.email || '',
+        telefone: atleta.telefone || '',
+        idade: atleta.idade != null ? String(atleta.idade) : '',
+        altura: atleta.altura != null ? String(atleta.altura) : '',
+        peso: atleta.peso != null ? String(atleta.peso) : '',
+        modalidade_esportiva: atleta.modalidade_esportiva || '',
+      },
+    });
+  };
+
   return (
     <ImageBackground
       source={require('./assets/Img/Background.png')}
@@ -101,7 +117,7 @@ export default function ListaAtletas() {
               key={atleta.id_usuario}
               style={styles.atletaCard}
               activeOpacity={0.75}
-              onPress={() => router.push('/TelaAtleta')}
+              onPress={() => abrirPerfilAtleta(atleta)}
             >
               <View style={styles.atletaLeft}>
                 {atleta.foto ? (
