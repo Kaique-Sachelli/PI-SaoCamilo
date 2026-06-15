@@ -25,13 +25,6 @@ export default function PerfilTreinador() {
 
         {/* ── Header ── */}
         <View style={styles.header}>
-          {/* Sino canto superior direito */}
-          <View style={styles.headerTop}>
-            <TouchableOpacity style={styles.sinoWrap}>
-              <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
-              <View style={styles.sinoDot} />
-            </TouchableOpacity>
-          </View>
 
           {/* Foto circular centralizada */}
           <View style={styles.fotoWrap}>
@@ -122,14 +115,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     marginBottom: 12,
-  },
-  sinoWrap: { position: 'relative' },
-  sino: { width: 28, height: 28, tintColor: '#fff' },
-  sinoDot: {
-    position: 'absolute', top: 0, right: 0,
-    width: 9, height: 9, borderRadius: 5,
-    backgroundColor: '#FF9800',
-    borderWidth: 1.5, borderColor: RED,
   },
 
   // Foto

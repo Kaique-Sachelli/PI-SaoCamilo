@@ -14,6 +14,8 @@ import { useRouter } from 'expo-router';
 import { NavbarAtleta } from './NavbarAtleta';
 import { useUser } from '../context/UserContext';
 import { getUrl } from '../constants/url';
+import { NotificacaoPopup } from './notificacao';
+
 
 // Dados fictícios de clima
 const CLIMA = {
@@ -46,6 +48,7 @@ export default function HomepageAtleta() {
   const router = useRouter();
   const { usuario } = useUser();
   const [ultimaSessao, setUltimaSessao] = useState<UltimaSessao | null>(null);
+  const [notifVisivel, setNotifVisivel] = useState(false);
 
   useEffect(() => {
     if (!usuario?.id_usuario) return;
@@ -103,7 +106,7 @@ export default function HomepageAtleta() {
               <Text style={styles.titulo}>São Camilo</Text>
               <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setNotifVisivel(true)}>
               <View style={styles.sinoWrap}>
                 <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
                 <View style={styles.sinoDot} />
@@ -219,6 +222,11 @@ export default function HomepageAtleta() {
         {/* ── Bottom Nav ── */}
         <NavbarAtleta active="home" />
 
+        {/* ── Popup de Notificações ── */}
+        <NotificacaoPopup
+          visible={notifVisivel}
+          onClose={() => setNotifVisivel(false)}
+        />
       </SafeAreaView>
     </ImageBackground>
   );

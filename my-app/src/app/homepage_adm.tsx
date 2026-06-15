@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { NavbarADM } from './Navbar_ADM';
-import { NotificationPopup } from './notificacao';
+import { NotificacaoPopup } from './notificacao';
 
 const MENU = [
   { id: 1, icone: require('./assets/Img/solicitacoes.png'),  label: 'Solicitações de cadastro', rota: '/solicitacoes_cadastro'},
@@ -87,7 +87,7 @@ export default function HomepageAdm() {
         <NavbarADM active="home"/>
 
         {/* ── Popup de Notificações ── */}
-        <NotificationPopup
+        <NotificacaoPopup
           visible={notifVisivel}
           onClose={() => setNotifVisivel(false)}
         />

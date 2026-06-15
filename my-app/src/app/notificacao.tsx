@@ -25,7 +25,7 @@ interface Props {
 }
 
 
-export function NotificationPopup({ visible, onClose, notificacoes }: Props) {
+export function NotificacaoPopup({ visible, onClose, notificacoes }: Props) {
   const router = useRouter();
 
   const NOTIFICACOES_PADRAO_COM_ROTA: Notificacao[] = [
