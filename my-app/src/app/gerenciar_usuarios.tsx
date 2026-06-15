@@ -158,7 +158,7 @@ async function excluirUsuario(id: number) {
           <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
             <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitulo}>TESTE PEDRO2</Text>
+          <Text style={styles.headerTitulo}>Arrumar nome (linha 161)</Text>
         </View>
 
         {/* ── Busca ── */}

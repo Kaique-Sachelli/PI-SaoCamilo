@@ -187,6 +187,26 @@ app.get('/dashboard/usuarios-por-perfil', async (req, res) => {
     });
   }
 });
+//rota para usuarios pendentes
+app.get('/usuarios/pendentes', async (req, res) => {
+  try {
+
+    const [usuarios] = await db.query(`
+      SELECT *
+      FROM Usuario
+      WHERE situacao = 'Pendente'
+    `);
+
+    res.json(usuarios);
+
+  } catch (erro) {
+    console.error(erro);
+
+    res.status(500).json({
+      erro: erro.message
+    });
+  }
+});
 //rota perfil do usuario visao adm
 app.get('/usuarios/:id', async (req, res) => {
   try {
@@ -219,6 +239,31 @@ app.get('/usuarios/:id', async (req, res) => {
     erro: erro.message
   });
 }
+});
+
+//rota para aprovar usuario
+app.patch('/usuario/:id/aprovar', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+
+    await db.query(
+      'UPDATE Usuario SET situacao = "Ativo" WHERE id_usuario = ?',
+      [id]
+    );
+
+    res.json({
+      sucesso: true
+    });
+
+  } catch (erro) {
+    console.error(erro);
+
+    res.status(500).json({
+      sucesso: false,
+      erro: erro.message
+    });
+  }
 });
 //rota para desativar usuario
 app.patch('/usuario/:id/desativar', async (req, res) => {
