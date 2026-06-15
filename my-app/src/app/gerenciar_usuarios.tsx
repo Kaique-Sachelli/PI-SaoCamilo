@@ -39,6 +39,8 @@ type Usuario = {
 
 const CATEGORIAS: Categoria[] = ['Atletas', 'Treinadores', 'Médicos', 'Nutricionistas'];
 
+const CATEGORIAS_GERAL: (Categoria | 'Todos')[] = ['Todos', ...CATEGORIAS];
+
 const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9', '#6a1b9a', '#00838f', '#558b2f'];
 
 function iniciais(nome: string) {
@@ -65,7 +67,7 @@ function converterCategoria(tipo: string) {
 export default function GerenciarUsuarios() {
   const router = useRouter();
   const [busca, setBusca] = useState('');
-  const [categoria, setCategoria] = useState<Categoria>('Atletas');
+   const [categoria, setCategoria] = useState<Categoria | 'Todos'>('Todos');
   const [removidos, setRemovidoss] = useState<number[]>([]);
   const [usuarios, setUsuarios] = useState<any[]>([]);
 
@@ -97,10 +99,13 @@ export default function GerenciarUsuarios() {
   const lista = usuarios.filter(
     (u) =>
       !removidos.includes(u.id_usuario) &&
-      converterCategoria(u.tipo_perfil) === categoria &&
+      (categoria === 'Todos' || converterCategoria(u.tipo_perfil) === categoria) &&
       (
         u.nome.toLowerCase().includes(busca.toLowerCase()) ||
-        u.email.toLowerCase().includes(busca.toLowerCase())
+        u.email.toLowerCase().includes(busca.toLowerCase()) ||
+        (u.registro || '').toLowerCase().includes(busca.toLowerCase()) ||
+        u.tipo_perfil.toLowerCase().includes(busca.toLowerCase()) ||
+        u.situacao.toLowerCase().includes(busca.toLowerCase())
       )
   );
 
@@ -145,7 +150,7 @@ export default function GerenciarUsuarios() {
 
         {/* ── Filtros ── */}
         <View style={styles.filtrosRow}>
-          {CATEGORIAS.map((c) => (
+          {CATEGORIAS_GERAL.map((c) => (
             <TouchableOpacity
               key={c}
               style={[styles.filtroPill, categoria === c && styles.filtroPillAtivo]}
