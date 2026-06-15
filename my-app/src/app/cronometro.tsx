@@ -16,9 +16,15 @@ export default function CronometroScreen() {
   const [running, setRunning] = useState(true);
   const [mlIngeridos, setMlIngeridos] = useState(0);
   const [quantidade, setQuantidade] = useState('');
+  const [urinaInput, setUrinaInput] = useState('');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const router = useRouter();
-  const { massa_pre, clima_temp, clima_umidade } = useLocalSearchParams<{ massa_pre: string; clima_temp: string; clima_umidade: string }>();
+  const { massa_pre, clima_temp, clima_umidade, urina_pre_cor } = useLocalSearchParams<{
+    massa_pre: string;
+    clima_temp: string;
+    clima_umidade: string;
+    urina_pre_cor: string;
+  }>();
 
   useEffect(() => {
     if (running) {
@@ -58,7 +64,9 @@ export default function CronometroScreen() {
 
   const handleEncerrar = () => {
     setRunning(false);
-    router.push(`/checklist-pos-sessao?massa_pre=${massa_pre}&clima_temp=${clima_temp}&clima_umidade=${clima_umidade}&ml_ingerido=${mlIngeridos}&duracao_segundos=${seconds}`);
+    router.push(
+      `/checklist-pos-sessao?massa_pre=${massa_pre}&clima_temp=${clima_temp}&clima_umidade=${clima_umidade}&ml_ingerido=${mlIngeridos}&duracao_segundos=${seconds}&urina_pre_cor=${urina_pre_cor ?? ''}&urina_sessao=${parseInt(urinaInput) || 0}`
+    );
   };
 
   return (
@@ -78,7 +86,7 @@ export default function CronometroScreen() {
             <View style={styles.dotVerde} />
             <Text style={styles.headerTextLeft}>SESSÃO ATIVA</Text>
           </View>
-          <Text style={styles.headerTextRight}>Corrida intervalar</Text>
+          <Text style={styles.headerTextRight}>Sessão ativa</Text>
         </View>
 
         {/* Timer */}
@@ -140,16 +148,31 @@ export default function CronometroScreen() {
         </View>
 
         {/* Input customizado */}
-        <View style={styles.inputRow}>
+        <View style={[styles.inputRow, { marginBottom: 16 }]}>
           <Text style={styles.gotaInputIcon}>💧</Text>
           <TextInput
             style={styles.inputHidratacao}
-            placeholder="Insira a quantidade inserida..."
+            placeholder="Insira a quantidade ingerida..."
             placeholderTextColor="#e78585"
             keyboardType="numeric"
             value={quantidade}
             onChangeText={setQuantidade}
             onSubmitEditing={adicionarCustom}
+            returnKeyType="done"
+          />
+        </View>
+
+        {/* Volume urinário opcional */}
+        <Text style={styles.labelHidratacao}>VOLUME URINÁRIO (opcional)</Text>
+        <View style={styles.inputRow}>
+          <Text style={styles.gotaInputIcon}>↓</Text>
+          <TextInput
+            style={styles.inputHidratacao}
+            placeholder="Volume eliminado (mL)..."
+            placeholderTextColor="#e78585"
+            keyboardType="numeric"
+            value={urinaInput}
+            onChangeText={setUrinaInput}
             returnKeyType="done"
           />
         </View>

@@ -14,37 +14,65 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { getUrl } from '../constants/url';
 import { useUser } from '../context/UserContext';
 
+type Intensidade = 'Baixa' | 'Média' | 'Alta';
+
+const INTENSIDADES: { valor: Intensidade; cor: string; bg: string }[] = [
+  { valor: 'Baixa', cor: '#1565c0', bg: '#e3f2fd' },
+  { valor: 'Média', cor: '#e65100', bg: '#fff3e0' },
+  { valor: 'Alta',  cor: '#b71c1c', bg: '#ffebee' },
+];
+
 export default function ChecklistPosSessaoScreen() {
   const [massaPos, setMassaPos] = useState('');
+  const [intensidade, setIntensidade] = useState<Intensidade | null>(null);
+  const [roupasEncharcadas, setRoupasEncharcadas] = useState(false);
+  const [nivelFadiga, setNivelFadiga] = useState(0);
+  const [sintomasGI, setSintomasGI] = useState('');
   const [loading, setLoading] = useState(false);
+
   const router = useRouter();
   const { usuario } = useUser();
-  const { massa_pre, clima_temp, clima_umidade, ml_ingerido, duracao_segundos } = useLocalSearchParams<{
+  const {
+    massa_pre,
+    clima_temp,
+    clima_umidade,
+    ml_ingerido,
+    duracao_segundos,
+    urina_pre_cor,
+    urina_sessao,
+  } = useLocalSearchParams<{
     massa_pre: string;
     clima_temp: string;
     clima_umidade: string;
     ml_ingerido: string;
     duracao_segundos: string;
+    urina_pre_cor: string;
+    urina_sessao: string;
   }>();
 
-  const massaPreNum = parseFloat((massa_pre ?? '0').replace(',', '.'));
-  const mlIngeridoLitros = parseFloat(ml_ingerido ?? '0') / 1000;
-  const horasSessao = parseFloat(duracao_segundos ?? '0') / 3600;
+  const massaPreNum        = parseFloat((massa_pre ?? '0').replace(',', '.'));
+  const mlIngeridoLitros   = parseFloat(ml_ingerido ?? '0') / 1000;
+  const urinaSessaoLitros  = parseFloat(urina_sessao ?? '0') / 1000;
+  const horasSessao        = parseFloat(duracao_segundos ?? '0') / 3600;
+  const massaPosNum        = parseFloat(massaPos.replace(',', '.')) || 0;
 
-  const massaPosNum = parseFloat(massaPos.replace(',', '.')) || 0;
-
-  // fórmulas do motor_calculo.py
-  const perdaTotal = massaPosNum > 0
-    ? (massaPreNum - massaPosNum) + mlIngeridoLitros
+  //(pré − pós) + ingestão − urina durante sessão
+  const perdaAjustada = massaPosNum > 0
+    ? (massaPreNum - massaPosNum) + mlIngeridoLitros - urinaSessaoLitros
     : 0;
 
+  // Taxa de Sudorese Estimada (L/h)
   const taxaSudorese = horasSessao > 0 && massaPosNum > 0
-    ? perdaTotal / horasSessao
+    ? perdaAjustada / horasSessao
     : 0;
 
+  // Percentual de Variação de Massa
   const variacaoMassa = massaPosNum > 0
     ? ((massaPreNum - massaPosNum) / massaPreNum) * 100
     : 0;
+
+  // Ingestão − perda estimada por suor
+  const balanco = massaPosNum > 0 ? mlIngeridoLitros - perdaAjustada : 0;
 
   const alerta = massaPosNum > massaPreNum
     ? 'ALERTA: Ganho de peso! Risco de hiponatremia (excesso de hidratação).'
@@ -53,13 +81,21 @@ export default function ChecklistPosSessaoScreen() {
       : '';
 
   const avaliacaoVariacao = (v: number) => {
-    if (v < 0)  return { label: 'Atenção', color: '#c62828', statusColor: 'Vermelho' as const };
-    if (v < 2)  return { label: 'Ótimo',   color: '#2e7d32', statusColor: 'Verde'    as const };
-    if (v <= 3) return { label: 'Moderado',color: '#f57f17', statusColor: 'Amarelo'  as const };
+    if (v < 0)  return { label: 'Atenção',  color: '#c62828', statusColor: 'Vermelho' as const };
+    if (v < 2)  return { label: 'Ótimo',    color: '#2e7d32', statusColor: 'Verde'    as const };
+    if (v <= 3) return { label: 'Moderado', color: '#f57f17', statusColor: 'Amarelo'  as const };
     return        { label: 'Crítico',  color: '#c62828', statusColor: 'Vermelho' as const };
   };
 
-  const avaliacao = avaliacaoVariacao(variacaoMassa);
+  const avaliacaoBalanco = (b: number) => {
+    if (b > 0.3)   return { label: 'Superávit',      color: '#e65100' };
+    if (b >= -0.3) return { label: 'Equilibrado',    color: '#2e7d32' };
+    if (b >= -1)   return { label: 'Déficit',         color: '#f57f17' };
+    return           { label: 'Déficit Crítico', color: '#c62828' };
+  };
+
+  const avaliacao  = avaliacaoVariacao(variacaoMassa);
+  const avaliacaoB = avaliacaoBalanco(balanco);
 
   const formatTime = (totalSeconds: number) => {
     const h = Math.floor(totalSeconds / 3600);
@@ -80,18 +116,24 @@ export default function ChecklistPosSessaoScreen() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id_atleta: usuario?.id_usuario,
-          massa_pre: massaPreNum,
-          massa_pos: massaPosNum,
-          clima_temp: parseFloat(clima_temp ?? '0'),
-          clima_umidade: parseFloat(clima_umidade ?? '0'),
-          duracao_minutos: Math.round(parseFloat(duracao_segundos ?? '0') / 60),
-          volume_ml: parseFloat(ml_ingerido ?? '0'),
-          perda_massa_ajustada: parseFloat(perdaTotal.toFixed(2)),
-          taxa_sudorese: parseFloat(taxaSudorese.toFixed(1)),
-          percentual_variacao: parseFloat(variacaoMassa.toFixed(1)),
-          alerta_seguranca: alerta || null,
-          status_color: avaliacao.statusColor,
+          id_atleta:              usuario?.id_usuario,
+          massa_pre:              massaPreNum,
+          massa_pos:              massaPosNum,
+          clima_temp:             parseFloat(clima_temp ?? '0'),
+          clima_umidade:          parseFloat(clima_umidade ?? '0'),
+          duracao_minutos:        Math.round(parseFloat(duracao_segundos ?? '0') / 60),
+          volume_ml:              parseFloat(ml_ingerido ?? '0'),
+          volume_urina_ml:        parseFloat(urina_sessao ?? '0') || null,
+          perda_massa_ajustada:   parseFloat(perdaAjustada.toFixed(2)),
+          taxa_sudorese:          parseFloat(taxaSudorese.toFixed(1)),
+          percentual_variacao:    parseFloat(variacaoMassa.toFixed(1)),
+          alerta_seguranca:       alerta || null,
+          status_color:           avaliacao.statusColor,
+          intensidade_percebida:  intensidade || null,
+          roupas_encharcadas:     roupasEncharcadas ? 1 : 0,
+          urina_pre_cor:          urina_pre_cor ? parseInt(urina_pre_cor) : null,
+          nivel_fadiga:           nivelFadiga || null,
+          sintomas_gastrointestinais: sintomasGI.trim() || null,
         }),
       });
 
@@ -117,12 +159,8 @@ export default function ChecklistPosSessaoScreen() {
       resizeMode="cover"
     >
       <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity 
-          onPress={() => router.back()} 
-          style={styles.voltarBtn}
-          >
+          <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
             <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitulo}>Checklist Pós-Sessão</Text>
@@ -131,8 +169,8 @@ export default function ChecklistPosSessaoScreen() {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          {/* Card: Massa Corporal Pós-Exercício */}
           <View style={styles.card}>
             <Text style={styles.cardLabel}>Massa Corporal Pós-Exercício</Text>
             <View style={styles.massaRow}>
@@ -148,30 +186,27 @@ export default function ChecklistPosSessaoScreen() {
             </View>
             <View style={styles.massaSubRow}>
               <Text style={styles.massaSubTexto}>Pré: {massaPreNum} Kg</Text>
-              <Text style={styles.massaSubTexto}>Ingerido: {mlIngeridoLitros.toFixed(2)}L</Text>
+              <Text style={styles.massaSubTexto}>Ingerido: {mlIngeridoLitros.toFixed(2)} L</Text>
             </View>
           </View>
 
-          {/* Cards lado a lado: Perda Total + Taxa de Sudorese */}
           <View style={styles.duploRow}>
             <View style={[styles.card, styles.cardMetade]}>
               <View style={styles.metricaHeader}>
                 <Text style={styles.metricaIcone}>💧</Text>
-                <Text style={styles.metricaRotulo}>PERDA TOTAL</Text>
+                <Text style={styles.metricaRotulo}>PERDA ESTIMADA</Text>
               </View>
-              <Text style={styles.metricaValor}>{perdaTotal.toFixed(2)}L</Text>
+              <Text style={styles.metricaValor}>{perdaAjustada.toFixed(2)} L</Text>
             </View>
-
             <View style={[styles.card, styles.cardMetade]}>
               <View style={styles.metricaHeader}>
                 <Text style={[styles.metricaIcone, { color: '#B3151F' }]}>⚡</Text>
                 <Text style={styles.metricaRotulo}>TAXA DE SUDORESE</Text>
               </View>
-              <Text style={styles.metricaValor}>{taxaSudorese.toFixed(1)}L/h</Text>
+              <Text style={styles.metricaValor}>{taxaSudorese.toFixed(1)} L/h</Text>
             </View>
           </View>
 
-          {/* Card: Variação de Massa */}
           <View style={styles.card}>
             <View style={styles.metricaHeader}>
               <Text style={[styles.metricaIcone, { color: '#2e7d32' }]}>↘</Text>
@@ -187,14 +222,115 @@ export default function ChecklistPosSessaoScreen() {
             </View>
           </View>
 
-          {/* Card: Alerta */}
+          {massaPosNum > 0 && (
+            <View style={styles.card}>
+              <View style={styles.metricaHeader}>
+                <Text style={[styles.metricaIcone, { color: '#1565c0' }]}>⚖️</Text>
+                <Text style={styles.metricaRotulo}>BALANÇO HÍDRICO</Text>
+              </View>
+              <View style={styles.variacaoRow}>
+                <Text style={[styles.variacaoValor, { color: avaliacaoB.color, fontSize: 26 }]}>
+                  {balanco >= 0 ? '+' : ''}{balanco.toFixed(2)} L
+                </Text>
+                <View style={[styles.badge, { backgroundColor: avaliacaoB.color + '22', borderColor: avaliacaoB.color }]}>
+                  <Text style={[styles.badgeTexto, { color: avaliacaoB.color }]}>{avaliacaoB.label}</Text>
+                </View>
+              </View>
+              <Text style={styles.balancoSub}>
+                Ingestão {mlIngeridoLitros.toFixed(2)} L · Perda estimada {perdaAjustada.toFixed(2)} L
+              </Text>
+            </View>
+          )}
+
           {alerta !== '' && (
             <View style={[styles.card, { borderLeftWidth: 4, borderLeftColor: '#c62828' }]}>
               <Text style={styles.alertaTexto}>{alerta}</Text>
             </View>
           )}
 
-          {/* Card: Tempo de Sessão */}
+          {/* Intensidade percebida */}
+          <View style={styles.card}>
+            <Text style={styles.cardLabel}>Intensidade percebida</Text>
+            <Text style={styles.cardSub}>Como você avalia a intensidade do treino de hoje?</Text>
+            <View style={styles.intensidadeRow}>
+              {INTENSIDADES.map(i => (
+                <TouchableOpacity
+                  key={i.valor}
+                  style={[
+                    styles.intensidadeBtn,
+                    { borderColor: i.cor },
+                    intensidade === i.valor && { backgroundColor: i.bg },
+                  ]}
+                  onPress={() => setIntensidade(i.valor)}
+                  activeOpacity={0.75}
+                >
+                  <Text style={[styles.intensidadeBtnTexto, { color: i.cor }]}>{i.valor}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Situação das roupas */}
+          <View style={styles.card}>
+            <Text style={styles.cardLabel}>Situação das roupas</Text>
+            <Text style={styles.cardSub}>
+              Suas roupas ficaram muito encharcadas durante o treino?
+            </Text>
+            <View style={styles.toggleRow}>
+              <TouchableOpacity
+                style={[styles.toggleBtn, !roupasEncharcadas && styles.toggleBtnAtivo]}
+                onPress={() => setRoupasEncharcadas(false)}
+              >
+                <Text style={[styles.toggleBtnTexto, !roupasEncharcadas && styles.toggleBtnTextoAtivo]}>
+                  Não
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.toggleBtn, roupasEncharcadas && styles.toggleBtnAtivoAlerta]}
+                onPress={() => setRoupasEncharcadas(true)}
+              >
+                <Text style={[styles.toggleBtnTexto, roupasEncharcadas && styles.toggleBtnTextoAtivo]}>
+                  Sim
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Como você está se sentindo */}
+          <View style={styles.card}>
+            <Text style={styles.cardLabel}>Como você está se sentindo?</Text>
+
+            <Text style={[styles.metricaRotulo, { marginBottom: 10 }]}>NÍVEL DE FADIGA</Text>
+            <View style={styles.fadigaRow}>
+              {[1, 2, 3, 4, 5].map(n => (
+                <TouchableOpacity
+                  key={n}
+                  style={[styles.fadigaBtn, nivelFadiga === n && styles.fadigaBtnAtivo]}
+                  onPress={() => setNivelFadiga(nivelFadiga === n ? 0 : n)}
+                >
+                  <Text style={[styles.fadigaBtnTexto, nivelFadiga === n && styles.fadigaBtnTextoAtivo]}>
+                    {n}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Text style={styles.fadigaLegenda}>1 = Sem fadiga · 5 = Exaustão extrema</Text>
+
+            <Text style={[styles.metricaRotulo, { marginTop: 16, marginBottom: 8 }]}>
+              SINTOMAS GASTROINTESTINAIS
+            </Text>
+            <TextInput
+              style={styles.sintomasInput}
+              placeholder="Descreva se houver (náuseas, cólicas, etc.) — opcional"
+              placeholderTextColor="#bbb"
+              multiline
+              numberOfLines={2}
+              value={sintomasGI}
+              onChangeText={setSintomasGI}
+            />
+          </View>
+
+          {/* Tempo de sessão */}
           <View style={styles.card}>
             <View style={styles.metricaHeader}>
               <Text style={styles.metricaIcone}>🕐</Text>
@@ -203,12 +339,11 @@ export default function ChecklistPosSessaoScreen() {
             <Text style={styles.tempoValor}>{formatTime(parseFloat(duracao_segundos ?? '0'))}</Text>
           </View>
 
-          {/* Botão Salvar */}
           <TouchableOpacity
-          style={[styles.btnSalvar, loading && { opacity: 0.6 }]}
-          onPress={handleSalvar}
-          activeOpacity={0.85}
-          disabled={loading}
+            style={[styles.btnSalvar, loading && { opacity: 0.6 }]}
+            onPress={handleSalvar}
+            activeOpacity={0.85}
+            disabled={loading}
           >
             <Text style={styles.btnSalvarTexto}>{loading ? 'Salvando...' : 'Salvar e encerrar'}</Text>
           </TouchableOpacity>
@@ -219,15 +354,9 @@ export default function ChecklistPosSessaoScreen() {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
+  background: { flex: 1 },
+  safeArea: { flex: 1, backgroundColor: 'transparent' },
 
-  // Header vermelho
   header: {
     backgroundColor: '#B3151F',
     paddingTop: 10,
@@ -236,47 +365,25 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
     paddingHorizontal: 16,
   },
-  voltarBtn: {
-    marginBottom: 4,
-  },
-  voltarTexto: {
-    color: '#ffffff',
-    fontSize: 14,
-    opacity: 0.85,
-  },
-  headerTitulo: {
-    color: '#ffffff',
-    fontSize: 24,
-    fontWeight: '700',
-  },
+  voltarBtn: { marginBottom: 4 },
+  voltarTexto: { color: '#ffffff', fontSize: 14, opacity: 0.85 },
+  headerTitulo: { color: '#ffffff', fontSize: 24, fontWeight: '700' },
 
-  // Scroll
-  scrollContent: {
-    flexGrow: 1,
-    padding: 16,
-    gap: 12,
-    paddingBottom: 32,
-  },
+  scrollContent: { flexGrow: 1, padding: 16, gap: 12, paddingBottom: 32 },
 
-  // Cards
   card: {
     backgroundColor: '#ffffff',
     borderRadius: 20,
     padding: 16,
     ...Platform.select({
-      ios: { boxshadow: '0px 2px 8px rgba(0,0,0,0.08)' },
+      ios:     { boxshadow: '0px 2px 8px rgba(0,0,0,0.08)' },
       android: { elevation: 3 },
-      web: { boxshadow: '0px 2px 8px rgba(0,0,0,0.08)' },
+      web:     { boxshadow: '0px 2px 8px rgba(0,0,0,0.08)' },
     }),
   },
-  cardLabel: {
-    fontSize: 14,
-    color: '#444',
-    marginBottom: 10,
-    fontWeight: '500',
-  },
+  cardLabel: { fontSize: 14, color: '#444', marginBottom: 6, fontWeight: '600' },
+  cardSub:   { fontSize: 12, color: '#888', marginBottom: 12 },
 
-  // Massa input
   massaRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -285,90 +392,82 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     marginBottom: 10,
   },
-  massaInput: {
+  massaInput:    { flex: 1, fontSize: 36, fontWeight: '600', color: '#747474' },
+  massaUnidade:  { fontSize: 22, fontWeight: '600', color: '#747474', marginLeft: 8 },
+  massaSubRow:   { flexDirection: 'row', justifyContent: 'space-between' },
+  massaSubTexto: { fontSize: 12, color: '#747474' },
+
+  duploRow:   { flexDirection: 'row', gap: 12 },
+  cardMetade: { flex: 1 },
+
+  metricaHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+  metricaIcone:  { fontSize: 16, color: '#1565c0' },
+  metricaRotulo: { fontSize: 11, fontWeight: '700', color: '#747474', letterSpacing: 0.5, flexShrink: 1 },
+  metricaValor:  { fontSize: 26, fontWeight: '700', color: '#747474' },
+
+  variacaoRow:  { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  variacaoValor: { fontSize: 32, fontWeight: '700' },
+  badge:         { borderWidth: 1, borderRadius: 20, paddingVertical: 4, paddingHorizontal: 12 },
+  badgeTexto:    { fontSize: 13, fontWeight: '600' },
+
+  balancoSub: { fontSize: 11, color: '#aaa', marginTop: 8 },
+
+  alertaTexto: { fontSize: 13, fontWeight: '600', color: '#c62828' },
+
+  intensidadeRow: { flexDirection: 'row', gap: 10 },
+  intensidadeBtn: {
     flex: 1,
-    fontSize: 36,
-    fontWeight: '600',
-    color: '#747474',
+    borderWidth: 2,
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    backgroundColor: '#fafafa',
   },
-  massaUnidade: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: '#747474',
-    marginLeft: 8,
-  },
-  massaSubRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  massaSubTexto: {
-    fontSize: 12,
-    color: '#747474',
-  },
+  intensidadeBtnTexto: { fontSize: 14, fontWeight: '700' },
 
-  // Duplo row
-  duploRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  cardMetade: {
+  toggleRow: { flexDirection: 'row', gap: 10 },
+  toggleBtn: {
     flex: 1,
-  },
-
-  // Métricas
-  metricaHeader: {
-    flexDirection: 'row',
+    borderWidth: 1.5,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    paddingVertical: 11,
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
+    backgroundColor: '#fafafa',
   },
-  metricaIcone: {
-    fontSize: 16,
-    color: '#1565c0',
-  },
-  metricaRotulo: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#747474',
-    letterSpacing: 0.5,
-    flexShrink: 1,
-  },
-  metricaValor: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#747474',
-  },
+  toggleBtnAtivo:       { backgroundColor: '#e8f5e9', borderColor: '#2e7d32' },
+  toggleBtnAtivoAlerta: { backgroundColor: '#fff3e0', borderColor: '#e65100' },
+  toggleBtnTexto:       { fontSize: 14, fontWeight: '600', color: '#888' },
+  toggleBtnTextoAtivo:  { color: '#222' },
 
-  // Variação
-  variacaoRow: {
-    flexDirection: 'row',
+  fadigaRow: { flexDirection: 'row', gap: 8, marginBottom: 6 },
+  fadigaBtn: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingVertical: 10,
     alignItems: 'center',
-    gap: 14,
+    backgroundColor: '#fafafa',
   },
-  variacaoValor: {
-    fontSize: 32,
-    fontWeight: '700',
-  },
-  badge: {
+  fadigaBtnAtivo:      { backgroundColor: '#B3151F', borderColor: '#B3151F' },
+  fadigaBtnTexto:      { fontSize: 16, fontWeight: '700', color: '#888' },
+  fadigaBtnTextoAtivo: { color: '#fff' },
+  fadigaLegenda:       { fontSize: 11, color: '#aaa', textAlign: 'center' },
+
+  sintomasInput: {
     borderWidth: 1,
-    borderRadius: 20,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-  },
-  badgeTexto: {
+    borderColor: '#e0e0e0',
+    borderRadius: 10,
+    padding: 10,
     fontSize: 13,
-    fontWeight: '600',
+    color: '#333',
+    minHeight: 60,
+    textAlignVertical: 'top',
   },
 
-  // Tempo
-  tempoValor: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#B3151F',
-    letterSpacing: 1,
-  },
+  tempoValor: { fontSize: 32, fontWeight: '700', color: '#B3151F', letterSpacing: 1 },
 
-  // Botão salvar
   btnSalvar: {
     backgroundColor: '#22C55E',
     borderRadius: 20,
@@ -376,20 +475,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
     ...Platform.select({
-      ios: { boxshadow: '0px 4px 12px rgba(76,175,80,0.35)' },
+      ios:     { boxshadow: '0px 4px 12px rgba(76,175,80,0.35)' },
       android: { elevation: 4 },
-      web: { boxshadow: '0px 4px 12px rgba(76,175,80,0.35)' },
+      web:     { boxshadow: '0px 4px 12px rgba(76,175,80,0.35)' },
     }),
   },
-  btnSalvarTexto: {
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  alertaTexto: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#c62828',
-  },
+  btnSalvarTexto: { color: '#ffffff', fontSize: 18, fontWeight: '700', letterSpacing: 0.5 },
 });

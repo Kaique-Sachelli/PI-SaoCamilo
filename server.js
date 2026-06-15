@@ -145,6 +145,9 @@ app.post('/sessao/completa', async (req, res) => {
     duracao_minutos, volume_ml,
     perda_massa_ajustada, taxa_sudorese, percentual_variacao,
     alerta_seguranca, status_color,
+    intensidade_percebida, roupas_encharcadas, urina_pre_cor,
+    volume_urina_ml,
+    nivel_fadiga, sintomas_gastrointestinais,
   } = req.body;
 
   try {
@@ -154,9 +157,19 @@ app.post('/sessao/completa', async (req, res) => {
     );
 
     const [sessao] = await db.query(
-      `INSERT INTO Sessao_Treino (id_atleta, data_hora_inicio, duracao_minutos, massa_pre, massa_pos, clima_temp, clima_umidade, status_sessao)
-       VALUES (?, NOW(), ?, ?, ?, ?, ?, 'Concluída')`,
-      [id_atleta, duracao_minutos, massa_pre, massa_pos, clima_temp || null, clima_umidade || null]
+      `INSERT INTO Sessao_Treino
+         (id_atleta, data_hora_inicio, duracao_minutos, massa_pre, massa_pos,
+          clima_temp, clima_umidade, status_sessao,
+          intensidade_percebida, roupas_encharcadas, urina_pre_cor, volume_urina_ml)
+       VALUES (?, NOW(), ?, ?, ?, ?, ?, 'Concluída', ?, ?, ?, ?)`,
+      [
+        id_atleta, duracao_minutos, massa_pre, massa_pos,
+        clima_temp || null, clima_umidade || null,
+        intensidade_percebida || null,
+        roupas_encharcadas != null ? roupas_encharcadas : 0,
+        urina_pre_cor || null,
+        volume_urina_ml || null,
+      ]
     );
 
     const id_sessao = sessao.insertId;
@@ -171,6 +184,14 @@ app.post('/sessao/completa', async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?)`,
       [id_sessao, perda_massa_ajustada, taxa_sudorese, percentual_variacao, alerta_seguranca || null, status_color]
     );
+
+    if (nivel_fadiga || sintomas_gastrointestinais) {
+      await db.query(
+        `INSERT INTO Saude_Sintomas (id_sessao, nivel_fadiga, sintomas_gastrointestinais)
+         VALUES (?, ?, ?)`,
+        [id_sessao, nivel_fadiga || null, sintomas_gastrointestinais || null]
+      );
+    }
 
     res.status(201).json({ sucesso: true, id_sessao });
   } catch (err) {
@@ -215,6 +236,92 @@ app.get('/atleta/:id/ultima-sessao', async (req, res) => {
     console.error('Erro ao buscar última sessão:', err.message);
     res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
 
+  }
+});
+
+// rota de buscar todas as sessões do atleta (mais recente → mais antiga)
+app.get('/atleta/:id/sessoes', async (req, res) => {
+  const { id } = req.params;
+  const { data } = req.query;
+
+  try {
+    let query = `
+      SELECT
+        st.id_sessao,
+        st.data_hora_inicio,
+        st.duracao_minutos,
+        st.massa_pre,
+        st.massa_pos,
+        st.clima_temp,
+        st.clima_umidade,
+        rc.taxa_sudorese,
+        rc.perda_massa_ajustada,
+        rc.percentual_variacao,
+        rc.alerta_seguranca,
+        rc.status_color,
+        rh.volume_ml
+      FROM Sessao_Treino st
+      LEFT JOIN Resultado_Calculo rc ON rc.id_sessao = st.id_sessao
+      LEFT JOIN Registro_Hidratacao rh ON rh.id_sessao = st.id_sessao
+      WHERE st.id_atleta = ? AND st.status_sessao = 'Concluída'
+    `;
+
+    const params = [id];
+
+    if (data) {
+      const parts = data.split('/');
+      if (parts.length === 3) {
+        query += ' AND DATE(st.data_hora_inicio) = ?';
+        params.push(`${parts[2]}-${parts[1]}-${parts[0]}`);
+      }
+    }
+
+    query += ' ORDER BY st.data_hora_inicio DESC';
+
+    const [rows] = await db.query(query, params);
+    res.json({ sucesso: true, sessoes: rows });
+  } catch (err) {
+    console.error('Erro ao buscar sessões:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
+  }
+});
+
+// rota de buscar detalhes de uma sessão específica
+app.get('/sessao/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        st.id_sessao,
+        st.data_hora_inicio,
+        st.duracao_minutos,
+        st.massa_pre,
+        st.massa_pos,
+        st.clima_temp,
+        st.clima_umidade,
+        rc.taxa_sudorese,
+        rc.perda_massa_ajustada,
+        rc.percentual_variacao,
+        rc.alerta_seguranca,
+        rc.status_color,
+        rh.volume_ml,
+        ap.modalidade_esportiva
+      FROM Sessao_Treino st
+      LEFT JOIN Resultado_Calculo rc ON rc.id_sessao = st.id_sessao
+      LEFT JOIN Registro_Hidratacao rh ON rh.id_sessao = st.id_sessao
+      LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = st.id_atleta
+      WHERE st.id_sessao = ?
+    `, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ sucesso: false, mensagem: 'Sessão não encontrada' });
+    }
+
+    res.json({ sucesso: true, sessao: rows[0] });
+  } catch (err) {
+    console.error('Erro ao buscar sessão:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
   }
 });
 
