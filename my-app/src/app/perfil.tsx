@@ -20,10 +20,15 @@ interface PesoData {
   peso: number;
 }
 
+interface AlturaData {
+  altura: number;
+}
+
 export default function Perfil() {
   const router = useRouter();
   const { usuario, logout } = useUser();
   const [peso, setPeso] = useState<number | null>(null);
+  const [altura, setAltura] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,6 +41,7 @@ export default function Perfil() {
 
   useEffect(() => {
     fetchPeso();
+    fetchAltura();
   }, []);
 
   async function fetchPeso() {
@@ -49,6 +55,24 @@ export default function Perfil() {
       const data: PesoData = await response.json();
 
       setPeso(data.peso);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function fetchAltura() {
+    try {
+      const response = await fetch(getUrl(`/altura/${usuario?.id_usuario}`));
+        
+      if (!response.ok) {
+        throw new Error('Erro ao buscar a altura do atleta');
+      }
+
+      const data: AlturaData = await response.json();
+
+      setAltura(data.altura);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
@@ -120,7 +144,7 @@ export default function Perfil() {
               <View style={styles.atleticoItem}>
                 <Image source={require('./assets/Img/batimento.png')} style={styles.atleticoIcone} />
                 <Text style={styles.atleticoLabel}>Altura</Text>
-                <Text style={styles.atleticoValor}>177 cm</Text>
+                <Text style={styles.atleticoValor}>{altura ? `${altura} cm` : 'Altura não registrada'}</Text>
               </View>
               <View style={styles.atleticoItem}>
                 <Image source={require('./assets/Img/batimento.png')} style={styles.atleticoIcone} />

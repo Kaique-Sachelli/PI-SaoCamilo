@@ -18,17 +18,25 @@ import { NavbarNutricionista } from './Navbar_nutricionista';
 import { NotificacaoPopup } from './notificacao';
 import { getUrl } from '../constants/url';
 
-type Atleta = {
-  id_usuario: number;
+// type Atleta = {
+//   id_usuario: number;
+//   nome: string;
+//   email?: string;
+//   telefone?: string;
+//   situacao?: string;
+//   idade?: number | string | null;
+//   altura?: number | string | null;
+//   peso?: number | string | null;
+//   modalidade_esportiva?: string | null;
+// };
+
+interface Atleta {
+  id: number;
   nome: string;
-  email?: string;
-  telefone?: string;
-  situacao?: string;
-  idade?: number | string | null;
-  altura?: number | string | null;
-  peso?: number | string | null;
-  modalidade_esportiva?: string | null;
-};
+  esporte: string;
+  ativo: string;
+  foto: null;
+}
 
 function iniciais(nome: string) {
   return nome.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
@@ -42,59 +50,92 @@ export default function HomepageNutricionista() {
   const [notifVisivel, setNotifVisivel] = useState(false);
   const [busca, setBusca] = useState('');
   const [atletas, setAtletas] = useState<Atleta[]>([]);
-  const [carregandoAtletas, setCarregandoAtletas] = useState(true);
+
+  // const [carregandoAtletas, setCarregandoAtletas] = useState(true);
+
+  // useEffect(() => {
+  //   carregarAtletas();
+  // }, []);
+
+  // async function carregarAtletas() {
+  //   try {
+  //     setCarregandoAtletas(true);
+
+  //     const response = await fetch(getUrl('/atletas'));
+  //     const dados = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(dados.mensagem || 'Não foi possível carregar os atletas.');
+  //     }
+
+  //     setAtletas(dados);
+  //   } catch (err) {
+  //     const mensagem = err instanceof Error ? err.message : 'Não foi possível carregar os atletas.';
+  //     console.log('Erro ao carregar atletas:', mensagem);
+  //     Alert.alert('Erro', mensagem);
+  //   } finally {
+  //     setCarregandoAtletas(false);
+  //   }
+  // }
+
+  // const atletasFiltrados = atletas.filter((atleta) => {
+  //   const termo = busca.trim().toLowerCase();
+  //   if (!termo) return true;
+
+  //   return [
+  //     atleta.nome,
+  //     atleta.email,
+  //     atleta.modalidade_esportiva,
+  //   ].some((valor) => (valor || '').toLowerCase().includes(termo));
+  // });
+
+  // const abrirPerfilAtleta = (atleta: Atleta) => {
+  //   router.push({
+  //     pathname: '/perfil_atleta_nutricionista',
+  //     params: {
+  //       id_atleta: String(atleta.id_usuario),
+  //       nome: atleta.nome,
+  //       email: atleta.email || '',
+  //       telefone: atleta.telefone || '',
+  //       idade: atleta.idade != null ? String(atleta.idade) : '',
+  //       altura: atleta.altura != null ? String(atleta.altura) : '',
+  //       peso: atleta.peso != null ? String(atleta.peso) : '',
+  //       modalidade_esportiva: atleta.modalidade_esportiva || '',
+  //     },
+  //   });
+  // };
+
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    carregarAtletas();
+    fetchAtletas();
   }, []);
 
-  async function carregarAtletas() {
-    try {
-      setCarregandoAtletas(true);
+async function fetchAtletas() { 
+  try { 
+    const resposta = await fetch(getUrl(`/atletas`)); 
+    
+    if (!resposta.ok) { 
+      throw new Error('Erro ao buscar a lista de atletas');
+    } 
+    
+    const dados: Atleta[] = await resposta.json();
+    setAtletas(dados);
+  } catch (err) { 
+    setError(err instanceof Error ? err.message : 'Erro desconhecido'); 
+  } finally { 
+    setLoading(false); 
+  } 
+}
 
-      const response = await fetch(getUrl('/atletas'));
-      const dados = await response.json();
+const atletasFiltrados = atletas.filter((a) => {
+  const termoBusca = busca ? busca.toLowerCase() : "";
+  const nomeMatch = a.nome ? a.nome.toLowerCase().includes(termoBusca) : false;
+  const esporteMatch = a.esporte ? a.esporte.toLowerCase().includes(termoBusca) : false;
 
-      if (!response.ok) {
-        throw new Error(dados.mensagem || 'Não foi possível carregar os atletas.');
-      }
-
-      setAtletas(dados);
-    } catch (err) {
-      const mensagem = err instanceof Error ? err.message : 'Não foi possível carregar os atletas.';
-      console.log('Erro ao carregar atletas:', mensagem);
-      Alert.alert('Erro', mensagem);
-    } finally {
-      setCarregandoAtletas(false);
-    }
-  }
-
-  const atletasFiltrados = atletas.filter((atleta) => {
-    const termo = busca.trim().toLowerCase();
-    if (!termo) return true;
-
-    return [
-      atleta.nome,
-      atleta.email,
-      atleta.modalidade_esportiva,
-    ].some((valor) => (valor || '').toLowerCase().includes(termo));
-  });
-
-  const abrirPerfilAtleta = (atleta: Atleta) => {
-    router.push({
-      pathname: '/perfil_atleta_nutricionista',
-      params: {
-        id_atleta: String(atleta.id_usuario),
-        nome: atleta.nome,
-        email: atleta.email || '',
-        telefone: atleta.telefone || '',
-        idade: atleta.idade != null ? String(atleta.idade) : '',
-        altura: atleta.altura != null ? String(atleta.altura) : '',
-        peso: atleta.peso != null ? String(atleta.peso) : '',
-        modalidade_esportiva: atleta.modalidade_esportiva || '',
-      },
-    });
-  };
+  return nomeMatch || esporteMatch;
+});
 
   return (
     <ImageBackground
@@ -132,7 +173,7 @@ export default function HomepageNutricionista() {
             <Text style={styles.searchIcone}>🔍</Text>
             <TextInput
               style={styles.searchInput}
-              placeholder="Pesquisar por nome ou categoria..."
+              placeholder="Pesquisar"
               placeholderTextColor="#aaa"
               value={busca}
               onChangeText={setBusca}
@@ -151,7 +192,7 @@ export default function HomepageNutricionista() {
             </TouchableOpacity>
           </View>
 
-          {/* Lista de atletas */}
+          {/* Lista de atletas
           {carregandoAtletas && (
             <Text style={styles.estadoTexto}>Carregando atletas...</Text>
           )}
@@ -160,7 +201,9 @@ export default function HomepageNutricionista() {
             <Text style={styles.estadoTexto}>Nenhum atleta encontrado.</Text>
           )}
 
-          {!carregandoAtletas && atletasFiltrados.map((atleta, idx) => (
+          {!carregandoAtletas && atletasFiltrados.map((atleta, idx) => ( */}
+
+          {/* {atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
               key={atleta.id_usuario}
               style={styles.atletaCard}
@@ -182,7 +225,7 @@ export default function HomepageNutricionista() {
                 <Text style={styles.atletaSeta}>›</Text>
               </View>
             </TouchableOpacity>
-          ))}
+          ))} */}
         </ScrollView>
       {/* ── Bottom Nav ── */}
       <NavbarNutricionista active="home"/>
