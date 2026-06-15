@@ -166,7 +166,26 @@ app.get('/usuarios', async (req, res) => {
     });
   }
 });
+// rota para listar por tipo de perfil
+app.get('/dashboard/usuarios-por-perfil', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        tipo_perfil,
+        COUNT(*) AS quantidade
+      FROM Usuario
+      GROUP BY tipo_perfil
+    `);
 
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+});
 // rota de salvar sessão completa
 app.post('/sessao/completa', async (req, res) => {
   const {

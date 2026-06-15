@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { PieChart } from 'react-native-chart-kit';
+import { Dimensions } from 'react-native';
+import { API_URL } from '../constants/url';
 import {
   Text,
   View,
@@ -16,14 +19,51 @@ import { NavbarADM } from './Navbar_ADM';
 import { NotificacaoPopup } from './notificacao';
 
 const MENU = [
-  { id: 1, icone: require('./assets/Img/solicitacoes.png'),  label: 'Solicitações de cadastro', rota: '/solicitacoes_cadastro'},
-  { id: 2, icone: require('./assets/Img/gerenciar.png'),     label: 'Gerenciar Usuários',        rota: '/gerenciar_usuarios'},
+  { id: 1, icone: require('./assets/Img/solicitacoes.png'), label: 'Solicitações de cadastro', rota: '/solicitacoes_cadastro' },
+  { id: 2, icone: require('./assets/Img/gerenciar.png'), label: 'Gerenciar Usuários', rota: '/gerenciar_usuarios' },
 ];
+//criando grafico
 
 export default function HomepageAdm() {
   const router = useRouter();
   const { usuario } = useUser();
   const [notifVisivel, setNotifVisivel] = useState(false);
+  const [dadosGrafico, setDadosGrafico] = useState<any[]>([]);
+useEffect(() => {
+  carregarGrafico();
+}, []);
+
+async function carregarGrafico() {
+  try {
+    const response = await fetch(
+      `${API_URL}/dashboard/usuarios-por-perfil`
+    );
+
+    const dados = await response.json();
+
+    const cores = [
+      '#ff0000',
+      '#0026ff',
+      '#00ff0d',
+      '#fbe200',
+      '#ff00ea',
+    ];
+
+    const formatado = dados.map(
+      (item: any, index: number) => ({
+        name: item.tipo_perfil,
+        population: item.quantidade,
+        color: cores[index % cores.length],
+        legendFontColor: '#333',
+        legendFontSize: 12,
+      })
+    );
+
+    setDadosGrafico(formatado);
+  } catch (erro) {
+    console.log('Erro ao carregar gráfico:', erro);
+  }
+}
 
   return (
     <ImageBackground
@@ -53,40 +93,51 @@ export default function HomepageAdm() {
         </View>
 
         <ScrollView
-                  style={styles.scroll}
-                  contentContainerStyle={styles.scrollContent}
-                  showsVerticalScrollIndicator={false}
-                  keyboardShouldPersistTaps="handled"
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-        {/* ── Conteúdo ── */}
-        <View style={styles.conteudo}>
+          {/* ── Conteúdo ── */}
+          <View style={styles.conteudo}>
 
-          {/* Gráfico */}
-          <View style={styles.graficoCard}>
-            <Image source={require('./assets/Img/grafico.png')} style={styles.grafico} />
-          </View>
+            {/* Gráfico */}
+            <View style={styles.graficoCard}>
+              <PieChart
+                data={dadosGrafico}
+                width={Dimensions.get('window').width - 60}
+                height={180}
+                chartConfig={{
+                  color: () => '#000',
+                }}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft="10"
+                absolute
+              />
+            </View>
 
-          {/* Painel */}
-          <Text style={styles.painelLabel}>Painel</Text>
+            {/* Painel */}
+            <Text style={styles.painelLabel}>Painel</Text>
 
-          {MENU.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.menuCard}
-              activeOpacity={0.75}
-              onPress={() => router.push(item.rota as any)}
-            >
-              <View style={styles.menuEsquerda}>
-                <Image source={item.icone} style={styles.menuIcone} />
-                <Text style={styles.menuTexto}>{item.label}</Text>
-              </View>
-              <Text style={styles.menuSeta}>›</Text>
-            </TouchableOpacity>
-          ))}
+            {MENU.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.menuCard}
+                activeOpacity={0.75}
+                onPress={() => router.push(item.rota as any)}
+              >
+                <View style={styles.menuEsquerda}>
+                  <Image source={item.icone} style={styles.menuIcone} />
+                  <Text style={styles.menuTexto}>{item.label}</Text>
+                </View>
+                <Text style={styles.menuSeta}>›</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </ScrollView>
         {/* ── Bottom Nav ── */}
-        <NavbarADM active="home"/>
+        <NavbarADM active="home" />
 
         {/* ── Popup de Notificações ── */}
         <NotificacaoPopup
@@ -130,7 +181,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: RED,
   },
   funcao: { fontSize: 20, color: '#fff', fontWeight: '700' },
-  
+
   // Scroll
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
