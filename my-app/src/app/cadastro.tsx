@@ -123,25 +123,28 @@ export default function CadastroScreen() {
       resizeMode="cover"
     >
       <SafeAreaView style={styles.safeArea}>
+        {/* Botão voltar fixo acima do card */}
+        <TouchableOpacity
+          onPress={() => router.push('/login')}
+          style={styles.voltarContainer}
+          disabled={loading}
+        >
+          <Text style={styles.voltarText}>← Voltar</Text>
+        </TouchableOpacity>
+
         <KeyboardAvoidingView
-          style={{ flex: 1 }}
+          style={styles.kavFlex}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <TouchableOpacity
-              onPress={() => router.push('/login')}
-              style={styles.voltarContainer}
-              disabled={loading}
+          <View style={[styles.formCard, { backgroundColor: '#ffffff', elevation: 6 }]}>
+            <Text style={styles.cadastroTitle}>Cadastro</Text>
+
+            {/* Scroll interno ao card */}
+            <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             >
-              <Text style={styles.voltarText}>← Voltar</Text>
-            </TouchableOpacity>
-
-            <View style={[styles.formCard, { backgroundColor: '#ffffff', elevation: 6 }]}>
-              <Text style={styles.cadastroTitle}>Cadastro</Text>
-
               <View style={styles.chipsRow}>
                 {TIPOS.map((tipo) => (
                   <TouchableOpacity
@@ -267,25 +270,26 @@ export default function CadastroScreen() {
                   </Text>
                 </TouchableOpacity>
               </View>
+            </ScrollView>
 
-              <TouchableOpacity
-                style={[styles.criarContaButton, (loading || !termosAceitos) && styles.buttonDisabled]}
-                onPress={handleCriarConta}
-                disabled={loading || !termosAceitos}
-                activeOpacity={0.8}
-              >
-                <Text style={[styles.criarContaButtonText, { color: '#ffffff' }]}>
-                  {loading ? 'Criando...' : 'Criar Conta'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-
-          <PoliticaPrivacidadeModal
-            visible={politicaVisivel}
-            onClose={() => setPoliticaVisivel(false)}
-          />
+            {/* Botão fixo na base do card */}
+            <TouchableOpacity
+              style={[styles.criarContaButton, (loading || !termosAceitos) && styles.buttonDisabled]}
+              onPress={handleCriarConta}
+              disabled={loading || !termosAceitos}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.criarContaButtonText, { color: '#ffffff' }]}>
+                {loading ? 'Criando...' : 'Criar Conta'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </KeyboardAvoidingView>
+
+        <PoliticaPrivacidadeModal
+          visible={politicaVisivel}
+          onClose={() => setPoliticaVisivel(false)}
+        />
       </SafeAreaView>
     </ImageBackground>
   );
@@ -300,33 +304,38 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: 'transparent',
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 16,
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    justifyContent: 'center',
+  kavFlex: {
+    flex: 1,
   },
   voltarContainer: {
     alignSelf: 'flex-start',
-    marginBottom: 16,
-    paddingVertical: 1,
-    marginTop: -50,
+    paddingVertical: 6,
+    marginBottom: 10,
   },
   voltarText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '500',
-    color: '#333333',
+    color: '#000000',
   },
   formCard: {
+    flex: 1,
     borderRadius: 20,
     paddingHorizontal: 4,
-    paddingVertical: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
     ...Platform.select({
       ios: { boxshadow: '0px 4px 12px rgba(0, 0, 0, 0.15)' },
       android: { elevation: 8 },
       web: { boxshadow: '0px 4px 12px rgba(0, 0, 0, 0.15)' },
     }),
+  },
+  scrollContent: {
+    paddingHorizontal: 4,
+    paddingBottom: 8,
   },
   cadastroTitle: {
     color: '#000000',
