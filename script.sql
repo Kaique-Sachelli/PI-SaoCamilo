@@ -1,4 +1,4 @@
--- -- CREATE DATABASE IF NOT EXISTS nutri_esportiva;
+-- CREATE DATABASE IF NOT EXISTS nutri_esportiva;
 -- USE nutri_esportiva;
 
 -- CREATE TABLE Usuario (

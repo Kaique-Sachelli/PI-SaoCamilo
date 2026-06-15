@@ -11,12 +11,13 @@ function parseDateBR(str) {
   return str;
 }
 
+// rota de login
 app.post('/login', async (req, res) => {
   const { email, senha } = req.body;
 
   try {
     const [rows] = await db.query(
-      'SELECT id_usuario, nome, tipo_perfil, situacao, senha FROM Usuario WHERE email = ?',
+      'SELECT id_usuario, nome, tipo_perfil, situacao, senha, data_nascimento, telefone, registro FROM Usuario WHERE email = ?',
       [email]
     );
     if (rows.length === 0) {
@@ -27,7 +28,7 @@ app.post('/login', async (req, res) => {
       return res.status(401).json({ sucesso: false, mensagem: 'login invalido' });
     }
     if (rows[0].situacao === 'Pendente') {
-      return res.status(401).json({ sucesso: false, mensagem: 'Aguardando confirmação do administrador, por favor aguarde.' });
+      return res.status(401).json({ sucesso: false, mensagem: 'Aguardando aprovação do administrador, por favor aguarde.' });
     }
 
     return res.json({ sucesso: true, mensagem: 'login ok', usuario: rows });
@@ -37,6 +38,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
+//rota de cadastro
 app.post('/cadastro', async (req, res) => {
   const { nome, email, senha, tipo_perfil, data_nascimento, telefone, registro } = req.body;
 
@@ -65,6 +67,7 @@ app.post('/cadastro', async (req, res) => {
   }
 });
 
+// rota de aprovação de cadastro
 app.patch('/usuario/:id/aprovar', async (req, res) => {
   const { id } = req.params;
 
