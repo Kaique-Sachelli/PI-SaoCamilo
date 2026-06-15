@@ -9,15 +9,16 @@ import {
   ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 export default function CronometroScreen() {
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(true);
-  const [mlIngeridos, setMlIngeridos] = useState(400);
+  const [mlIngeridos, setMlIngeridos] = useState(0);
   const [quantidade, setQuantidade] = useState('');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const router = useRouter();
+  const { massa_pre, clima_temp, clima_umidade } = useLocalSearchParams<{ massa_pre: string; clima_temp: string; clima_umidade: string }>();
 
   useEffect(() => {
     if (running) {
@@ -57,7 +58,7 @@ export default function CronometroScreen() {
 
   const handleEncerrar = () => {
     setRunning(false);
-    router.back();
+    router.push(`/checklist-pos-sessao?massa_pre=${massa_pre}&clima_temp=${clima_temp}&clima_umidade=${clima_umidade}&ml_ingerido=${mlIngeridos}&duracao_segundos=${seconds}`);
   };
 
   return (
@@ -160,9 +161,9 @@ export default function CronometroScreen() {
             <Text style={styles.btnAcaoTexto}>{running ? 'Pausar' : 'Retomar'}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
           style={styles.btnEncerrar}
-          onPress={() => router.push('/checklist-pos-sessao')}
+          onPress={handleEncerrar}
           >
             <Text style={styles.btnAcaoIcon}>⏹</Text>
             <Text style={styles.btnAcaoTexto}>Encerrar</Text>

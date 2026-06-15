@@ -11,12 +11,13 @@ function parseDateBR(str) {
   return str;
 }
 
+// rota de login
 app.post('/login', async (req, res) => {
   const { email, senha } = req.body;
 
   try {
     const [rows] = await db.query(
-      'SELECT id_usuario, nome, tipo_perfil, situacao, senha FROM Usuario WHERE email = ?',
+      'SELECT id_usuario, nome, tipo_perfil, situacao, senha, data_nascimento, telefone, registro FROM Usuario WHERE email = ?',
       [email]
     );
     if (rows.length === 0) {
@@ -27,7 +28,7 @@ app.post('/login', async (req, res) => {
       return res.status(401).json({ sucesso: false, mensagem: 'login invalido' });
     }
     if (rows[0].situacao === 'Pendente') {
-      return res.status(401).json({ sucesso: false, mensagem: 'Aguardando confirmação do administrador, por favor aguarde.' });
+      return res.status(401).json({ sucesso: false, mensagem: 'Aguardando aprovação do administrador, por favor aguarde.' });
     }
 
     return res.json({ sucesso: true, mensagem: 'login ok', usuario: rows });
@@ -37,6 +38,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
+//rota de cadastro
 app.post('/cadastro', async (req, res) => {
   const { nome, email, senha, tipo_perfil, data_nascimento, telefone, registro } = req.body;
 
@@ -65,6 +67,7 @@ app.post('/cadastro', async (req, res) => {
   }
 });
 
+// rota de aprovação de cadastro
 app.patch('/usuario/:id/aprovar', async (req, res) => {
   const { id } = req.params;
 
@@ -79,6 +82,87 @@ app.patch('/usuario/:id/aprovar', async (req, res) => {
     res.json({ sucesso: true, mensagem: 'Usuário aprovado' });
   } catch (err) {
     console.error('Erro ao aprovar usuário:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
+  }
+});
+
+// rota de salvar sessão completa
+app.post('/sessao/completa', async (req, res) => {
+  const {
+    id_atleta,
+    massa_pre, massa_pos,
+    clima_temp, clima_umidade,
+    duracao_minutos, volume_ml,
+    perda_massa_ajustada, taxa_sudorese, percentual_variacao,
+    alerta_seguranca, status_color,
+  } = req.body;
+
+  try {
+    await db.query(
+      'INSERT IGNORE INTO Atleta_Perfil (id_atleta) VALUES (?)',
+      [id_atleta]
+    );
+
+    const [sessao] = await db.query(
+      `INSERT INTO Sessao_Treino (id_atleta, data_hora_inicio, duracao_minutos, massa_pre, massa_pos, clima_temp, clima_umidade, status_sessao)
+       VALUES (?, NOW(), ?, ?, ?, ?, ?, 'Concluída')`,
+      [id_atleta, duracao_minutos, massa_pre, massa_pos, clima_temp || null, clima_umidade || null]
+    );
+
+    const id_sessao = sessao.insertId;
+
+    await db.query(
+      'INSERT INTO Registro_Hidratacao (id_sessao, volume_ml) VALUES (?, ?)',
+      [id_sessao, volume_ml]
+    );
+
+    await db.query(
+      `INSERT INTO Resultado_Calculo (id_sessao, perda_massa_ajustada, taxa_sudorese, percentual_variacao, alerta_seguranca, status_color)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [id_sessao, perda_massa_ajustada, taxa_sudorese, percentual_variacao, alerta_seguranca || null, status_color]
+    );
+
+    res.status(201).json({ sucesso: true, id_sessao });
+  } catch (err) {
+    console.error('Erro ao salvar sessão:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
+  }
+});
+
+// rota de buscar última sessão do atleta
+app.get('/atleta/:id/ultima-sessao', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    console.log('Buscando ultima sessao para id_atleta:', id);
+    const [rows] = await db.query(
+      `SELECT
+         st.data_hora_inicio,
+         st.duracao_minutos,
+         st.massa_pre,
+         st.massa_pos,
+         rc.taxa_sudorese,
+         rc.perda_massa_ajustada,
+         rc.percentual_variacao,
+         rc.status_color,
+         rc.alerta_seguranca
+       FROM Sessao_Treino st
+       LEFT JOIN Resultado_Calculo rc ON rc.id_sessao = st.id_sessao
+       WHERE st.id_atleta = ? AND st.status_sessao = 'Concluída'
+       ORDER BY st.data_hora_inicio DESC
+       LIMIT 1`,
+      [id]
+    );
+
+    console.log('Rows encontradas:', rows.length, rows[0] ?? 'nenhuma');
+
+    if (rows.length === 0) {
+      return res.json({ sucesso: true, sessao: null });
+    }
+
+    res.json({ sucesso: true, sessao: rows[0] });
+  } catch (err) {
+    console.error('Erro ao buscar última sessão:', err.message);
     res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
   }
 });
