@@ -186,6 +186,54 @@ app.get('/dashboard/usuarios-por-perfil', async (req, res) => {
     });
   }
 });
+
+app.get('/solicitacoes-cadastro', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        id_usuario,
+        nome,
+        email,
+        telefone,
+        registro,
+        tipo_perfil,
+        data_nascimento
+      FROM Usuario
+      WHERE situacao = 'Pendente'
+      ORDER BY nome
+    `);
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+});
+app.patch('/usuario/:id/recusar', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await db.query(
+      `UPDATE Usuario
+       SET situacao = 'Desativado'
+       WHERE id_usuario = ?`,
+      [id]
+    );
+
+    res.json({
+      sucesso: true
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      sucesso: false
+    });
+  }
+});
+
 // rota de salvar sessão completa
 app.post('/sessao/completa', async (req, res) => {
   const {

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { API_URL } from '../constants/url';
 import {
   Text,
   View,
@@ -25,30 +26,32 @@ type Solicitacao = {
   foto: null;
 };
 
-const SOLICITACOES: Solicitacao[] = [
-  {
-    id: 1,
-    nome: 'Gabriel Moreira',
-    tipo: 'ATLETA',
-    email: 'gabriel.moreira@saocamilo.br',
-    telefone: '(11) 98765-4321',
-    registro: 'RA 2026.10234',
-    especialidade: 'Handebol',
-    data: '21/05/2026',
-    foto: null,
-  },
-  {
-    id: 2,
-    nome: 'Larissa Antunes',
-    tipo: 'NUTRICIONISTA',
-    email: 'larissa.antunes@saocamilo.br',
-    telefone: '(11) 97123-5544',
-    registro: 'CRN 8 - 45.221',
-    especialidade: '',
-    data: '24/05/2026',
-    foto: null,
-  },
-];
+// const SOLICITACOES: Solicitacao[] = [
+//   {
+//     id: 1,
+//     nome: 'Gabriel Moreira',
+//     tipo: 'ATLETA',
+//     email: 'gabriel.moreira@saocamilo.br',
+//     telefone: '(11) 98765-4321',
+//     registro: 'RA 2026.10234',
+//     especialidade: 'Handebol',
+//     data: '21/05/2026',
+//     foto: null,
+//   },
+//   {
+//     id: 2,
+//     nome: 'Larissa Antunes',
+//     tipo: 'NUTRICIONISTA',
+//     email: 'larissa.antunes@saocamilo.br',
+//     telefone: '(11) 97123-5544',
+//     registro: 'CRN 8 - 45.221',
+//     especialidade: '',
+//     data: '24/05/2026',
+//     foto: null,
+//   },
+// ];
+
+
 
 const FILTROS = ['Hoje', '30 dias', '15 dias', '7 dias'];
 
@@ -66,16 +69,59 @@ export default function SolicitacoesCadastro() {
   const router = useRouter();
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState('Hoje');
-  const [recusados, setRecusados] = useState<number[]>([]);
-  const [aprovados, setAprovados] = useState<number[]>([]);
+  const [solicitacoes, setSolicitacoes] = useState<any[]>([]);
 
-  const lista = SOLICITACOES.filter(
-    (s) =>
-      !recusados.includes(s.id) &&
-      !aprovados.includes(s.id) &&
-      (s.nome.toLowerCase().includes(busca.toLowerCase()) ||
-        s.email.toLowerCase().includes(busca.toLowerCase()))
-  );
+  useEffect(() => {
+    carregarSolicitacoes();
+  }, []);
+
+  async function carregarSolicitacoes() {
+    try {
+      const response = await fetch(
+        `${API_URL}/solicitacoes-cadastro`
+      );
+
+      const dados = await response.json();
+
+      setSolicitacoes(dados);
+    } catch (erro) {
+      console.log('Erro ao carregar solicitações:', erro);
+    }
+  }
+
+  async function aprovarUsuario(id: number) {
+  try {
+    await fetch(
+      `${API_URL}/usuario/${id}/aprovar`,
+      {
+        method: 'PATCH',
+      }
+    );
+
+    carregarSolicitacoes();
+  } catch (erro) {
+    console.log('Erro ao aprovar usuário:', erro);
+  }
+}
+async function recusarUsuario(id: number) {
+  try {
+    await fetch(
+      `${API_URL}/usuario/${id}/recusar`,
+      {
+        method: 'PATCH',
+      }
+    );
+
+    carregarSolicitacoes();
+  } catch (erro) {
+    console.log('Erro ao recusar usuário:', erro);
+  }
+}
+  const lista = solicitacoes.filter(
+  (s) =>
+    s.nome.toLowerCase().includes(busca.toLowerCase()) ||
+    s.email.toLowerCase().includes(busca.toLowerCase())
+);
 
   return (
     <ImageBackground
@@ -133,10 +179,10 @@ export default function SolicitacoesCadastro() {
           )}
 
           {lista.map((s) => (
-            <View key={s.id} style={styles.card}>
-              {/* Topo: avatar + nome + tipo */}
+            <View key={s.id_usuario} style={styles.card}>
+              {}
               <View style={styles.cardTopo}>
-                <View style={[styles.avatar, { backgroundColor: CORES_AVATAR[s.tipo] ?? '#888' }]}>
+                <View style={[styles.avatar, { backgroundColor: CORES_AVATAR[s.tipo_perfil?.toUpperCase()] ?? '#888' }]}>
                   <Text style={styles.avatarIniciais}>{iniciais(s.nome)}</Text>
                 </View>
                 <View>
@@ -175,13 +221,13 @@ export default function SolicitacoesCadastro() {
               <View style={styles.botoesRow}>
                 <TouchableOpacity
                   style={styles.btnRecusar}
-                  onPress={() => setRecusados((prev) => [...prev, s.id])}
+                  onPress={() => recusarUsuario(s.id_usuario)}
                 >
                   <Text style={styles.btnRecusarTexto}>✕  Recusar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.btnAprovar}
-                  onPress={() => setAprovados((prev) => [...prev, s.id])}
+                  onPress={() => aprovarUsuario(s.id_usuario)}
                 >
                   <Text style={styles.btnAprovarTexto}>✓  Aprovar</Text>
                 </TouchableOpacity>
