@@ -83,6 +83,53 @@ app.patch('/usuario/:id/aprovar', async (req, res) => {
   }
 });
 
+//rota para listar usuarios
+/**app.get('/atletas', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        id_usuario,
+        nome,
+        email,
+        situacao
+      FROM Usuario
+      WHERE tipo_perfil = 'Atleta'
+    `);
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+});
+/** */
+app.get('/usuarios', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        id_usuario,
+        nome,
+        email,
+        registro,
+        tipo_perfil,
+        situacao
+      FROM Usuario
+      ORDER BY nome
+    `);
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+});
+
 app.listen(3000, () => {
   console.log('rodando na porta 3000');
 });
