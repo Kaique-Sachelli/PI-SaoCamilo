@@ -173,7 +173,7 @@ export default function GerenciarUsuarios() {
               <TouchableOpacity
                 style={styles.cardEsquerda}
                 activeOpacity={0.7}
-                onPress={() => router.push({ pathname: '/perfil_atleta_adm', params: { id: u.id_usuario } })}
+                onPress={() => router.push({ pathname: '/perfil_usuario_adm', params: { id: u.id_usuario } })}
               >
                 {u.foto ? (
                   <Image source={u.foto} style={styles.avatar} />
