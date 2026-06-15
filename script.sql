@@ -41,6 +41,9 @@
 --     clima_sensacao   DECIMAL(4,1),
 --     clima_vento      DECIMAL(5,2),
 --     status_sessao    ENUM('Pendente', 'Concluída') NOT NULL DEFAULT 'Pendente',
+--     intensidade_percebida ENUM('Baixa','Média','Alta'),
+--     roupas_encharcadas TINYINT(1) DEFAULT 0,
+--     urina_pre_cor TINYINT,
 --     FOREIGN KEY (id_atleta) REFERENCES Atleta_Perfil(id_atleta)
 -- );
 
@@ -66,13 +69,10 @@
 
 -- CREATE TABLE Saude_Sintomas (
 --     id_saude                   INT  PRIMARY KEY AUTO_INCREMENT,
---     id_atleta                  INT  NOT NULL,
---     data_registro              DATE,
+--     id_sessao                  INT  NOT NULL,
 --     nivel_fadiga               INT,
---     humor                      INT,
---     dor_muscular               INT,
 --     sintomas_gastrointestinais TEXT,
---     FOREIGN KEY (id_atleta) REFERENCES Atleta_Perfil(id_atleta)
+--     FOREIGN KEY (id_sessao) REFERENCES Sessao_Treino(id_sessao)
 -- );
 
 -- CREATE TABLE Logs_Auditoria (
