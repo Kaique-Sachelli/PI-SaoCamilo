@@ -128,9 +128,9 @@ export default function HomepageAtleta() {
             <View style={styles.sessaoCard}>
               <View style={styles.sessaoTopo}>
                 <Text style={styles.sessaoData}>Treino  {formatarData(ultimaSessao.data_hora_inicio)}</Text>
-                <View style={[styles.hidratacaoOkBadge, { backgroundColor: badgeSessao[ultimaSessao.status_color].cor + '22', borderColor: badgeSessao[ultimaSessao.status_color].cor }]}>
-                  <Text style={[styles.hidratacaoOkTexto, { color: badgeSessao[ultimaSessao.status_color].cor }]}>
-                    {badgeSessao[ultimaSessao.status_color].texto}
+                <View style={[styles.hidratacaoOkBadge, { backgroundColor: (badgeSessao[ultimaSessao.status_color] ?? badgeSessao['Verde']).cor + '22', borderColor: (badgeSessao[ultimaSessao.status_color] ?? badgeSessao['Verde']).cor }]}>
+                  <Text style={[styles.hidratacaoOkTexto, { color: (badgeSessao[ultimaSessao.status_color] ?? badgeSessao['Verde']).cor }]}>
+                    {(badgeSessao[ultimaSessao.status_color] ?? badgeSessao['Verde']).texto}
                   </Text>
                 </View>
               </View>

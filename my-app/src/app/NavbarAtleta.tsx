@@ -30,11 +30,12 @@ export function NavbarAtleta({ active }: Props) {
         />
       </TouchableOpacity>
 
-      {/* Nutrição / Checklist (bowl emoji) */}
+      {/* Dieta */}
       <TouchableOpacity style={styles.navItem} onPress={() => router.push('/dieta_atleta')}>
-        <Text style={[styles.navEmoji, active === 'dieta' && styles.navEmojiAtivo]}>
-          🥗
-        </Text>
+        <Image
+          source={require('./assets/Img/lucide_salad.png')}
+          style={[styles.navImg, active === 'dieta' && styles.navImgAtivo]}
+        />
       </TouchableOpacity>
 
       {/* Perfil */}
@@ -69,12 +70,5 @@ const styles = StyleSheet.create({
   },
   navImgAtivo: {
     tintColor: RED,
-  },
-  navEmoji: {
-    fontSize: 22,
-    opacity: 0.35,
-  },
-  navEmojiAtivo: {
-    opacity: 1,
   },
 });
