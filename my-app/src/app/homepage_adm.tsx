@@ -77,7 +77,7 @@ async function carregarGrafico() {
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View>
-              <Text style={styles.titulo}>Hidra Pro-formance</Text>
+              <Text style={styles.titulo}>HIDRA PRO-FORMANCE</Text>
             </View>
 
             <TouchableOpacity onPress={() => setNotifVisivel(true)}>
