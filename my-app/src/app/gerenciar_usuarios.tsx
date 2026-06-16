@@ -85,29 +85,56 @@ export default function GerenciarUsuarios() {
       console.log('Erro ao carregar usuários:', erro);
     }
   }
-
-  const handleRemover = (id: number, nome: string) => {
-    Alert.alert(
-      'Remover usuário',
-      `Deseja remover ${nome}?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Remover', style: 'destructive', onPress: () => setRemovidoss((prev) => [...prev, id]) },
-      ]
+async function excluirUsuario(id: number) {
+  try {
+    const response = await fetch(
+      `${API_URL}/usuario/${id}/desativar`,
+      {
+        method: 'PATCH',
+      }
     );
-  };
-  const lista = usuarios.filter(
-    (u) =>
-      !removidos.includes(u.id_usuario) &&
-      (categoria === 'Todos' || converterCategoria(u.tipo_perfil) === categoria) &&
-      (
-        u.nome.toLowerCase().includes(busca.toLowerCase()) ||
-        u.email.toLowerCase().includes(busca.toLowerCase()) ||
-        (u.registro || '').toLowerCase().includes(busca.toLowerCase()) ||
-        u.tipo_perfil.toLowerCase().includes(busca.toLowerCase()) ||
-        u.situacao.toLowerCase().includes(busca.toLowerCase())
-      )
+
+    const dados = await response.json();
+
+    if (dados.sucesso) {
+      carregarUsuarios();
+    }
+
+  } catch (erro) {
+    console.log('Erro ao desativar usuário:', erro);
+  }
+}
+  const handleRemover = (id: number, nome: string) => {
+  Alert.alert(
+    'Desativar usuário',
+    `Deseja desativar ${nome}?`,
+    [
+      {
+        text: 'Cancelar',
+        style: 'cancel',
+      },
+      {
+        text: 'Desativar',
+        style: 'destructive',
+        onPress: async () => {
+          await excluirUsuario(id);
+        },
+      },
+    ]
   );
+};
+  const lista = usuarios.filter(
+  (u) =>
+    u.situacao !== 'Desativado' &&
+    (categoria === 'Todos' || converterCategoria(u.tipo_perfil) === categoria) &&
+    (
+      u.nome.toLowerCase().includes(busca.toLowerCase()) ||
+      u.email.toLowerCase().includes(busca.toLowerCase()) ||
+      (u.registro || '').toLowerCase().includes(busca.toLowerCase()) ||
+      u.tipo_perfil.toLowerCase().includes(busca.toLowerCase()) ||
+      u.situacao.toLowerCase().includes(busca.toLowerCase())
+    )
+);
 
   /**  const lista = USUARIOS.filter(
       (u) =>
@@ -131,7 +158,7 @@ export default function GerenciarUsuarios() {
           <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
             <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitulo}>TESTE PEDRO2</Text>
+          <Text style={styles.headerTitulo}>Arrumar nome (linha 161)</Text>
         </View>
 
         {/* ── Busca ── */}

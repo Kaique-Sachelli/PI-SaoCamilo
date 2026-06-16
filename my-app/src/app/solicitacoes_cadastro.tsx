@@ -51,26 +51,53 @@ type Solicitacao = {
 //   },
 // ];
 
-
-
 const FILTROS = ['Hoje', '30 dias', '15 dias', '7 dias'];
 
 const CORES_AVATAR: Record<string, string> = {
-  ATLETA: '#1565c0',
-  NUTRICIONISTA: '#2e7d32',
-  TREINADOR: '#6a1b9a',
+  Atleta: '#1565c0',
+  Nutricionista: '#2e7d32',
+  Treinador: '#6a1b9a',
+  Medico: '#ef6c00',
+  Admin: '#424242',
 };
 
-function iniciais(nome: string) {
-  return nome.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
+function iniciais(nome?: string) {
+  if (!nome) return '?';
+
+  return nome
+    .split(' ')
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase();
 }
+
 
 export default function SolicitacoesCadastro() {
   const router = useRouter();
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState('Hoje');
+
+  //  const [recusados, setRecusados] = useState<number[]>([]);
+  //  const [aprovados, setAprovados] = useState<number[]>([]);
   const [solicitacoes, setSolicitacoes] = useState<any[]>([]);
 
+  /**const lista = SOLICITACOES.filter(
+    (s) =>
+      !recusados.includes(s.id) &&
+      !aprovados.includes(s.id) &&
+      (s.nome.toLowerCase().includes(busca.toLowerCase()) ||
+        s.email.toLowerCase().includes(busca.toLowerCase()))
+  );*/
+  console.log('SOLICITACOES:', solicitacoes);
+  const lista = Array.isArray(solicitacoes)
+    ? solicitacoes.filter(
+      (s) =>
+        s.nome?.toLowerCase().includes(busca.toLowerCase()) ||
+        s.email?.toLowerCase().includes(busca.toLowerCase())
+    )
+    : [];
+    
   useEffect(() => {
     carregarSolicitacoes();
   }, []);
@@ -78,50 +105,56 @@ export default function SolicitacoesCadastro() {
   async function carregarSolicitacoes() {
     try {
       const response = await fetch(
-        `${API_URL}/solicitacoes-cadastro`
+        `${API_URL}/usuarios/pendentes`
       );
-
       const dados = await response.json();
 
+      console.log('DADOS API:', dados);
+
       setSolicitacoes(dados);
+
     } catch (erro) {
       console.log('Erro ao carregar solicitações:', erro);
     }
   }
-
   async function aprovarUsuario(id: number) {
-  try {
-    await fetch(
-      `${API_URL}/usuario/${id}/aprovar`,
-      {
-        method: 'PATCH',
-      }
-    );
+    try {
+      const response = await fetch(
+        `${API_URL}/usuario/${id}/aprovar`,
+        {
+          method: 'PATCH',
+        }
+      );
 
-    carregarSolicitacoes();
-  } catch (erro) {
-    console.log('Erro ao aprovar usuário:', erro);
-  }
-}
-async function recusarUsuario(id: number) {
-  try {
-    await fetch(
-      `${API_URL}/usuario/${id}/recusar`,
-      {
-        method: 'PATCH',
-      }
-    );
+      const dados = await response.json();
 
-    carregarSolicitacoes();
-  } catch (erro) {
-    console.log('Erro ao recusar usuário:', erro);
+      if (dados.sucesso) {
+        carregarSolicitacoes();
+      }
+
+    } catch (erro) {
+      console.log('Erro ao aprovar usuário:', erro);
+    }
   }
-}
-  const lista = solicitacoes.filter(
-  (s) =>
-    s.nome.toLowerCase().includes(busca.toLowerCase()) ||
-    s.email.toLowerCase().includes(busca.toLowerCase())
-);
+  async function recusarUsuario(id: number) {
+    try {
+      const response = await fetch(
+        `${API_URL}/usuario/${id}/desativar`,
+        {
+          method: 'PATCH',
+        }
+      );
+
+      const dados = await response.json();
+
+      if (dados.sucesso) {
+        carregarSolicitacoes();
+      }
+
+    } catch (erro) {
+      console.log('Erro ao recusar usuário:', erro);
+    }
+  }
 
   return (
     <ImageBackground
@@ -182,12 +215,12 @@ async function recusarUsuario(id: number) {
             <View key={s.id_usuario} style={styles.card}>
               {}
               <View style={styles.cardTopo}>
-                <View style={[styles.avatar, { backgroundColor: CORES_AVATAR[s.tipo_perfil?.toUpperCase()] ?? '#888' }]}>
+                <View style={[styles.avatar, { backgroundColor: CORES_AVATAR[s.tipo_perfil] ?? '#888' }]}>
                   <Text style={styles.avatarIniciais}>{iniciais(s.nome)}</Text>
                 </View>
                 <View>
                   <Text style={styles.cardNome}>{s.nome}</Text>
-                  <Text style={[styles.cardTipo, { color: RED }]}>{s.tipo}</Text>
+                  <Text style={[styles.cardTipo, { color: RED }]}>{s.tipo_perfil}</Text>
                 </View>
               </View>
 
@@ -204,12 +237,12 @@ async function recusarUsuario(id: number) {
               </View>
               <View style={styles.detalheRow}>
                 <Text style={styles.detalheIcone}>💳</Text>
-                <Text style={styles.detalheTexto}>{s.registro}</Text>
+                <Text style={styles.detalheTexto}>{s.registro || '-'}</Text>
               </View>
               {s.especialidade ? (
                 <View style={styles.detalheRow}>
                   <Text style={styles.detalheIcone}>🏅</Text>
-                  <Text style={styles.detalheTexto}>{s.especialidade}</Text>
+                  <Text style={styles.detalheTexto}>{s.modalidade_esportiva}</Text>
                 </View>
               ) : null}
               <View style={styles.detalheRow}>

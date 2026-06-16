@@ -1,3 +1,7 @@
+import { useState, useEffect } from 'react';
+import { useLocalSearchParams } from 'expo-router';
+import { API_URL } from '../constants/url';
+
 import {
   Text,
   View,
@@ -14,16 +18,47 @@ import { useRouter } from 'expo-router';
 import { NavbarAtleta } from './NavbarAtleta';
 import { useUser } from '../context/UserContext';
 
-export default function Perfil() {
+export default function PerfilUsuarioAdm() {
   const router = useRouter();
-  const { logout } = useUser();
 
-  const handleSair = () => {
-    Alert.alert('Sair', 'Deseja encerrar a sessão?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sair', style: 'destructive', onPress: () => { logout(); router.replace('/login'); } },
-    ]);
-  };
+
+  const { id } = useLocalSearchParams();
+
+  const [usuario, setUsuario] = useState<any>(null);
+  useEffect(() => {
+    carregarUsuario();
+  }, []);
+
+  async function carregarUsuario() {
+    try {
+      console.log('ID RECEBIDO:', id);
+      const response = await fetch(
+        `${API_URL}/usuarios/${id}`
+      );
+
+      const dados = await response.json();
+      console.log(dados);
+      setUsuario(dados);
+
+
+    } catch (erro) {
+      console.log('Erro ao carregar usuário:', erro);
+    }
+  }
+
+  if (!usuario) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Text>Carregando...</Text>
+      </View>
+    );
+  }
 
   return (
     <ImageBackground
@@ -44,8 +79,11 @@ export default function Perfil() {
             <Image source={require('./assets/Img/marcus.jpg')} style={styles.avatar} />
           </View>
 
-          <Text style={styles.nome}>Kacique</Text>
-          <Text style={styles.posicao}>Vôlei  •  Arremessador</Text>
+          <Text style={styles.nome}>{usuario.nome}</Text>
+
+          <Text style={styles.posicao}>
+            {usuario.modalidade_esportiva || usuario.tipo_perfil}
+          </Text>
         </View>
 
         <ScrollView
@@ -54,68 +92,70 @@ export default function Perfil() {
           showsVerticalScrollIndicator={false}
         >
 
-        {/* ── Conteúdo ── */}
-        <View style={styles.conteudo}>
+          {/* ── Conteúdo ── */}
+          <View style={styles.conteudo}>
 
-          {/* Card Informações Pessoais */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitulo}>Informações Pessoais</Text>
+            {/* Card Informações Pessoais */}
+            <View style={styles.card}>
+              <Text style={styles.cardTitulo}>
+  Informações Pessoais
+</Text>
 
-            <View style={styles.linhaInfo}>
-              <Image source={require('./assets/Img/email.png')} style={styles.icone} />
-              <View>
-                <Text style={styles.linhaLabel}>E-mail:</Text>
-                <Text style={styles.linhaValor}>carlinmaia@gmail.com</Text>
+              <View style={styles.linhaInfo}>
+                <Image source={require('./assets/Img/email.png')} style={styles.icone} />
+                <View>
+                  <Text style={styles.linhaLabel}>E-mail:</Text>
+                  <Text style={styles.linhaValor}>
+                    {usuario.email}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.linhaInfo}>
+                <Image source={require('./assets/Img/telefone.png')} style={styles.icone} />
+                <View>
+                  <Text style={styles.linhaLabel}>Telefone:</Text>
+                  <Text style={styles.linhaValor}>
+                    {usuario.telefone}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.linhaInfo}>
+                <Image source={require('./assets/Img/idade.png')} style={styles.icone} />
+                <View>
+                  <Text style={styles.linhaLabel}>Idade:</Text>
+                  <Text style={styles.linhaValor}>
+                    {usuario.idade || '-'} anos
+                  </Text>
+                </View>
               </View>
             </View>
 
-            <View style={styles.linhaInfo}>
-              <Image source={require('./assets/Img/telefone.png')} style={styles.icone} />
-              <View>
-                <Text style={styles.linhaLabel}>Telefone:</Text>
-                <Text style={styles.linhaValor}>(55)11 4002-8922</Text>
-              </View>
-            </View>
-
-            <View style={styles.linhaInfo}>
-              <Image source={require('./assets/Img/idade.png')} style={styles.icone} />
-              <View>
-                <Text style={styles.linhaLabel}>Idade:</Text>
-                <Text style={styles.linhaValor}>45 anos</Text>
+            {/* Card Perfil Atlético */}
+            <View style={styles.card}>
+              <Text style={styles.cardTitulo}>Perfil Atlético</Text>
+              <View style={styles.atleticoRow}>
+                <View style={styles.atleticoItem}>
+                  <Image source={require('./assets/Img/batimento.png')} style={styles.atleticoIcone} />
+                  <Text style={styles.atleticoLabel}>Altura</Text>
+                  <Text style={styles.atleticoValor}>
+                    {usuario.altura || '-'} m
+                  </Text>
+                </View>
+                <View style={styles.atleticoItem}>
+                  <Image source={require('./assets/Img/batimento.png')} style={styles.atleticoIcone} />
+                  <Text style={styles.atleticoLabel}>Peso</Text>
+                  <Text style={styles.atleticoValor}>
+                    {usuario.peso || '-'} kg
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
-
-          {/* Card Perfil Atlético */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitulo}>Perfil Atlético</Text>
-            <View style={styles.atleticoRow}>
-              <View style={styles.atleticoItem}>
-                <Image source={require('./assets/Img/batimento.png')} style={styles.atleticoIcone} />
-                <Text style={styles.atleticoLabel}>Altura</Text>
-                <Text style={styles.atleticoValor}>177 cm</Text>
-              </View>
-              <View style={styles.atleticoItem}>
-                <Image source={require('./assets/Img/batimento.png')} style={styles.atleticoIcone} />
-                <Text style={styles.atleticoLabel}>Peso</Text>
-                <Text style={styles.atleticoValor}>78 kg</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Espaçador */}
-          <View style={{ flex: 1 }} />
-
-          {/* Botão Sair */}
-          <TouchableOpacity style={styles.btnSair} onPress={handleSair} activeOpacity={0.8}>
-            <Text style={styles.btnSairIcone}>↪</Text>
-            <Text style={styles.btnSairTexto}>Sair</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+        </ScrollView>
       </SafeAreaView>
 
-      <NavbarAtleta active="perfil" />
 
     </ImageBackground>
   );
@@ -185,7 +225,7 @@ const styles = StyleSheet.create({
   // Scroll
   scroll: { flex: 1 },
   scrollContent: { padding: 16, gap: 14, paddingBottom: 24 },
-  
+
   // Linhas informações
   linhaInfo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   icone: { width: 28, height: 28, resizeMode: 'contain' },

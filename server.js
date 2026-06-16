@@ -358,6 +358,7 @@ app.get('/dashboard/usuarios-por-perfil', async (req, res) => {
         tipo_perfil,
         COUNT(*) AS quantidade
       FROM Usuario
+      WHERE situacao = 'Ativo'
       GROUP BY tipo_perfil
     `);
 
@@ -371,49 +372,112 @@ app.get('/dashboard/usuarios-por-perfil', async (req, res) => {
   }
 });
 
-app.get('/solicitacoes-cadastro', async (req, res) => {
+//rota para usuarios pendentes
+app.get('/usuarios/pendentes', async (req, res) => {
   try {
-    const [rows] = await db.query(`
-      SELECT
-        id_usuario,
-        nome,
-        email,
-        telefone,
-        registro,
-        tipo_perfil,
-        data_nascimento
+
+    const [usuarios] = await db.query(`
+      SELECT *
       FROM Usuario
       WHERE situacao = 'Pendente'
-      ORDER BY nome
     `);
 
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
+    res.json(usuarios);
+
+  } catch (erro) {
+    console.error(erro);
+
     res.status(500).json({
-      sucesso: false,
-      mensagem: err.message
+      erro: erro.message
     });
   }
 });
-app.patch('/usuario/:id/recusar', async (req, res) => {
+//rota perfil do usuario visao adm
+app.get('/usuarios/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [resultado] = await db.query(`
+      SELECT
+        u.*,
+        a.idade,
+        a.altura,
+        a.modalidade_esportiva
+      FROM Usuario u
+      LEFT JOIN Atleta_Perfil a
+        ON u.id_usuario = a.id_atleta
+      WHERE u.id_usuario = ?
+    `, [id]);
+
+    if (resultado.length === 0) {
+      return res.status(404).json({
+        erro: 'Usuário não encontrado'
+      });
+    }
+
+    res.json(resultado[0]);
+
+  } catch (erro) {
+  console.error('ERRO COMPLETO:', erro);
+
+  res.status(500).json({
+    erro: erro.message
+  });
+}
+});
+
+//rota para aprovar usuario
+app.patch('/usuario/:id/aprovar', async (req, res) => {
   const { id } = req.params;
 
   try {
+
     await db.query(
-      `UPDATE Usuario
-       SET situacao = 'Desativado'
-       WHERE id_usuario = ?`,
+      'UPDATE Usuario SET situacao = "Ativo" WHERE id_usuario = ?',
       [id]
     );
 
     res.json({
       sucesso: true
     });
+
+  } catch (erro) {
+    console.error(erro);
+
+    res.status(500).json({
+      sucesso: false,
+      erro: erro.message
+    });
+  }
+});
+//rota para desativar usuario
+app.patch('/usuario/:id/desativar', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await db.query(
+      'UPDATE Usuario SET situacao = "Desativado" WHERE id_usuario = ?',
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: 'Usuário não encontrado'
+      });
+    }
+
+    res.json({
+      sucesso: true,
+      mensagem: 'Usuário desativado com sucesso'
+    });
+
   } catch (err) {
     console.error(err);
+
     res.status(500).json({
-      sucesso: false
+      sucesso: false,
+      mensagem: err.message
     });
   }
 });
