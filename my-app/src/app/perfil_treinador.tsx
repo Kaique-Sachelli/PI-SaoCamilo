@@ -75,14 +75,6 @@ export default function PerfilTreinador() {
                 <Text style={styles.infoValor}>+55 {usuario?.telefone}</Text>
               </View>
             </View>
-
-            <View style={styles.infoRow}>
-              <Text style={styles.infoIcone}>📅</Text>
-              <View>
-                <Text style={styles.infoLabel}>Idade:</Text>
-                <Text style={styles.infoValor}>{usuario?.data_nascimento} anos</Text>
-              </View>
-            </View>
           </View>
 
           {/* ── Botão Sair ── */}
