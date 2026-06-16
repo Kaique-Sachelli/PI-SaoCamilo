@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Text,
   View,
@@ -11,63 +11,76 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useUser } from '../context/UserContext';
 import { NavbarMedico } from './Navbar_Medico';
 import { NotificacaoPopup } from './notificacao';
 import { getUrl } from '../constants/url';
 
-interface Atleta {
-  id: number;
+type Atleta = {
+  id_usuario: number;
   nome: string;
-  esporte: string;
-  ativo: string;
-  foto: null;
-}
-
-function iniciais(nome: string) {
-  return nome.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
-}
+  email?: string | null;
+  situacao?: string | null;
+  modalidade_esportiva?: string | null;
+  esporte?: string | null;
+};
 
 const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9'];
+const RED = '#B3151F';
 
-export default function HomepageTreinador() {
+function iniciais(nome: string) {
+  return nome.split(' ').filter(Boolean).slice(0, 2).map((n) => n[0]).join('').toUpperCase();
+}
+
+export default function HomepageMedico() {
   const router = useRouter();
   const { usuario } = useUser();
   const [busca, setBusca] = useState('');
   const [notifVisivel, setNotifVisivel] = useState(false);
   const [atletas, setAtletas] = useState<Atleta[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchAtletas();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchAtletas();
+    }, [usuario?.id_usuario])
+  );
 
-async function fetchAtletas() { 
-  try { 
-    const resposta = await fetch(getUrl(`/atletas`)); 
-    
-    if (!resposta.ok) { 
-      throw new Error('Erro ao buscar a lista de atletas');
-    } 
-    
-    const dados: Atleta[] = await resposta.json();
-    setAtletas(dados);
-  } catch (err) { 
-    setError(err instanceof Error ? err.message : 'Erro desconhecido'); 
-  } finally { 
-    setLoading(false); 
-  } 
-}
+  async function fetchAtletas() {
+    if (!usuario?.id_usuario) {
+      setLoading(false);
+      return;
+    }
 
-const atletasFiltrados = atletas.filter((a) => {
-  const termoBusca = busca ? busca.toLowerCase() : "";
-  const nomeMatch = a.nome ? a.nome.toLowerCase().includes(termoBusca) : false;
-  const esporteMatch = a.esporte ? a.esporte.toLowerCase().includes(termoBusca) : false;
+    try {
+      setLoading(true);
+      setError(null);
+      const resposta = await fetch(getUrl(`/profissionais/${usuario.id_usuario}/atletas/vinculados`));
+      const dados = await resposta.json();
 
-  return nomeMatch || esporteMatch;
-});
+      if (!resposta.ok || !dados.sucesso) {
+        throw new Error(dados.mensagem || 'Erro ao buscar a lista de atletas');
+      }
+
+      setAtletas(Array.isArray(dados.atletas) ? dados.atletas : []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const atletasFiltrados = atletas.filter((atleta) => {
+    const termoBusca = busca.trim().toLowerCase();
+    if (!termoBusca) return true;
+
+    const esporte = atleta.modalidade_esportiva || atleta.esporte || '';
+    return [atleta.nome, atleta.email, esporte]
+      .filter(Boolean)
+      .some((valor) => String(valor).toLowerCase().includes(termoBusca));
+  });
 
   return (
     <ImageBackground
@@ -76,11 +89,10 @@ const atletasFiltrados = atletas.filter((a) => {
       resizeMode="cover"
     >
       <SafeAreaView style={styles.safeArea}>
-        {/* ── Header ── */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View>
-              <Text style={styles.titulo}>São Camilo</Text>
+              <Text style={styles.titulo}>Sao Camilo</Text>
               <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
             </View>
             <TouchableOpacity onPress={() => setNotifVisivel(true)}>
@@ -90,19 +102,16 @@ const atletasFiltrados = atletas.filter((a) => {
               </View>
             </TouchableOpacity>
           </View>
-          <Text style={styles.funcao}>Olá, {usuario?.nome}</Text>
+          <Text style={styles.funcao}>Ola, {usuario?.nome}</Text>
         </View>
 
-        {/* ── Conteúdo ── */}
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Barra de pesquisa */}
           <View style={styles.searchRow}>
-            <Text style={styles.searchIcone}>🔍</Text>
             <TextInput
               style={styles.searchInput}
               placeholder="Pesquisar"
@@ -112,9 +121,8 @@ const atletasFiltrados = atletas.filter((a) => {
             />
           </View>
 
-          {/* Cabeçalho da lista */}
           <View style={styles.listHeader}>
-            <Text style={styles.listTitulo}>Meu time</Text>
+            <Text style={styles.listTitulo}>Meus atletas</Text>
             <TouchableOpacity
               style={styles.gerenciarBtn}
               onPress={() => router.push('/TelaGerenciarAtletas')}
@@ -124,39 +132,45 @@ const atletasFiltrados = atletas.filter((a) => {
             </TouchableOpacity>
           </View>
 
-          {/* Lista de atletas */}
-          {atletasFiltrados.map((atleta, idx) => (
-            <TouchableOpacity
-              key={atleta.id}
-              style={styles.atletaCard}
-              activeOpacity={0.75}
-              onPress={() => router.push('/sessoes_medico')}
-            >
-              <View style={styles.atletaLeft}>
-                {atleta.foto ? (
-                  <Image source={atleta.foto} style={styles.atletaAvatar} />
-                ) : (
+          {loading && <Text style={styles.estadoTexto}>Carregando atletas...</Text>}
+
+          {!loading && error && <Text style={styles.estadoTexto}>{error}</Text>}
+
+          {!loading && !error && atletasFiltrados.length === 0 && (
+            <Text style={styles.estadoTexto}>Nenhum atleta adicionado.</Text>
+          )}
+
+          {!loading && !error && atletasFiltrados.map((atleta, idx) => {
+            const esporte = atleta.modalidade_esportiva || atleta.esporte || 'Atleta';
+
+            return (
+              <TouchableOpacity
+                key={atleta.id_usuario}
+                style={styles.atletaCard}
+                activeOpacity={0.75}
+                onPress={() => router.push('/sessoes_medico')}
+              >
+                <View style={styles.atletaLeft}>
                   <View style={[styles.atletaAvatar, styles.atletaAvatarPlaceholder, { backgroundColor: CORES_AVATAR[idx % CORES_AVATAR.length] }]}>
                     <Text style={styles.atletaIniciais}>{iniciais(atleta.nome)}</Text>
                   </View>
-                )}
-                <View style={styles.atletaInfo}>
-                  <Text style={styles.atletaNome}>{atleta.nome}</Text>
-                  <Text style={styles.atletaEsporte}>{atleta.esporte}</Text>
+                  <View style={styles.atletaInfo}>
+                    <Text style={styles.atletaNome} numberOfLines={1}>{atleta.nome}</Text>
+                    <Text style={styles.atletaEsporte} numberOfLines={1}>{esporte}</Text>
+                  </View>
                 </View>
-              </View>
 
-              <View style={styles.atletaRight}>
-                <View style={[styles.statusDot, atleta.ativo ? styles.dotVerde : styles.dotVermelho]} />
-                <Text style={styles.atletaSeta}>›</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+                <View style={styles.atletaRight}>
+                  <View style={[styles.statusDot, atleta.situacao === 'Ativo' ? styles.dotVerde : styles.dotVermelho]} />
+                  <Text style={styles.atletaSeta}>{'>'}</Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
-        {/* ── Bottom Nav ── */}
+
         <NavbarMedico active="home"/>
 
-        {/* ── Popup de Notificações ── */}
         <NotificacaoPopup
           visible={notifVisivel}
           onClose={() => setNotifVisivel(false)}
@@ -166,13 +180,9 @@ const atletasFiltrados = atletas.filter((a) => {
   );
 }
 
-const RED = '#B3151F';
-
 const styles = StyleSheet.create({
   background: { flex: 1 },
   safeArea: { flex: 1, backgroundColor: 'transparent' },
-
-  // Header
   header: {
     backgroundColor: RED,
     paddingHorizontal: 20,
@@ -198,30 +208,21 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: RED,
   },
   funcao: { fontSize: 20, color: '#fff', fontWeight: '700' },
-
-  // Scroll
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
-
-  // Search
   searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: Platform.OS === 'ios' ? 10 : 6,
     marginBottom: 6,
     ...Platform.select({
-      ios: { boxshadow: '0px 1px 4px rgba(0,0,0,0.08)' },
+      ios: { boxShadow: '0px 1px 4px rgba(0,0,0,0.08)' },
       android: { elevation: 2 },
-      web: { boxshadow: '0px 1px 4px rgba(0,0,0,0.08)' },
+      web: { boxShadow: '0px 1px 4px rgba(0,0,0,0.08)' },
     }),
   },
-  searchIcone: { fontSize: 16, marginRight: 8, opacity: 0.5 },
-  searchInput: { flex: 1, fontSize: 15, color: '#333' },
-
-  // List header
+  searchInput: { fontSize: 15, color: '#333' },
   listHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -232,8 +233,14 @@ const styles = StyleSheet.create({
   gerenciarBtn: { flexDirection: 'row', alignItems: 'center' },
   gerenciarTexto: { fontSize: 15, color: RED, fontWeight: '600' },
   gerenciarIcone: { width: 18, height: 16, tintColor: RED },
-
-  // Athlete cards
+  estadoTexto: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 14,
+    color: '#555',
+    fontSize: 14,
+    textAlign: 'center',
+  },
   atletaCard: {
     backgroundColor: '#fff',
     borderRadius: 14,
@@ -243,33 +250,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     ...Platform.select({
-      ios: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' },
+      ios: { boxShadow: '0px 1px 4px rgba(0,0,0,0.07)' },
       android: { elevation: 2 },
-      web: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' },
+      web: { boxShadow: '0px 1px 4px rgba(0,0,0,0.07)' },
     }),
   },
-  atletaLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  atletaLeft: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
   atletaAvatar: { width: 44, height: 44, borderRadius: 22 },
   atletaAvatarPlaceholder: { justifyContent: 'center', alignItems: 'center' },
   atletaIniciais: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  atletaInfo: { gap: 2 },
+  atletaInfo: { flex: 1, gap: 2 },
   atletaNome: { fontSize: 15, fontWeight: '600', color: '#111' },
   atletaEsporte: { fontSize: 13, color: '#888' },
   atletaRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   statusDot: { width: 12, height: 12, borderRadius: 6 },
   dotVerde: { backgroundColor: '#4CAF50' },
   dotVermelho: { backgroundColor: '#e53935' },
-  atletaSeta: { fontSize: 22, color: '#ccc', fontWeight: '300' },
-
-  // Navbar
-  navbar: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-  },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navImg: { width: 26, height: 26, resizeMode: 'contain' },
+  atletaSeta: { fontSize: 18, color: '#ccc', fontWeight: '700' },
 });
