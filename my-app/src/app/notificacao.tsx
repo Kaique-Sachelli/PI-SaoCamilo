@@ -13,7 +13,6 @@ export interface Notificacao {
   id: number;
   titulo: string;
   mensagem: string;
-  tempo: string;
   lida: boolean;
   onPress?: () => void;
 }
@@ -33,25 +32,22 @@ export function NotificacaoPopup({ visible, onClose, notificacoes }: Props) {
       id: 1,
       titulo: 'Solicitação de login',
       mensagem: 'Um usuário solicitou a liberação do seu login.',
-      tempo: '5 min atrás',
       lida: false,
       onPress: () => { onClose(); router.push('/solicitacoes_cadastro'); },
     },
     {
       id: 2,
       titulo: 'Novo cadastro',
-      mensagem: 'Novo atleta cadastrado: Ricardo Gomes.',
-      tempo: '20 min atrás',
+      mensagem: 'Novo atleta cadastrado.',
       lida: false,
       onPress: () => { onClose(); router.push('/gerenciar_usuarios'); },
     },
     {
       id: 3,
-      titulo: 'Relatório enviado',
-      mensagem: 'Relatório alimentar enviado por Marcus Silva.',
-      tempo: '1h atrás',
+      titulo: 'Novo cadastro',
+      mensagem: 'Novo atleta cadastrado.',
       lida: true,
-      onPress: () => { onClose(); router.push('/relatorio_alimentar'); },
+      onPress: () => { onClose(); router.push('/gerenciar_usuarios'); },
     },
   ];
 
@@ -108,7 +104,6 @@ export function NotificacaoPopup({ visible, onClose, notificacoes }: Props) {
                     <View style={styles.itemConteudo}>
                       <Text style={styles.itemTitulo}>{n.titulo}</Text>
                       <Text style={styles.itemMensagem}>{n.mensagem}</Text>
-                      <Text style={styles.itemTempo}>{n.tempo}</Text>
                     </View>
                     {n.onPress && <Text style={styles.itemSeta}>›</Text>}
                   </TouchableOpacity>
@@ -196,6 +191,5 @@ const styles = StyleSheet.create({
   itemConteudo: { flex: 1, gap: 2 },
   itemTitulo: { fontSize: 13, fontWeight: '700', color: '#111' },
   itemMensagem: { fontSize: 13, color: '#444', lineHeight: 18 },
-  itemTempo: { fontSize: 11, color: '#aaa', marginTop: 2 },
   itemSeta: { fontSize: 20, color: '#ccc', alignSelf: 'center' },
 });
