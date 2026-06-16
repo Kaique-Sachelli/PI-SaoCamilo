@@ -18,11 +18,11 @@ import { NotificacaoPopup } from './notificacao';
 import { getUrl } from '../constants/url';
 
 interface Atleta {
-  id: number;
+  id_usuario: number;
   nome: string;
-  esporte: string;
-  ativo: string;
-  foto: null;
+  esporte?: string;
+  ativo?: string;
+  foto?: null;
 }
 
 function iniciais(nome: string) {
@@ -128,9 +128,10 @@ const atletasFiltrados = atletas.filter((a) => {
           {atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
               key={`atleta-${atleta.id || idx}`}
+
               style={styles.atletaCard}
               activeOpacity={0.75}
-              onPress={() => router.push('/sessoes_medico')}
+              onPress={() => router.push({ pathname: '/sessoes_medico', params: { id_atleta: String(atleta.id_usuario), nome: atleta.nome } })}
             >
               <View style={styles.atletaLeft}>
                 {atleta.foto ? (
