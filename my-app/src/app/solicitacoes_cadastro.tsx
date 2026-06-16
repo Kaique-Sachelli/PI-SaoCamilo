@@ -228,7 +228,7 @@ export default function SolicitacoesCadastro() {
 
               {/* Detalhes */}
               <View style={styles.detalheRow}>
-                <Text style={styles.detalheIcone}>✉</Text>
+                <Text style={styles.detalheIcone}>📧</Text>
                 <Text style={styles.detalheTexto}>{s.email}</Text>
               </View>
               <View style={styles.detalheRow}>

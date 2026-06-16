@@ -154,7 +154,7 @@ export default function PerfilAtleta() {
             <Text style={styles.secaoTitulo}>Contatos do Atleta</Text>
 
             <View style={styles.contatoRow}>
-                <Text style={styles.contatoIcone}>✉</Text>
+                <Text style={styles.contatoIcone}>📧</Text>
               <View>
                 <Text style={styles.contatoLabel}>E-mail:</Text>
                 <Text style={styles.contatoValor}>{emailAtleta}</Text>

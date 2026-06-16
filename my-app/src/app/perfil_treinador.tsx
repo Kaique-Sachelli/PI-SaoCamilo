@@ -61,7 +61,7 @@ export default function PerfilTreinador() {
             <View style={styles.divisor} />
 
             <View style={styles.infoRow}>
-              <Text style={styles.infoIcone}>✉</Text>
+              <Text style={styles.infoIcone}>📧</Text>
               <View>
                 <Text style={styles.infoLabel}>E-mail:</Text>
                 <Text style={styles.infoValor}>{usuario?.email}</Text>
