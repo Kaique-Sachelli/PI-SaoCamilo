@@ -40,6 +40,7 @@ export default function ChecklistPosSessaoScreen() {
     duracao_segundos,
     urina_pre_cor,
     urina_sessao,
+    modalidade,
   } = useLocalSearchParams<{
     massa_pre: string;
     clima_temp: string;
@@ -48,6 +49,7 @@ export default function ChecklistPosSessaoScreen() {
     duracao_segundos: string;
     urina_pre_cor: string;
     urina_sessao: string;
+    modalidade: string;
   }>();
 
   const massaPreNum        = parseFloat((massa_pre ?? '0').replace(',', '.'));
@@ -135,6 +137,7 @@ export default function ChecklistPosSessaoScreen() {
           percentual_variacao:    parseFloat(variacaoMassa.toFixed(1)),
           alerta_seguranca:       alerta || null,
           status_color:           avaliacao.statusColor,
+          modalidade_esportiva:   modalidade || null,
           intensidade_percebida:  intensidade || null,
           roupas_encharcadas:     roupasEncharcadas ? 1 : 0,
           urina_pre_cor:          urina_pre_cor ? parseInt(urina_pre_cor) : null,
@@ -170,6 +173,11 @@ export default function ChecklistPosSessaoScreen() {
             <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitulo}>Checklist Pós-Sessão</Text>
+          {modalidade ? (
+            <View style={styles.modalidadeBadge}>
+              <Text style={styles.modalidadeBadgeTexto}>🏅 {modalidade}</Text>
+            </View>
+          ) : null}
         </View>
 
         <ScrollView
@@ -219,7 +227,7 @@ export default function ChecklistPosSessaoScreen() {
               <Text style={styles.metricaRotulo}>VARIAÇÃO DE MASSA</Text>
             </View>
             <View style={styles.variacaoRow}>
-              <Text style={[styles.variacaoValor, { color: variacaoMassa < 0 ? '#2e7d32' : '#B3151F' }]}>
+              <Text style={[styles.variacaoValor, { color: avaliacao.color }]}>
                 {variacaoMassa >= 0 ? '+' : ''}{variacaoMassa.toFixed(1)}%
               </Text>
               <View style={[styles.badge, { backgroundColor: avaliacao.color + '22', borderColor: avaliacao.color }]}>
@@ -307,6 +315,15 @@ export default function ChecklistPosSessaoScreen() {
               </TouchableOpacity>
             </View>
           </View>
+
+          {roupasEncharcadas && (
+            <View style={styles.avisoRoupas}>
+              <Text style={styles.avisoRoupasIcone}>⚠️</Text>
+              <Text style={styles.avisoRoupasTexto}>
+                Roupas encharcadas retêm suor e podem subestimar a perda real de massa. Para maior precisão, pese-se sem as roupas molhadas ou registre essa observação ao nutricionista.
+              </Text>
+            </View>
+          )}
 
           {/* Como você está se sentindo */}
           <View style={styles.card}>
@@ -451,6 +468,24 @@ const styles = StyleSheet.create({
   toggleBtnAtivoAlerta: { backgroundColor: '#fff3e0', borderColor: '#e65100' },
   toggleBtnTexto:       { fontSize: 14, fontWeight: '600', color: '#888' },
   toggleBtnTextoAtivo:  { color: '#222' },
+
+  modalidadeBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginTop: 6,
+  },
+  modalidadeBadgeTexto: { fontSize: 13, color: '#fff', fontWeight: '600' },
+
+  avisoRoupas: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+    backgroundColor: '#fff8e1', borderRadius: 12, padding: 14,
+    borderLeftWidth: 4, borderLeftColor: '#f59e0b',
+  },
+  avisoRoupasIcone: { fontSize: 18, marginTop: 1 },
+  avisoRoupasTexto: { flex: 1, fontSize: 13, color: '#7a5a00', lineHeight: 19 },
 
   fadigaRow: { flexDirection: 'row', gap: 8, marginBottom: 6 },
   fadigaBtn: {
