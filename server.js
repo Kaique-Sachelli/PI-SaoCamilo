@@ -584,6 +584,7 @@ app.get('/atleta/:id/ultima-sessao', async (req, res) => {
     console.log('Buscando ultima sessao para id_atleta:', id);
     const [rows] = await db.query(
       `SELECT
+         st.id_sessao,
          st.data_hora_inicio,
          st.duracao_minutos,
          st.massa_pre,
@@ -676,17 +677,24 @@ app.get('/sessao/:id', async (req, res) => {
         st.massa_pos,
         st.clima_temp,
         st.clima_umidade,
+        st.intensidade_percebida,
+        st.roupas_encharcadas,
+        st.urina_pre_cor,
+        st.volume_urina_ml,
         rc.taxa_sudorese,
         rc.perda_massa_ajustada,
         rc.percentual_variacao,
         rc.alerta_seguranca,
         rc.status_color,
         rh.volume_ml,
-        ap.modalidade_esportiva
+        ap.modalidade_esportiva,
+        ss.nivel_fadiga,
+        ss.sintomas_gastrointestinais
       FROM Sessao_Treino st
       LEFT JOIN Resultado_Calculo rc ON rc.id_sessao = st.id_sessao
       LEFT JOIN Registro_Hidratacao rh ON rh.id_sessao = st.id_sessao
       LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = st.id_atleta
+      LEFT JOIN Saude_Sintomas ss ON ss.id_sessao = st.id_sessao
       WHERE st.id_sessao = ?
     `, [id]);
 
@@ -705,13 +713,11 @@ app.get('/peso/:id', async (req, res) => {
   const { id } = req.params;
 
   const [rows] = await db.query(
-    `SELECT peso
-     FROM Atleta_Perfil
-     WHERE id_atleta = ?`,
+    `SELECT peso FROM Atleta_Perfil WHERE id_atleta = ?`,
     [id]
   );
 
-    res.json({ peso: rows[0] });
+  res.json({ peso: rows[0]?.peso ?? null });
 });
 
 inicializarBanco()
@@ -729,13 +735,11 @@ app.get('/altura/:id', async (req, res) => {
   const { id } = req.params;
 
   const [rows] = await db.query(
-    `SELECT altura
-     FROM Atleta_Perfil
-     WHERE id_atleta = ?`,
+    `SELECT altura FROM Atleta_Perfil WHERE id_atleta = ?`,
     [id]
   );
 
-    res.json({ altura: rows[0] });
+  res.json({ altura: rows[0]?.altura ?? null });
 });
 
 // rota de clima atual via OpenWeatherMap
