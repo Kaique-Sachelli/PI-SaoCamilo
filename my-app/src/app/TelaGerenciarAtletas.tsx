@@ -9,10 +9,13 @@ import {
   Image,
   ImageBackground,
   Platform,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { getUrl } from '../constants/url';
+import { useUser } from '../context/UserContext';
 
 interface Atleta {
   id: number;
@@ -20,7 +23,6 @@ interface Atleta {
   esporte: string;
   ativo: string;
   foto: null;
-  selecionado: false;
 }
 
 const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9'];
@@ -31,50 +33,70 @@ function iniciais(nome: string) {
 
 export default function TelaGerenciarAtletas() {
   const router = useRouter();
+  const { usuario } = useUser();
   const [busca, setBusca] = useState('');
-
   const [atletas, setAtletas] = useState<Atleta[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [selecionados, setSelecionados] = useState<number[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
-    fetchAtletas();
+    Promise.all([fetchTodosAtletas(), fetchAtletasDoTreinador()])
+      .finally(() => setCarregando(false));
   }, []);
 
-  async function fetchAtletas() { 
-    try { 
-      const resposta = await fetch(getUrl(`/atletas`)); 
-      
-      if (!resposta.ok) { 
-        throw new Error('Erro ao buscar a lista de atletas');
-      } 
-      
+  async function fetchTodosAtletas() {
+    const resposta = await fetch(getUrl('/atletas'));
+    if (resposta.ok) {
       const dados: Atleta[] = await resposta.json();
       setAtletas(dados);
-    } catch (err) { 
-      setError(err instanceof Error ? err.message : 'Erro desconhecido'); 
-    } finally { 
-      setLoading(false); 
-    } 
+    }
+  }
+
+  async function fetchAtletasDoTreinador() {
+    if (!usuario?.id_usuario) return;
+    const resposta = await fetch(getUrl(`/treinador/${usuario.id_usuario}/atletas`));
+    if (resposta.ok) {
+      const dados: Atleta[] = await resposta.json();
+      setSelecionados(dados.map((a) => a.id));
+    }
   }
 
   const atletasFiltrados = atletas.filter((a) => {
-    const termoBusca = busca ? busca.toLowerCase() : "";
-    const nomeMatch = a.nome ? a.nome.toLowerCase().includes(termoBusca) : false;
-    const esporteMatch = a.esporte ? a.esporte.toLowerCase().includes(termoBusca) : false;
-
-    return nomeMatch || esporteMatch;
+    const termo = busca.toLowerCase();
+    return (
+      (a.nome?.toLowerCase().includes(termo)) ||
+      (a.esporte?.toLowerCase().includes(termo))
+    );
   });
-
-  const [selecionados, setSelecionados] = useState<number[]>(
-    atletasFiltrados.filter((a) => a.selecionado).map((a) => a.id)
-  );
 
   const toggle = (id: number) => {
     setSelecionados((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
   };
+
+  async function salvar() {
+    if (!usuario?.id_usuario) return;
+    setSalvando(true);
+    try {
+      const resposta = await fetch(getUrl(`/treinador/${usuario.id_usuario}/atletas`), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ atleta_ids: selecionados }),
+      });
+
+      if (!resposta.ok) throw new Error('Erro ao salvar');
+
+      Alert.alert('Sucesso', 'Time atualizado com sucesso!', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+    } catch {
+      Alert.alert('Erro', 'Não foi possível salvar o time. Tente novamente.');
+    } finally {
+      setSalvando(false);
+    }
+  }
 
   return (
     <ImageBackground
@@ -92,7 +114,7 @@ export default function TelaGerenciarAtletas() {
           <Text style={styles.headerSubtitulo}>Selecione os atletas para compor seu grupo</Text>
         </View>
 
-        {/* ── Barra de pesquisa (fora do header, acima da lista) ── */}
+        {/* ── Barra de pesquisa ── */}
         <View style={styles.searchWrap}>
           <View style={styles.searchRow}>
             <Text style={styles.searchIcone}>🔍</Text>
@@ -107,42 +129,66 @@ export default function TelaGerenciarAtletas() {
         </View>
 
         {/* ── Lista ── */}
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {atletasFiltrados.map((atleta, idx) => {
-            const isSel = selecionados.includes(atleta.id || idx);
-            return (
-              <TouchableOpacity
-                key={`atleta-${atleta.id || idx}`}
-                style={styles.atletaCard}
-                activeOpacity={0.75}
-                onPress={() => toggle(atleta.id || idx)}
-              >
-                <View style={styles.atletaLeft}>
-                  {atleta.foto ? (
-                    <Image source={atleta.foto} style={styles.avatar} />
-                  ) : (
-                    <View style={[styles.avatar, styles.avatarPlaceholder, { backgroundColor: CORES_AVATAR[idx % CORES_AVATAR.length] }]}>
-                      <Text style={styles.avatarIniciais}>{iniciais(atleta.nome)}</Text>
+        {carregando ? (
+          <ActivityIndicator color={RED} style={{ marginTop: 40 }} />
+        ) : (
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {atletasFiltrados.map((atleta, idx) => {
+              const isSel = selecionados.includes(atleta.id);
+              return (
+                <TouchableOpacity
+                  key={`atleta-${atleta.id}`}
+                  style={styles.atletaCard}
+                  activeOpacity={0.75}
+                  onPress={() => toggle(atleta.id)}
+                >
+                  <View style={styles.atletaLeft}>
+                    {atleta.foto ? (
+                      <Image source={atleta.foto} style={styles.avatar} />
+                    ) : (
+                      <View
+                        style={[
+                          styles.avatar,
+                          styles.avatarPlaceholder,
+                          { backgroundColor: CORES_AVATAR[idx % CORES_AVATAR.length] },
+                        ]}
+                      >
+                        <Text style={styles.avatarIniciais}>{iniciais(atleta.nome)}</Text>
+                      </View>
+                    )}
+                    <View style={styles.atletaInfo}>
+                      <Text style={styles.atletaNome}>{atleta.nome}</Text>
+                      <Text style={styles.atletaEsporte}>{atleta.esporte ?? ''}</Text>
                     </View>
-                  )}
-                  <View style={styles.atletaInfo}>
-                    <Text style={styles.atletaNome}>{atleta.nome}</Text>
-                    <Text style={styles.atletaEsporte}>{atleta.esporte}</Text>
                   </View>
-                </View>
 
-                {/* Checkbox */}
-                <View style={[styles.checkbox, isSel && styles.checkboxSel]}>
-                  {isSel && <Text style={styles.checkmark}>✓</Text>}
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+                  <View style={[styles.checkbox, isSel && styles.checkboxSel]}>
+                    {isSel && <Text style={styles.checkmark}>✓</Text>}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        )}
+
+        {/* ── Botão Salvar ── */}
+        <View style={styles.footerWrap}>
+          <TouchableOpacity
+            style={[styles.salvarBtn, salvando && { opacity: 0.7 }]}
+            onPress={salvar}
+            disabled={salvando}
+          >
+            {salvando ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.salvarTexto}>Salvar time</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     </ImageBackground>
   );
@@ -154,7 +200,6 @@ const styles = StyleSheet.create({
   background: { flex: 1 },
   safeArea: { flex: 1, backgroundColor: 'transparent' },
 
-  // Header
   header: {
     backgroundColor: RED,
     paddingHorizontal: 20,
@@ -168,7 +213,6 @@ const styles = StyleSheet.create({
   headerTitulo: { color: '#fff', fontSize: 24, fontWeight: '700' },
   headerSubtitulo: { color: 'rgba(255,255,255,0.75)', fontSize: 13, marginTop: 4 },
 
-  // Search (fora do header)
   searchWrap: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
   searchRow: {
     flexDirection: 'row',
@@ -186,11 +230,9 @@ const styles = StyleSheet.create({
   searchIcone: { fontSize: 15, marginRight: 8, opacity: 0.45 },
   searchInput: { flex: 1, fontSize: 14, color: '#333' },
 
-  // Scroll
   scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 0 },
+  scrollContent: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 8, gap: 0 },
 
-  // Cards atleta
   atletaCard: {
     backgroundColor: '#fff',
     flexDirection: 'row',
@@ -209,7 +251,6 @@ const styles = StyleSheet.create({
   atletaNome: { fontSize: 15, fontWeight: '600', color: '#111' },
   atletaEsporte: { fontSize: 13, color: '#888' },
 
-  // Checkbox
   checkbox: {
     width: 24,
     height: 24,
@@ -219,21 +260,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  checkboxSel: {
-    backgroundColor: RED,
-    borderColor: RED,
-  },
+  checkboxSel: { backgroundColor: RED, borderColor: RED },
   checkmark: { color: '#fff', fontSize: 14, fontWeight: '700' },
 
-  // Navbar
-  navbar: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+  footerWrap: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: 'transparent',
   },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navImg: { width: 26, height: 26, resizeMode: 'contain' },
+  salvarBtn: {
+    backgroundColor: RED,
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    ...Platform.select({
+      ios: { boxshadow: '0px 2px 6px rgba(0,0,0,0.2)' },
+      android: { elevation: 3 },
+      web: { boxshadow: '0px 2px 6px rgba(0,0,0,0.2)' },
+    }),
+  },
+  salvarTexto: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });
