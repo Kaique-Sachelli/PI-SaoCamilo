@@ -113,7 +113,7 @@ async function gerarPDFSessao(s: SessaoDetalhe) {
 
   const alertaHtml = s.alerta_seguranca ? `
     <div style="background:${s.status_color === 'Vermelho' ? '#ffebee' : '#fff8e1'};border-left:4px solid ${statusCor};border-radius:8px;padding:12px 16px;margin-bottom:20px;">
-      <strong>${s.status_color === 'Vermelho' ? '🚨 Alerta Crítico' : '⚠️ Atenção'}</strong>
+      <strong>${s.status_color === 'Vermelho' ? 'Alerta Crítico' : 'Atenção'}</strong>
       <p style="margin:6px 0 0;color:#444;font-size:13px;">${s.alerta_seguranca}</p>
     </div>` : '';
 
@@ -319,9 +319,6 @@ export default function SessaoSelecionada() {
                 styles.alertaCard,
                 sessao.status_color === 'Vermelho' ? styles.alertaCritico : styles.alertaAtencao,
               ]}>
-                <Text style={styles.alertaIcone}>
-                  {sessao.status_color === 'Vermelho' ? '🚨' : '⚠️'}
-                </Text>
                 <Text style={styles.alertaTexto}>{sessao.alerta_seguranca}</Text>
               </View>
             ) : null}
@@ -331,7 +328,6 @@ export default function SessaoSelecionada() {
               <View style={styles.topoCard}>
                 <View style={styles.topoCardHeader}>
                   <Text style={styles.topoCardLabel}>Tempo Total</Text>
-                  <Text style={[styles.topoIcone, { color: '#e53935' }]}>🕐</Text>
                 </View>
                 <Text style={styles.topoValor}>{sessao.duracao_minutos}</Text>
                 <Text style={styles.topoUnidade}>min</Text>
@@ -340,7 +336,6 @@ export default function SessaoSelecionada() {
               <View style={styles.topoCard}>
                 <View style={styles.topoCardHeader}>
                   <Text style={styles.topoCardLabel}>Volume Ingerido</Text>
-                  <Text style={[styles.topoIcone, { color: '#1565c0' }]}>💧</Text>
                 </View>
                 <Text style={styles.topoValor}>
                   {sessao.volume_ml !== null
@@ -442,10 +437,7 @@ export default function SessaoSelecionada() {
               {sessao.clima_temp !== null && (
                 <>
                   <View style={styles.linhaRow}>
-                    <View style={styles.linhaEsquerda}>
-                      <Text style={styles.condicaoIcone}>🌡</Text>
-                      <Text style={styles.linhaChave}>Temperatura</Text>
-                    </View>
+                    <Text style={styles.linhaChave}>Temperatura</Text>
                     <Text style={styles.linhaValor}>{sessao.clima_temp} °C</Text>
                   </View>
                   <View style={styles.divisor} />
@@ -455,10 +447,7 @@ export default function SessaoSelecionada() {
               {sessao.clima_umidade !== null && (
                 <>
                   <View style={styles.linhaRow}>
-                    <View style={styles.linhaEsquerda}>
-                      <Text style={styles.condicaoIcone}>💦</Text>
-                      <Text style={styles.linhaChave}>Umidade</Text>
-                    </View>
+                    <Text style={styles.linhaChave}>Umidade</Text>
                     <Text style={styles.linhaValor}>{sessao.clima_umidade}%</Text>
                   </View>
                   <View style={styles.divisor} />
@@ -468,10 +457,7 @@ export default function SessaoSelecionada() {
               {sessao.modalidade_esportiva && (
                 <>
                   <View style={styles.linhaRow}>
-                    <View style={styles.linhaEsquerda}>
-                      <Text style={styles.condicaoIcone}>🏅</Text>
-                      <Text style={styles.linhaChave}>Esporte</Text>
-                    </View>
+                    <Text style={styles.linhaChave}>Esporte</Text>
                     <Text style={styles.linhaValor}>{sessao.modalidade_esportiva}</Text>
                   </View>
                   <View style={styles.divisor} />
@@ -479,10 +465,7 @@ export default function SessaoSelecionada() {
               )}
 
               <View style={styles.linhaRow}>
-                <View style={styles.linhaEsquerda}>
-                  <Text style={styles.condicaoIcone}>⚡</Text>
-                  <Text style={styles.linhaChave}>Intensidade</Text>
-                </View>
+                <Text style={styles.linhaChave}>Intensidade</Text>
                 <Text style={styles.linhaValor}>
                   {sessao.intensidade_percebida ?? calcularIntensidade(sessao.taxa_sudorese)}
                 </Text>
@@ -492,10 +475,7 @@ export default function SessaoSelecionada() {
                 <>
                   <View style={styles.divisor} />
                   <View style={styles.linhaRow}>
-                    <View style={styles.linhaEsquerda}>
-                      <Text style={styles.condicaoIcone}>👕</Text>
-                      <Text style={styles.linhaChave}>Roupas encharcadas</Text>
-                    </View>
+                    <Text style={styles.linhaChave}>Roupas encharcadas</Text>
                     <Text style={styles.linhaValor}>
                       {sessao.roupas_encharcadas ? 'Sim' : 'Não'}
                     </Text>
@@ -507,10 +487,7 @@ export default function SessaoSelecionada() {
                 <>
                   <View style={styles.divisor} />
                   <View style={styles.linhaRow}>
-                    <View style={styles.linhaEsquerda}>
-                      <Text style={styles.condicaoIcone}>🚽</Text>
-                      <Text style={styles.linhaChave}>Volume urinário na sessão</Text>
-                    </View>
+                    <Text style={styles.linhaChave}>Volume urinário na sessão</Text>
                     <Text style={styles.linhaValor}>{sessao.volume_urina_ml} mL</Text>
                   </View>
                 </>

@@ -43,14 +43,18 @@ export default function HomepageMedico() {
   useFocusEffect(
     useCallback(() => {
       fetchAtletas();
-    }, [])
+    }, [usuario?.id_usuario])
   );
 
 async function fetchAtletas() {
+  if (!usuario?.id_usuario) {
+    setLoading(false);
+    return;
+  }
   setLoading(true);
   setError(null);
   try {
-    const resposta = await fetch(getUrl('/atletas'));
+    const resposta = await fetch(getUrl(`/medico/${usuario.id_usuario}/atletas`));
     if (!resposta.ok) throw new Error('Erro ao buscar a lista de atletas');
     const dados: Atleta[] = await resposta.json();
     setAtletas(dados);
@@ -113,7 +117,14 @@ const atletasFiltrados = atletas.filter((a) => {
 
           {/* Cabeçalho da lista */}
           <View style={styles.listHeader}>
-            <Text style={styles.listTitulo}>Atletas</Text>
+            <Text style={styles.listTitulo}>Meu time</Text>
+            <TouchableOpacity
+              style={styles.gerenciarBtn}
+              onPress={() => router.push('/TelaGerenciarEquipe_Medico')}
+            >
+              <Text style={styles.gerenciarTexto}>Gerenciar </Text>
+              <Image source={require('./assets/Img/gerenciar.png')} style={styles.gerenciarIcone} />
+            </TouchableOpacity>
           </View>
 
           {/* Lista de atletas */}
@@ -123,7 +134,7 @@ const atletasFiltrados = atletas.filter((a) => {
             <Text style={styles.msgCentro}>{error}</Text>
           ) : atletasFiltrados.length === 0 ? (
             <Text style={styles.msgCentro}>
-              {busca ? 'Nenhum atleta encontrado.' : 'Nenhum atleta cadastrado.'}
+              {busca ? 'Nenhum atleta encontrado.' : 'Seu time está vazio.\nClique em Gerenciar para adicionar atletas.'}
             </Text>
           ) : atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
