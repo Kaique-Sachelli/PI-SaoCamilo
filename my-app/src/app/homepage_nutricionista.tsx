@@ -268,7 +268,7 @@ const atletasFiltrados = atletas.filter((a) => {
             <Text style={styles.estadoTexto}>Nenhum atleta encontrado.</Text>
           )}
 
-          {!carregandoAtletas && atletasFiltrados.map((atleta, idx) => ( */} */}
+          {!carregandoAtletas && atletasFiltrados.map((atleta, idx) => ( */}
 
           {/* {atletasFiltrados.map((atleta, idx) => (
 
@@ -295,6 +295,34 @@ const atletasFiltrados = atletas.filter((a) => {
               </View>
             </TouchableOpacity>
           ))} */}
+          {/* Lista de atletas */}
+          {atletasFiltrados.map((atleta, idx) => (
+            <TouchableOpacity
+              key={`atleta-${atleta.id || idx}`}
+              style={styles.atletaCard}
+              activeOpacity={0.75}
+              onPress={() => router.push('/sessoes_treinador')}
+            >
+              <View style={styles.atletaLeft}>
+                {atleta.foto ? (
+                  <Image source={atleta.foto} style={styles.atletaAvatar} />
+                ) : (
+                  <View style={[styles.atletaAvatar, styles.atletaAvatarPlaceholder, { backgroundColor: CORES_AVATAR[idx % CORES_AVATAR.length] }]}>
+                    <Text style={styles.atletaIniciais}>{iniciais(atleta.nome)}</Text>
+                  </View>
+                )}
+                <View style={styles.atletaInfo}>
+                  <Text style={styles.atletaNome}>{atleta.nome}</Text>
+                  <Text style={styles.atletaEsporte}>{atleta.esporte}</Text>
+                </View>
+              </View>
+
+              <View style={styles.atletaRight}>
+                <View style={[styles.statusDot, atleta.ativo ? styles.dotVerde : styles.dotVermelho]} />
+                <Text style={styles.atletaSeta}>›</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
       {/* ── Bottom Nav ── */}
       <NavbarNutricionista active="home"/>

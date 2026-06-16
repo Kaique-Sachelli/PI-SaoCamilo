@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,14 +12,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { getUrl } from '../constants/url';
 
-const ATLETAS = [
-  { id: 1, nome: 'Marcus Silva',      esporte: 'Vôlei',   foto: require('./assets/Img/marcus.jpg'), selecionado: true  },
-  { id: 2, nome: 'Jéssica do Santos', esporte: 'Tênis',   foto: null,                               selecionado: true  },
-  { id: 3, nome: 'Eurico Miranda',    esporte: 'Boxe',    foto: null,                               selecionado: true  },
-  { id: 4, nome: 'Ricardo Gomes',     esporte: 'Natação', foto: null,                               selecionado: true  },
-  { id: 5, nome: 'Márcia Figueiras',  esporte: 'Natação', foto: null,                               selecionado: true  },
-];
+interface Atleta {
+  id: number;
+  nome: string;
+  esporte: string;
+  ativo: string;
+  foto: null;
+  selecionado: false;
+}
 
 const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9'];
 
@@ -30,8 +32,42 @@ function iniciais(nome: string) {
 export default function TelaGerenciarAtletas() {
   const router = useRouter();
   const [busca, setBusca] = useState('');
+
+  const [atletas, setAtletas] = useState<Atleta[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchAtletas();
+  }, []);
+
+  async function fetchAtletas() { 
+    try { 
+      const resposta = await fetch(getUrl(`/atletas`)); 
+      
+      if (!resposta.ok) { 
+        throw new Error('Erro ao buscar a lista de atletas');
+      } 
+      
+      const dados: Atleta[] = await resposta.json();
+      setAtletas(dados);
+    } catch (err) { 
+      setError(err instanceof Error ? err.message : 'Erro desconhecido'); 
+    } finally { 
+      setLoading(false); 
+    } 
+  }
+
+  const atletasFiltrados = atletas.filter((a) => {
+    const termoBusca = busca ? busca.toLowerCase() : "";
+    const nomeMatch = a.nome ? a.nome.toLowerCase().includes(termoBusca) : false;
+    const esporteMatch = a.esporte ? a.esporte.toLowerCase().includes(termoBusca) : false;
+
+    return nomeMatch || esporteMatch;
+  });
+
   const [selecionados, setSelecionados] = useState<number[]>(
-    ATLETAS.filter((a) => a.selecionado).map((a) => a.id)
+    atletasFiltrados.filter((a) => a.selecionado).map((a) => a.id)
   );
 
   const toggle = (id: number) => {
@@ -39,11 +75,6 @@ export default function TelaGerenciarAtletas() {
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
   };
-
-  const atletasFiltrados = ATLETAS.filter((a) =>
-    a.nome.toLowerCase().includes(busca.toLowerCase()) ||
-    a.esporte.toLowerCase().includes(busca.toLowerCase())
-  );
 
   return (
     <ImageBackground
@@ -82,13 +113,13 @@ export default function TelaGerenciarAtletas() {
           showsVerticalScrollIndicator={false}
         >
           {atletasFiltrados.map((atleta, idx) => {
-            const isSel = selecionados.includes(atleta.id);
+            const isSel = selecionados.includes(atleta.id || idx);
             return (
               <TouchableOpacity
-                key={atleta.id}
+                key={`atleta-${atleta.id || idx}`}
                 style={styles.atletaCard}
                 activeOpacity={0.75}
-                onPress={() => toggle(atleta.id)}
+                onPress={() => toggle(atleta.id || idx)}
               >
                 <View style={styles.atletaLeft}>
                   {atleta.foto ? (
