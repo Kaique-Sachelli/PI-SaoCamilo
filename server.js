@@ -38,6 +38,12 @@ async function inicializarBanco() {
       FOREIGN KEY (id_nutricionista) REFERENCES Usuario(id_usuario)
     )
   `);
+
+  try {
+    await db.query(`ALTER TABLE Atleta_Perfil ADD COLUMN id_treinador INT`);
+  } catch (_) {
+    // coluna já existe
+  }
 }
 
 // rota de login
@@ -197,27 +203,77 @@ app.patch('/usuario/:id/aprovar', async (req, res) => {
 //     });
 //   }
 
-app.get('/atletas', async (req, res) => { 
-  const busca = req.query.busca ? `%${req.query.busca}%` : null; 
-  
-  try { 
-    let sql = `SELECT id_usuario, nome, email, registro, tipo_perfil, situacao FROM Usuario WHERE tipo_perfil = 'Atleta' AND situacao = 'Ativo'`; 
-    const params = []; 
-    
-    if (busca) { 
-      sql += ' AND (nome LIKE ? OR email LIKE ? OR registro LIKE ?)'; 
-      params.push(busca, busca, busca); 
-    } 
-    
-    sql += ' ORDER BY nome'; 
-    
-    const [rows] = await db.query(sql, params); 
-    res.json(rows); 
-  } catch (err) { 
-    console.error(err); 
-    res.status(500).json({ sucesso: false, mensagem: err.message }); 
-  } 
+app.get('/atletas', async (req, res) => {
+  const busca = req.query.busca ? `%${req.query.busca}%` : null;
 
+  try {
+    let sql = `
+      SELECT u.id_usuario AS id, u.nome, ap.modalidade_esportiva AS esporte, u.situacao AS ativo
+      FROM Usuario u
+      LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = u.id_usuario
+      WHERE u.tipo_perfil = 'Atleta' AND u.situacao = 'Ativo'
+    `;
+    const params = [];
+
+    if (busca) {
+      sql += ' AND (u.nome LIKE ? OR ap.modalidade_esportiva LIKE ?)';
+      params.push(busca, busca);
+    }
+
+    sql += ' ORDER BY u.nome';
+
+    const [rows] = await db.query(sql, params);
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ sucesso: false, mensagem: err.message });
+  }
+});
+
+// rota de atletas de um treinador
+app.get('/treinador/:id/atletas', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [rows] = await db.query(
+      `SELECT u.id_usuario AS id, u.nome, ap.modalidade_esportiva AS esporte
+       FROM Usuario u
+       JOIN Atleta_Perfil ap ON ap.id_atleta = u.id_usuario
+       WHERE ap.id_treinador = ? AND u.situacao = 'Ativo'
+       ORDER BY u.nome`,
+      [id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ sucesso: false, mensagem: err.message });
+  }
+});
+
+// rota para atualizar a lista de atletas de um treinador
+app.put('/treinador/:id/atletas', async (req, res) => {
+  const { id } = req.params;
+  const { atleta_ids } = req.body;
+
+  if (!Array.isArray(atleta_ids)) {
+    return res.status(400).json({ sucesso: false, mensagem: 'atleta_ids deve ser um array' });
+  }
+
+  try {
+    await db.query(`UPDATE Atleta_Perfil SET id_treinador = NULL WHERE id_treinador = ?`, [id]);
+
+    if (atleta_ids.length > 0) {
+      await db.query(
+        `UPDATE Atleta_Perfil SET id_treinador = ? WHERE id_atleta IN (?)`,
+        [id, atleta_ids]
+      );
+    }
+
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ sucesso: false, mensagem: err.message });
+  }
 });
 
 // rota para enviar dieta do nutricionista para um atleta
@@ -670,7 +726,19 @@ app.get('/atleta/:id/sessoes', async (req, res) => {
   const { data } = req.query;
 
   try {
-    let query = `
+    let filtroData = '';
+    const params = [id];
+
+    if (data) {
+      const parts = data.split('/');
+      if (parts.length === 3) {
+        filtroData = ' AND DATE(st.data_hora_inicio) = ?';
+        params.push(`${parts[2]}-${parts[1]}-${parts[0]}`);
+      }
+    }
+
+    // Subquery para somar hidratação por sessão evita duplicatas por múltiplos eventos
+    const query = `
       SELECT
         st.id_sessao,
         st.data_hora_inicio,
@@ -684,26 +752,15 @@ app.get('/atleta/:id/sessoes', async (req, res) => {
         rc.percentual_variacao,
         rc.alerta_seguranca,
         rc.status_color,
-        rh.volume_ml,
+        (SELECT SUM(rh.volume_ml) FROM Registro_Hidratacao rh WHERE rh.id_sessao = st.id_sessao) AS volume_ml,
         ap.modalidade_esportiva
       FROM Sessao_Treino st
       LEFT JOIN Resultado_Calculo rc ON rc.id_sessao = st.id_sessao
-      LEFT JOIN Registro_Hidratacao rh ON rh.id_sessao = st.id_sessao
       LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = st.id_atleta
       WHERE st.id_atleta = ? AND st.status_sessao = 'Concluída'
+      ${filtroData}
+      ORDER BY st.data_hora_inicio DESC
     `;
-
-    const params = [id];
-
-    if (data) {
-      const parts = data.split('/');
-      if (parts.length === 3) {
-        query += ' AND DATE(st.data_hora_inicio) = ?';
-        params.push(`${parts[2]}-${parts[1]}-${parts[0]}`);
-      }
-    }
-
-    query += ' ORDER BY st.data_hora_inicio DESC';
 
     const [rows] = await db.query(query, params);
     res.json({ sucesso: true, sessoes: rows });
@@ -736,13 +793,12 @@ app.get('/sessao/:id', async (req, res) => {
         rc.percentual_variacao,
         rc.alerta_seguranca,
         rc.status_color,
-        rh.volume_ml,
+        (SELECT SUM(rh.volume_ml) FROM Registro_Hidratacao rh WHERE rh.id_sessao = st.id_sessao) AS volume_ml,
         ap.modalidade_esportiva,
         ss.nivel_fadiga,
         ss.sintomas_gastrointestinais
       FROM Sessao_Treino st
       LEFT JOIN Resultado_Calculo rc ON rc.id_sessao = st.id_sessao
-      LEFT JOIN Registro_Hidratacao rh ON rh.id_sessao = st.id_sessao
       LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = st.id_atleta
       LEFT JOIN Saude_Sintomas ss ON ss.id_sessao = st.id_sessao
       WHERE st.id_sessao = ?
