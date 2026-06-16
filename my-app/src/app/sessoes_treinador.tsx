@@ -2,52 +2,95 @@ import {
   Text,
   View,
   StyleSheet,
-  Image,
   TouchableOpacity,
   ScrollView,
   ImageBackground,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-
-const SESSOES = [
-  {
-    id: 'ultima',
-    label: 'Última sessão',
-    data: '22/04/2026, 10:02',
-    duracao: '90 min',
-    liquidos: '1.8L',
-    perdaPeso: '1.5%',
-  },
-  {
-    id: 'sessao4',
-    label: 'Sessão 4',
-    data: '05/04/2026, 12:56',
-    duracao: '87 min',
-    liquidos: '1.8L',
-    perdaPeso: '1.5%',
-  },
-  {
-    id: 'sessao3',
-    label: 'Sessão 3',
-    data: '22/03/2026, 18:02',
-    duracao: '30 min',
-    liquidos: '500ml',
-    perdaPeso: '1.5%',
-  },
-  {
-    id: 'sessao2',
-    label: 'Sessão 2',
-    data: '22/03/2026, 18:02',
-    duracao: '30 min',
-    liquidos: '500ml',
-    perdaPeso: '1.5%',
-  },
-];
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { getUrl } from '../constants/url';
 
 export default function SessoesTreinador() {
   const router = useRouter();
+  const { id_atleta } = useLocalSearchParams();
+
+  const [atleta, setAtleta] = useState<any>(null);
+  const [sessoes, setSessoes] = useState<any[]>([]);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    carregarDados();
+  }, []);
+
+  async function carregarDados() {
+    try {
+      setCarregando(true);
+
+      const usuarioResponse = await fetch(
+        getUrl(`/usuarios/${id_atleta}`)
+      );
+
+      const usuarioData = await usuarioResponse.json();
+
+      setAtleta(usuarioData);
+
+      const sessoesResponse = await fetch(
+        getUrl(`/atleta/${id_atleta}/sessoes`)
+      );
+
+      const sessoesData = await sessoesResponse.json();
+
+      if (sessoesData?.sucesso) {
+        setSessoes(sessoesData.sessoes || []);
+      }
+    } catch (erro) {
+      console.log('Erro ao carregar sessões:', erro);
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  const mediaLiquidos =
+    sessoes.length > 0
+      ? (
+          sessoes.reduce(
+            (acc, s) => acc + Number(s.volume_ml || 0),
+            0
+          ) /
+          sessoes.length /
+          1000
+        ).toFixed(1)
+      : '0';
+
+  const mediaPerda =
+    sessoes.length > 0
+      ? (
+          sessoes.reduce(
+            (acc, s) =>
+              acc + Number(s.percentual_variacao || 0),
+            0
+          ) / sessoes.length
+        ).toFixed(1)
+      : '0';
+
+  const sessoesSemana = sessoes.length;
+
+  if (carregando) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <ImageBackground
@@ -56,13 +99,25 @@ export default function SessoesTreinador() {
       resizeMode="cover"
     >
       <SafeAreaView style={styles.safeArea}>
-        {/* ── Header ── */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
-            <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.voltarBtn}
+          >
+            <Text style={styles.voltarTexto}>
+              {'< Voltar'}
+            </Text>
           </TouchableOpacity>
-          <Text style={styles.atletaNome}>Marcus Silva</Text>
-          <Text style={styles.atletaEsporte}>Volante</Text>
+
+          <Text style={styles.atletaNome}>
+            {atleta?.nome || 'Atleta'}
+          </Text>
+
+          <Text style={styles.atletaEsporte}>
+            {atleta?.modalidade_esportiva ||
+              atleta?.tipo_perfil ||
+              ''}
+          </Text>
         </View>
 
         <ScrollView
@@ -70,57 +125,161 @@ export default function SessoesTreinador() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* ── Cards de métricas ── */}
           <View style={styles.metricasRow}>
             <View style={styles.metricaCard}>
-              <Text style={[styles.metricaIcone, { color: '#e53935' }]}>⚡</Text>
-              <Text style={styles.metricaValor}>5</Text>
-              <Text style={styles.metricaLabel}>Sessões/Semana</Text>
+              <Text
+                style={[
+                  styles.metricaIcone,
+                  { color: '#e53935' },
+                ]}
+              >
+                ⚡
+              </Text>
+
+              <Text style={styles.metricaValor}>
+                {sessoesSemana}
+              </Text>
+
+              <Text style={styles.metricaLabel}>
+                Sessões
+              </Text>
             </View>
+
             <View style={styles.metricaCard}>
-              <Text style={[styles.metricaIcone, { color: '#1565c0' }]}>💧</Text>
-              <Text style={styles.metricaValor}>2.4</Text>
-              <Text style={styles.metricaLabel}>L médio</Text>
+              <Text
+                style={[
+                  styles.metricaIcone,
+                  { color: '#1565c0' },
+                ]}
+              >
+                💧
+              </Text>
+
+              <Text style={styles.metricaValor}>
+                {mediaLiquidos}
+              </Text>
+
+              <Text style={styles.metricaLabel}>
+                L médio
+              </Text>
             </View>
+
             <View style={styles.metricaCard}>
-              <Text style={[styles.metricaIcone, { color: '#333' }]}>📊</Text>
-              <Text style={styles.metricaValor}>1.8%</Text>
-              <Text style={styles.metricaLabel}>Perda média</Text>
+              <Text
+                style={[
+                  styles.metricaIcone,
+                  { color: '#333' },
+                ]}
+              >
+                📊
+              </Text>
+
+              <Text style={styles.metricaValor}>
+                {mediaPerda}%
+              </Text>
+
+              <Text style={styles.metricaLabel}>
+                Perda média
+              </Text>
             </View>
           </View>
 
-          {/* ── Lista de sessões ── */}
-          {SESSOES.map((s) => (
+          {sessoes.length === 0 && (
+            <View style={styles.sessaoCard}>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  color: '#666',
+                }}
+              >
+                Nenhuma sessão encontrada.
+              </Text>
+            </View>
+          )}
+
+          {sessoes.map((s, index) => (
             <TouchableOpacity
-              key={s.id}
+              key={
+                s.id_sessao?.toString() ||
+                index.toString()
+              }
               style={styles.sessaoCard}
               activeOpacity={0.75}
-              onPress={() => router.push('/sessao_selecionada')}
+              onPress={() =>
+                router.push({
+                  pathname: '/sessao_selecionada',
+                  params: {
+                    idSessao: s.id_sessao,
+                  },
+                })
+              }
             >
-              {/* Cabeçalho da sessão */}
               <View style={styles.sessaoTopo}>
-                <Text style={styles.sessaoLabel}>{s.label}</Text>
-                <Text style={styles.sessaoSeta}>›</Text>
+                <Text style={styles.sessaoLabel}>
+                  {index === 0
+                    ? 'Última sessão'
+                    : `Sessão ${
+                        sessoes.length - index
+                      }`}
+                </Text>
+
+                <Text style={styles.sessaoSeta}>
+                  ›
+                </Text>
               </View>
 
-              {/* Linhas de detalhe */}
               <View style={styles.divisor} />
 
               <View style={styles.detalheRow}>
-                <Text style={styles.detalheChave}>Data</Text>
-                <Text style={styles.detalheValor}>{s.data}</Text>
+                <Text style={styles.detalheChave}>
+                  Data
+                </Text>
+
+                <Text style={styles.detalheValor}>
+                  {s.data_hora_inicio
+                    ? new Date(
+                        s.data_hora_inicio
+                      ).toLocaleString('pt-BR')
+                    : '-'}
+                </Text>
               </View>
+
               <View style={styles.detalheRow}>
-                <Text style={styles.detalheChave}>Duração</Text>
-                <Text style={styles.detalheValor}>{s.duracao}</Text>
+                <Text style={styles.detalheChave}>
+                  Duração
+                </Text>
+
+                <Text style={styles.detalheValor}>
+                  {s.duracao_minutos || 0} min
+                </Text>
               </View>
+
               <View style={styles.detalheRow}>
-                <Text style={styles.detalheChave}>Ingestão de líquidos</Text>
-                <Text style={styles.detalheValor}>{s.liquidos}</Text>
+                <Text style={styles.detalheChave}>
+                  Ingestão de líquidos
+                </Text>
+
+                <Text style={styles.detalheValor}>
+                  {(
+                    Number(s.volume_ml || 0) / 1000
+                  ).toFixed(1)}
+                  L
+                </Text>
               </View>
+
               <View style={styles.detalheRow}>
-                <Text style={styles.detalheChave}>Perda de peso</Text>
-                <Text style={[styles.detalheValor, styles.perdaVerde]}>{s.perdaPeso}</Text>
+                <Text style={styles.detalheChave}>
+                  Perda de peso
+                </Text>
+
+                <Text
+                  style={[
+                    styles.detalheValor,
+                    styles.perdaVerde,
+                  ]}
+                >
+                  {s.percentual_variacao || 0}%
+                </Text>
               </View>
             </TouchableOpacity>
           ))}

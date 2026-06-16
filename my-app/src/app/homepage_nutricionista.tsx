@@ -18,7 +18,7 @@ import { NotificacaoPopup } from './notificacao';
 import { getUrl } from '../constants/url';
 
 interface Atleta {
-  id: number;
+  id_usuario: number;
   nome: string;
   esporte: string;
   ativo: string;
@@ -58,6 +58,7 @@ export default function HomepageNutricionista() {
       }
 
       const dados: Atleta[] = await resposta.json();
+      console.log('ATLETAS:', dados);
       setAtletas(dados);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
@@ -78,7 +79,7 @@ export default function HomepageNutricionista() {
     router.push({
       pathname: '/perfil_atleta_nutricionista',
       params: {
-        id_atleta: String(atleta.id),
+        id_atleta: String(atleta.id_usuario),
         nome: atleta.nome,
         email: atleta.email || '',
         telefone: atleta.telefone || '',
@@ -178,10 +179,19 @@ export default function HomepageNutricionista() {
           {/* Lista de atletas */}
           {atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
-              key={`atleta-${atleta.id || idx}`}
+              key={`atleta-${atleta.id_usuario || idx}`}
               style={styles.atletaCard}
               activeOpacity={0.75}
-              onPress={() => router.push('/sessoes_treinador')}
+              onPress={() =>
+                router.push({
+                  pathname: '/sessoes_treinador',
+                  params: {
+                    id_atleta: atleta.id_usuario,
+                    nome: atleta.nome,
+                    modalidade: atleta.esporte || 'Atleta',
+                  },
+                })
+              }
             >
               <View style={styles.atletaLeft}>
                 {atleta.foto ? (
