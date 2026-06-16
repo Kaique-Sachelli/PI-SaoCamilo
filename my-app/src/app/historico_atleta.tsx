@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router';
 import { NavbarAtleta } from './NavbarAtleta';
 import { useUser } from '../context/UserContext';
 import { getUrl } from '../constants/url';
+import * as Print from 'expo-print';
 
 type Sessao = {
   id_sessao: number;
@@ -32,6 +33,7 @@ type Sessao = {
   alerta_seguranca: string | null;
   status_color: 'Verde' | 'Amarelo' | 'Vermelho' | null;
   volume_ml: number | null;
+  modalidade_esportiva: string | null;
 };
 
 type Aba = 'Sessões' | 'Exames';
@@ -247,6 +249,126 @@ function AbaExames() {
   );
 }
 
+// ─── Exportar PDF ─────────────────────────────────────────────────────────────
+function statusTexto(statusColor: string | null): string {
+  if (statusColor === 'Verde') return 'Hidratação OK';
+  if (statusColor === 'Vermelho') return 'Crítico';
+  if (statusColor === 'Amarelo') return 'Atenção';
+  return '--';
+}
+
+function statusCorHex(statusColor: string | null): string {
+  if (statusColor === 'Verde') return '#2e7d32';
+  if (statusColor === 'Vermelho') return '#b71c1c';
+  if (statusColor === 'Amarelo') return '#e65100';
+  return '#888';
+}
+
+async function exportarPDF(
+  sessoes: Sessao[],
+  nomeAtleta: string | undefined,
+  taxaMedia: number | null,
+  perdaMedia: number | null,
+) {
+  if (sessoes.length === 0) {
+    Alert.alert('Sem dados', 'Não há sessões para exportar.');
+    return;
+  }
+
+  const dataExport = new Date().toLocaleDateString('pt-BR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+  });
+
+  const linhas = sessoes.map(s => {
+    const d = new Date(s.data_hora_inicio);
+    const data = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const taxa = s.taxa_sudorese !== null ? `${Number(s.taxa_sudorese).toFixed(2)} L/h` : '--';
+    const perda = s.perda_massa_ajustada !== null ? `${Number(s.perda_massa_ajustada).toFixed(2)} kg` : '--';
+    const variacao = s.percentual_variacao !== null ? `${Number(s.percentual_variacao).toFixed(1)}%` : '--';
+    const status = statusTexto(s.status_color);
+    const cor = statusCorHex(s.status_color);
+    return `
+      <tr>
+        <td>${data} ${hora}</td>
+        <td>${s.duracao_minutos} min</td>
+        <td>${taxa}</td>
+        <td>${perda}</td>
+        <td>${variacao}</td>
+        <td style="color:${cor}; font-weight:600;">${status}</td>
+      </tr>`;
+  }).join('');
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 32px; color: #222; }
+    h1   { color: #B3151F; font-size: 22px; margin: 0 0 4px; }
+    h2   { font-size: 14px; color: #555; font-weight: normal; margin: 0 0 20px; }
+    .resumo { display: flex; gap: 24px; margin-bottom: 24px; }
+    .card   { border: 1px solid #e0e0e0; border-radius: 10px; padding: 14px 20px; min-width: 140px; }
+    .card-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+    .card-valor { font-size: 24px; font-weight: 700; color: #111; }
+    .card-unidade { font-size: 12px; color: #888; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #B3151F; color: #fff; padding: 10px 8px; text-align: left; font-size: 12px; }
+    td { padding: 9px 8px; border-bottom: 1px solid #f0f0f0; }
+    tr:nth-child(even) td { background: #fafafa; }
+    .rodape { margin-top: 28px; font-size: 11px; color: #aaa; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>São Camilo — Nutri-Esportiva</h1>
+  <h2>Histórico de Sessões  •  ${nomeAtleta ?? 'Atleta'}  •  Gerado em ${dataExport}</h2>
+
+  <div class="resumo">
+    <div class="card">
+      <div class="card-label">Taxa de sudorese média</div>
+      <div class="card-valor">${taxaMedia !== null ? taxaMedia.toFixed(2) : '--'}</div>
+      <div class="card-unidade">L/h</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Perda de massa média</div>
+      <div class="card-valor">${perdaMedia !== null ? perdaMedia.toFixed(1) + '%' : '--'}</div>
+      <div class="card-unidade">Peso corporal</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Total de sessões</div>
+      <div class="card-valor">${sessoes.length}</div>
+      <div class="card-unidade">registradas</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Data / Hora</th>
+        <th>Duração</th>
+        <th>Taxa de Sudorese</th>
+        <th>Perda Ajustada</th>
+        <th>Variação %</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>${linhas}</tbody>
+  </table>
+
+  <div class="rodape">São Camilo — Projeto Integrador • ${dataExport}</div>
+</body>
+</html>`;
+
+  try {
+    await Print.printAsync({ html });
+  } catch (err: any) {
+    if (err?.message?.includes('cancelled') || err?.message?.includes('dismissed')) return;
+    Alert.alert('Erro', 'Não foi possível gerar o PDF.');
+    console.error('exportarPDF erro:', err);
+  }
+}
+
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function HistoricoAtleta() {
   const router = useRouter();
@@ -400,9 +522,17 @@ export default function HistoricoAtleta() {
               <View style={styles.card}>
                 <View style={styles.sessoesHeader}>
                   <Text style={styles.cardTitulo}>Sessões Recentes</Text>
-                  <TouchableOpacity onPress={() => setCalVisible(true)} style={styles.calBtn}>
-                    <Text style={styles.calBtnIcone}>📅</Text>
-                  </TouchableOpacity>
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <TouchableOpacity
+                      onPress={() => exportarPDF(sessoesFiltradas, usuario?.nome, taxaMedia, perdaMedia)}
+                      style={styles.pdfBtn}
+                    >
+                      <Text style={styles.pdfBtnTexto}>PDF</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setCalVisible(true)} style={styles.calBtn}>
+                      <Text style={styles.calBtnIcone}>📅</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
 
                 <View style={styles.buscaRow}>
@@ -465,7 +595,14 @@ export default function HistoricoAtleta() {
                               </Text>
                             </View>
                           </View>
-                          <Text style={styles.sessaoNome}>{s.duracao_minutos} min de treino</Text>
+                          <View style={styles.sessaoNomeRow}>
+                            <Text style={styles.sessaoNome}>{s.duracao_minutos} min de treino</Text>
+                            {s.modalidade_esportiva ? (
+                              <View style={styles.modalidadeTag}>
+                                <Text style={styles.modalidadeTagTexto}>🏅 {s.modalidade_esportiva}</Text>
+                              </View>
+                            ) : null}
+                          </View>
                           <View style={styles.sessaoMetricasRow}>
                             <View style={styles.sessaoMetrica}>
                               <Text style={styles.sessaoMetricaLabel}>Taxa de sudorese</Text>
@@ -604,6 +741,12 @@ const styles = StyleSheet.create({
   legendaText: { fontSize: 12, color: '#555' },
 
   sessoesHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  pdfBtn: {
+    height: 36, paddingHorizontal: 14, borderRadius: 10,
+    backgroundColor: '#B3151F',
+    justifyContent: 'center', alignItems: 'center',
+  },
+  pdfBtnTexto: { fontSize: 13, fontWeight: '700', color: '#fff' },
   calBtn: {
     width: 36, height: 36, borderRadius: 10,
     backgroundColor: '#f5f5f5',
@@ -636,7 +779,13 @@ const styles = StyleSheet.create({
   statusOkText: { color: '#2e7d32' },
   statusAtencaoText: { color: '#e65100' },
   statusCriticoText: { color: '#b71c1c' },
+  sessaoNomeRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   sessaoNome: { fontSize: 16, fontWeight: '700', color: '#111' },
+  modalidadeTag: {
+    backgroundColor: '#f0f0f0', borderRadius: 20,
+    paddingHorizontal: 10, paddingVertical: 3,
+  },
+  modalidadeTagTexto: { fontSize: 11, color: '#555', fontWeight: '600' },
   sessaoMetricasRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
   sessaoMetrica: { gap: 2 },
   sessaoMetricaLabel: { fontSize: 10, color: '#999' },

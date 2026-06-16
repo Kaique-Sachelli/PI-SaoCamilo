@@ -20,11 +20,12 @@ export default function CronometroScreen() {
   const [urinaInput, setUrinaInput] = useState('');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const router = useRouter();
-  const { massa_pre, clima_temp, clima_umidade, urina_pre_cor } = useLocalSearchParams<{
+  const { massa_pre, clima_temp, clima_umidade, urina_pre_cor, modalidade } = useLocalSearchParams<{
     massa_pre: string;
     clima_temp: string;
     clima_umidade: string;
     urina_pre_cor: string;
+    modalidade: string;
   }>();
 
   useEffect(() => {
@@ -67,7 +68,7 @@ export default function CronometroScreen() {
     const doEncerrar = () => {
       setRunning(false);
       router.push(
-        `/checklist-pos-sessao?massa_pre=${massa_pre}&clima_temp=${clima_temp}&clima_umidade=${clima_umidade}&ml_ingerido=${mlIngeridos}&duracao_segundos=${seconds}&urina_pre_cor=${urina_pre_cor ?? ''}&urina_sessao=${parseInt(urinaInput) || 0}`
+        `/checklist-pos-sessao?massa_pre=${massa_pre}&clima_temp=${clima_temp}&clima_umidade=${clima_umidade}&ml_ingerido=${mlIngeridos}&duracao_segundos=${seconds}&urina_pre_cor=${urina_pre_cor ?? ''}&urina_sessao=${parseInt(urinaInput) || 0}&modalidade=${encodeURIComponent(modalidade ?? '')}`
       );
     };
 
