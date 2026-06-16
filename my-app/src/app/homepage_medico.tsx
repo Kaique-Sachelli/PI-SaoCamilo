@@ -127,7 +127,8 @@ const atletasFiltrados = atletas.filter((a) => {
           {/* Lista de atletas */}
           {atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
-              key={atleta.id_usuario}
+              key={`atleta-${atleta.id || idx}`}
+
               style={styles.atletaCard}
               activeOpacity={0.75}
               onPress={() => router.push({ pathname: '/sessoes_medico', params: { id_atleta: String(atleta.id_usuario), nome: atleta.nome } })}

@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useUser } from '../context/UserContext';
-import { NavbarMedico } from './Navbar_Medico';
+import { NavbarNutricionista } from './Navbar_nutricionista';
 
 export default function PerfilTreinador() {
   const router = useRouter();
@@ -38,7 +38,7 @@ export default function PerfilTreinador() {
           </View>
 
           <Text style={styles.nomeTexto}>{usuario?.nome}</Text>
-          <Text style={styles.funcaoTexto}>Treinador</Text>
+          <Text style={styles.funcaoTexto}>{usuario?.tipo_perfil}</Text>
         </View>
 
         <ScrollView
@@ -89,7 +89,7 @@ export default function PerfilTreinador() {
         </ScrollView>
 
         {/* ── Bottom Nav ── */}
-        <NavbarMedico active="perfil" />
+        <NavbarNutricionista active="perfil" />
 
       </SafeAreaView>
     </ImageBackground>

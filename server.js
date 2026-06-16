@@ -6,6 +6,7 @@ app.use(express.json());
 
 const db = require('./db');
 const bcrypt = require('bcrypt');
+const https = require('https');
 
 function parseDateBR(str) {
   const parts = str.split('/');
@@ -520,6 +521,7 @@ app.post('/sessao/completa', async (req, res) => {
     duracao_minutos, volume_ml,
     perda_massa_ajustada, taxa_sudorese, percentual_variacao,
     alerta_seguranca, status_color,
+    modalidade_esportiva,
     intensidade_percebida, roupas_encharcadas, urina_pre_cor,
     volume_urina_ml,
     nivel_fadiga, sintomas_gastrointestinais,
@@ -530,6 +532,13 @@ app.post('/sessao/completa', async (req, res) => {
       'INSERT IGNORE INTO Atleta_Perfil (id_atleta) VALUES (?)',
       [id_atleta]
     );
+
+    if (modalidade_esportiva) {
+      await db.query(
+        'UPDATE Atleta_Perfil SET modalidade_esportiva = ? WHERE id_atleta = ?',
+        [modalidade_esportiva, id_atleta]
+      );
+    }
 
     const [sessao] = await db.query(
       `INSERT INTO Sessao_Treino
@@ -583,6 +592,7 @@ app.get('/atleta/:id/ultima-sessao', async (req, res) => {
     console.log('Buscando ultima sessao para id_atleta:', id);
     const [rows] = await db.query(
       `SELECT
+         st.id_sessao,
          st.data_hora_inicio,
          st.duracao_minutos,
          st.massa_pre,
@@ -634,10 +644,12 @@ app.get('/atleta/:id/sessoes', async (req, res) => {
         rc.percentual_variacao,
         rc.alerta_seguranca,
         rc.status_color,
-        rh.volume_ml
+        rh.volume_ml,
+        ap.modalidade_esportiva
       FROM Sessao_Treino st
       LEFT JOIN Resultado_Calculo rc ON rc.id_sessao = st.id_sessao
       LEFT JOIN Registro_Hidratacao rh ON rh.id_sessao = st.id_sessao
+      LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = st.id_atleta
       WHERE st.id_atleta = ? AND st.status_sessao = 'Concluída'
     `;
 
@@ -675,17 +687,24 @@ app.get('/sessao/:id', async (req, res) => {
         st.massa_pos,
         st.clima_temp,
         st.clima_umidade,
+        st.intensidade_percebida,
+        st.roupas_encharcadas,
+        st.urina_pre_cor,
+        st.volume_urina_ml,
         rc.taxa_sudorese,
         rc.perda_massa_ajustada,
         rc.percentual_variacao,
         rc.alerta_seguranca,
         rc.status_color,
         rh.volume_ml,
-        ap.modalidade_esportiva
+        ap.modalidade_esportiva,
+        ss.nivel_fadiga,
+        ss.sintomas_gastrointestinais
       FROM Sessao_Treino st
       LEFT JOIN Resultado_Calculo rc ON rc.id_sessao = st.id_sessao
       LEFT JOIN Registro_Hidratacao rh ON rh.id_sessao = st.id_sessao
       LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = st.id_atleta
+      LEFT JOIN Saude_Sintomas ss ON ss.id_sessao = st.id_sessao
       WHERE st.id_sessao = ?
     `, [id]);
 
@@ -704,13 +723,11 @@ app.get('/peso/:id', async (req, res) => {
   const { id } = req.params;
 
   const [rows] = await db.query(
-    `SELECT peso
-     FROM Atleta_Perfil
-     WHERE id_atleta = ?`,
+    `SELECT peso FROM Atleta_Perfil WHERE id_atleta = ?`,
     [id]
   );
 
-    res.json({ peso: rows[0] });
+  res.json({ peso: rows[0]?.peso ?? null });
 });
 
 inicializarBanco()
@@ -728,16 +745,43 @@ app.get('/altura/:id', async (req, res) => {
   const { id } = req.params;
 
   const [rows] = await db.query(
-    `SELECT altura
-     FROM Atleta_Perfil
-     WHERE id_atleta = ?`,
+    `SELECT altura FROM Atleta_Perfil WHERE id_atleta = ?`,
     [id]
   );
 
-    res.json({ altura: rows[0] });
+  res.json({ altura: rows[0]?.altura ?? null });
 });
 
-app.listen(3000, () => {
-  console.log('rodando na porta 3000');
+// rota de clima atual via OpenWeatherMap
+app.get('/clima', (req, res) => {
+  const lat = parseFloat(req.query.lat) || -23.5505;
+  const lon = parseFloat(req.query.lon) || -46.6333;
+  const API_KEY = '767b1b3605d38e5550bdcf4fbed7be5f';
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=pt_br`;
+
+  https.get(url, (apiRes) => {
+    let data = '';
+    apiRes.on('data', chunk => { data += chunk; });
+    apiRes.on('end', () => {
+      try {
+        const json = JSON.parse(data);
+        res.json({
+          sucesso: true,
+          clima: {
+            temp: Math.round(json.main.temp),
+            sensacao: Math.round(json.main.feels_like),
+            umidade: json.main.humidity,
+            vento: Math.round((json.wind?.speed || 0) * 3.6),
+            descricao: json.weather[0].description,
+          },
+        });
+      } catch {
+        res.status(500).json({ sucesso: false, mensagem: 'Erro ao processar dados de clima' });
+      }
+    });
+  }).on('error', (err) => {
+    console.error('Erro na API de clima:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro ao buscar clima' });
+  });
 });
 
