@@ -46,7 +46,7 @@ export default function PerfilTreinador() {
           </View>
 
           <Text style={styles.nomeTexto}>{usuario?.nome}</Text>
-          <Text style={styles.funcaoTexto}>Médico</Text>
+          <Text style={styles.funcaoTexto}>{usuario?.tipo_perfil}</Text>
         </View>
 
         <ScrollView

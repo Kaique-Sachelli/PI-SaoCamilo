@@ -96,7 +96,7 @@ export default function Perfil() {
           </View>
 
           <Text style={styles.nome}>{usuario?.nome}</Text>
-          <Text style={styles.posicao}>Vôlei  •  Arremessador</Text>
+          <Text style={styles.posicao}>{usuario?.tipo_perfil}</Text>
         </View>
 
         <ScrollView
