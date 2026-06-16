@@ -11,6 +11,7 @@ import {
   ImageBackground,
   Platform,
   Alert,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -68,6 +69,8 @@ export default function GerenciarUsuarios() {
   const router = useRouter();
   const [busca, setBusca] = useState('');
   const [categoria, setCategoria] = useState<Categoria | 'Todos'>('Todos');
+  const [statusFiltro, setStatusFiltro] = useState<'Ativos' | 'Desativados'>('Ativos');
+  const [statusMenuAberto, setStatusMenuAberto] = useState(false);
   const [removidos, setRemovidoss] = useState<number[]>([]);
   const [usuarios, setUsuarios] = useState<any[]>([]);
 
@@ -91,6 +94,8 @@ async function excluirUsuario(id: number) {
       `${API_URL}/usuario/${id}/desativar`,
       {
         method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
       }
     );
 
@@ -98,42 +103,136 @@ async function excluirUsuario(id: number) {
 
     if (dados.sucesso) {
       carregarUsuarios();
+      if (Platform.OS === 'web') {
+        alert('Usuário desativado com sucesso');
+      } else {
+        Alert.alert('Sucesso', 'Usuário desativado com sucesso');
+      }
+    } else {
+      if (Platform.OS === 'web') {
+        alert('Erro: ' + (dados.mensagem || 'Não foi possível desativar o usuário'));
+      } else {
+        Alert.alert('Erro', dados.mensagem || 'Não foi possível desativar o usuário');
+      }
     }
 
   } catch (erro) {
     console.log('Erro ao desativar usuário:', erro);
+    if (Platform.OS === 'web') {
+      alert('Erro ao conectar ao servidor');
+    } else {
+      Alert.alert('Erro', 'Erro ao conectar ao servidor');
+    }
   }
 }
-  const handleRemover = (id: number, nome: string) => {
-  Alert.alert(
-    'Desativar usuário',
-    `Deseja desativar ${nome}?`,
-    [
+async function reativarUsuario(id: number) {
+  try {
+    const response = await fetch(
+      `${API_URL}/usuario/${id}/aprovar`,
       {
-        text: 'Cancelar',
-        style: 'cancel',
-      },
-      {
-        text: 'Desativar',
-        style: 'destructive',
-        onPress: async () => {
-          await excluirUsuario(id);
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      }
+    );
+
+    const dados = await response.json();
+
+    if (dados.sucesso) {
+      carregarUsuarios();
+      if (Platform.OS === 'web') {
+        alert('Usuário reativado com sucesso');
+      } else {
+        Alert.alert('Sucesso', 'Usuário reativado com sucesso');
+      }
+    } else {
+      if (Platform.OS === 'web') {
+        alert('Erro: ' + (dados.mensagem || 'Não foi possível reativar o usuário'));
+      } else {
+        Alert.alert('Erro', dados.mensagem || 'Não foi possível reativar o usuário');
+      }
+    }
+
+  } catch (erro) {
+    console.log('Erro ao reativar usuário:', erro);
+    if (Platform.OS === 'web') {
+      alert('Erro ao conectar ao servidor');
+    } else {
+      Alert.alert('Erro', 'Erro ao conectar ao servidor');
+    }
+  }
+}
+  const handleRemover = (id: number, nome: string, situacao: string) => {
+    if (situacao === 'Desativado') {
+      if (Platform.OS === 'web') {
+        const confirmar = window.confirm(`Tem certeza que deseja reativar ${nome}?`);
+        if (!confirmar) return;
+        reativarUsuario(id);
+        return;
+      }
+
+      Alert.alert(
+        'Reativar usuário',
+        `Tem certeza que deseja reativar ${nome}?`,
+        [
+          {
+            text: 'Cancelar',
+            style: 'cancel',
+          },
+          {
+            text: 'Reativar',
+            style: 'default',
+            onPress: () => {
+              reativarUsuario(id);
+            },
+          },
+        ]
+      );
+      return;
+    }
+
+    if (Platform.OS === 'web') {
+      const confirmar = window.confirm(`Tem certeza que deseja desativar ${nome}?`);
+      if (!confirmar) return;
+      excluirUsuario(id);
+      return;
+    }
+
+    Alert.alert(
+      'Desativar usuário',
+      `Tem certeza que deseja desativar ${nome}?`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
         },
-      },
-    ]
-  );
-};
+        {
+          text: 'Desativar',
+          style: 'destructive',
+          onPress: () => {
+            excluirUsuario(id);
+          },
+        },
+      ]
+    );
+  };
   const lista = usuarios.filter(
-  (u) =>
-    u.situacao !== 'Desativado' &&
-    (categoria === 'Todos' || converterCategoria(u.tipo_perfil) === categoria) &&
-    (
+  (u) => {
+    const statusOk = statusFiltro === 'Ativos' 
+      ? u.situacao !== 'Desativado' 
+      : u.situacao === 'Desativado';
+    
+    const categoriasOk = categoria === 'Todos' || converterCategoria(u.tipo_perfil) === categoria;
+    
+    const buscaOk = 
       u.nome.toLowerCase().includes(busca.toLowerCase()) ||
       u.email.toLowerCase().includes(busca.toLowerCase()) ||
       (u.registro || '').toLowerCase().includes(busca.toLowerCase()) ||
       u.tipo_perfil.toLowerCase().includes(busca.toLowerCase()) ||
-      u.situacao.toLowerCase().includes(busca.toLowerCase())
-    )
+      u.situacao.toLowerCase().includes(busca.toLowerCase());
+    
+    return statusOk && categoriasOk && buscaOk;
+  }
 );
 
   /**  const lista = USUARIOS.filter(
@@ -176,24 +275,64 @@ async function excluirUsuario(id: number) {
         </View>
 
         {/* ── Filtros ── */}
-        <ScrollView
-          style={styles.filtrosScroll}
-          contentContainerStyle={styles.filtrosRow}
-          showsVerticalScrollIndicator={false}
-          nestedScrollEnabled
-        >
-          {CATEGORIAS_GERAL.map((c) => (
+        <View style={styles.filtrosContainer}>
+          <ScrollView
+            style={styles.filtrosScroll}
+            contentContainerStyle={styles.filtrosRow}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled
+            horizontal
+          >
+            {CATEGORIAS_GERAL.map((c) => (
+              <TouchableOpacity
+                key={c}
+                style={[styles.filtroPill, categoria === c && styles.filtroPillAtivo]}
+                onPress={() => setCategoria(c)}
+              >
+                <Text style={[styles.filtroTexto, categoria === c && styles.filtroTextoAtivo]}>
+                  {c}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Status Dropdown Button - Canto Direito */}
+          <TouchableOpacity
+            style={[styles.statusDropdownBtn, statusFiltro === 'Ativos' && styles.statusDropdownBtnAtivo]}
+            onPress={() => setStatusMenuAberto(!statusMenuAberto)}
+          >
+            <Text style={[styles.statusDropdownText, statusFiltro === 'Ativos' && styles.statusDropdownTextAtivo]}>
+              {statusFiltro}
+            </Text>
+            <Text style={[styles.statusDropdownArrow, statusFiltro === 'Ativos' && styles.statusDropdownArrowAtivo]}>
+              {statusMenuAberto ? '▲' : '▼'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Status Dropdown Menu - Fora do Container */}
+        {statusMenuAberto && (
+          <View style={styles.statusDropdownMenuContainer}>
             <TouchableOpacity
-              key={c}
-              style={[styles.filtroPill, categoria === c && styles.filtroPillAtivo]}
-              onPress={() => setCategoria(c)}
+              style={styles.statusDropdownItem}
+              onPress={() => {
+                setStatusFiltro('Ativos');
+                setStatusMenuAberto(false);
+              }}
             >
-              <Text style={[styles.filtroTexto, categoria === c && styles.filtroTextoAtivo]}>
-                {c}
-              </Text>
+              <Text style={styles.statusDropdownItemText}>Ativos</Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
+            <TouchableOpacity
+              style={styles.statusDropdownItem}
+              onPress={() => {
+                setStatusFiltro('Desativados');
+                setStatusMenuAberto(false);
+              }}
+            >
+              <Text style={styles.statusDropdownItemText}>Desativados</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* ── Lista ── */}
         <ScrollView
@@ -228,9 +367,9 @@ async function excluirUsuario(id: number) {
 
               <TouchableOpacity
                 style={styles.btnLixo}
-                onPress={() => handleRemover(u.id_usuario, u.nome)}
+                onPress={() => handleRemover(u.id_usuario, u.nome, u.situacao)}
               >
-                <Text style={styles.lixoIcone}>🗑</Text>
+                <Text style={styles.lixoIcone}>{u.situacao === 'Desativado' ? '↺' : '🗑'}</Text>
               </TouchableOpacity>
             </View>
           ))}
@@ -277,16 +416,22 @@ const styles = StyleSheet.create({
   searchIcone: { fontSize: 15, marginRight: 8, opacity: 0.45 },
   searchInput: { flex: 1, fontSize: 14, color: '#333' },
 
+  // Container Filtros
+  filtrosContainer: {
+    position: 'relative',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+
   // Filtros
   filtrosScroll: {
-    maxHeight: 100,
-    paddingHorizontal: 16,
+    maxHeight: 50,
   },
   filtrosRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingVertical: 10,
     gap: 8,
+    paddingRight: 120,
   },
   filtroPill: {
     borderRadius: 20,
@@ -302,6 +447,72 @@ const styles = StyleSheet.create({
   },
   filtroTexto: { fontSize: 13, color: '#555', fontWeight: '500' },
   filtroTextoAtivo: { color: '#fff', fontWeight: '700' },
+
+  // Status Dropdown
+  statusDropdownBtn: {
+    position: 'absolute',
+    right: 16,
+    top: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  statusDropdownBtnAtivo: {
+    backgroundColor: RED,
+    borderColor: RED,
+  },
+  statusDropdownText: { fontSize: 13, color: '#555', fontWeight: '500' },
+  statusDropdownTextAtivo: { color: '#fff', fontWeight: '700' },
+  statusDropdownArrow: { fontSize: 10, color: '#555', marginLeft: 4 },
+  statusDropdownArrowAtivo: { color: '#fff' },
+
+  statusDropdownMenu: {
+    position: 'absolute',
+    right: 16,
+    top: 50,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 100,
+  },
+  statusDropdownMenuContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    marginHorizontal: 16,
+    marginTop: -5,
+    marginRight: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 1000,
+  },
+  statusDropdownItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  statusDropdownItemText: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '500',
+  },
 
   // Scroll
   scroll: { flex: 1 },
