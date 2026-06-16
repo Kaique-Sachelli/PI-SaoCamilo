@@ -248,7 +248,19 @@ export default function HomepageAtleta() {
             </View>
           </View>
 
-          {/* ── Botão Pronto para Treinar ── */}
+          <TouchableOpacity
+            style={styles.btnExames}
+            activeOpacity={0.85}
+            onPress={() => router.push('/exames_atleta')}
+          >
+            <Text style={styles.btnExamesIcone}>🩺</Text>
+            <View style={styles.btnExamesTextos}>
+              <Text style={styles.btnExamesTitulo}>Meus Exames</Text>
+              <Text style={styles.btnExamesSub}>Compartilhados com seu médico</Text>
+            </View>
+            <Text style={styles.btnExamesSeta}>›</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.btnTreinar}
             activeOpacity={0.85}
@@ -402,5 +414,25 @@ const styles = StyleSheet.create({
     }),
   },
   btnTreinarTexto: { color: '#fff', fontSize: 18, fontWeight: '700', letterSpacing: 1 },
+
+  btnExames: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    ...Platform.select({
+      ios: { boxshadow: '0px 1px 4px rgba(0,0,0,0.08)' },
+      android: { elevation: 2 },
+      web: { boxshadow: '0px 1px 4px rgba(0,0,0,0.08)' },
+    }),
+  },
+  btnExamesIcone: { fontSize: 26 },
+  btnExamesTextos: { flex: 1 },
+  btnExamesTitulo: { fontSize: 15, fontWeight: '700', color: '#111' },
+  btnExamesSub: { fontSize: 12, color: '#888', marginTop: 2 },
+  btnExamesSeta: { fontSize: 22, color: '#ccc' },
 
 });
