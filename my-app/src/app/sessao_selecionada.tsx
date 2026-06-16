@@ -21,6 +21,10 @@ type SessaoDetalhe = {
   massa_pos: number;
   clima_temp: number | null;
   clima_umidade: number | null;
+  intensidade_percebida: string | null;
+  roupas_encharcadas: number | null;
+  urina_pre_cor: number | null;
+  volume_urina_ml: number | null;
   taxa_sudorese: number | null;
   perda_massa_ajustada: number | null;
   percentual_variacao: number | null;
@@ -28,6 +32,8 @@ type SessaoDetalhe = {
   status_color: 'Verde' | 'Amarelo' | 'Vermelho' | null;
   volume_ml: number | null;
   modalidade_esportiva: string | null;
+  nivel_fadiga: number | null;
+  sintomas_gastrointestinais: string | null;
 };
 
 const ESCALA_CORES = [
@@ -106,7 +112,9 @@ export default function SessaoSelecionada() {
     })();
   }, [id]);
 
-  const nivelNum = nivelUrina(sessao?.percentual_variacao ?? null);
+  const nivelNum = sessao?.urina_pre_cor
+    ? Math.min(8, Math.max(1, sessao.urina_pre_cor))
+    : nivelUrina(sessao?.percentual_variacao ?? null);
   const nivelIdx = nivelNum - 1;
 
   return (
@@ -314,13 +322,76 @@ export default function SessaoSelecionada() {
               <View style={styles.linhaRow}>
                 <View style={styles.linhaEsquerda}>
                   <Text style={styles.condicaoIcone}>⚡</Text>
-                  <Text style={styles.linhaChave}>Intensidade estimada</Text>
+                  <Text style={styles.linhaChave}>Intensidade</Text>
                 </View>
                 <Text style={styles.linhaValor}>
-                  {calcularIntensidade(sessao.taxa_sudorese)}
+                  {sessao.intensidade_percebida ?? calcularIntensidade(sessao.taxa_sudorese)}
                 </Text>
               </View>
+
+              {sessao.roupas_encharcadas !== null && (
+                <>
+                  <View style={styles.divisor} />
+                  <View style={styles.linhaRow}>
+                    <View style={styles.linhaEsquerda}>
+                      <Text style={styles.condicaoIcone}>👕</Text>
+                      <Text style={styles.linhaChave}>Roupas encharcadas</Text>
+                    </View>
+                    <Text style={styles.linhaValor}>
+                      {sessao.roupas_encharcadas ? 'Sim' : 'Não'}
+                    </Text>
+                  </View>
+                </>
+              )}
+
+              {sessao.volume_urina_ml !== null && (
+                <>
+                  <View style={styles.divisor} />
+                  <View style={styles.linhaRow}>
+                    <View style={styles.linhaEsquerda}>
+                      <Text style={styles.condicaoIcone}>🚽</Text>
+                      <Text style={styles.linhaChave}>Volume urinário na sessão</Text>
+                    </View>
+                    <Text style={styles.linhaValor}>{sessao.volume_urina_ml} mL</Text>
+                  </View>
+                </>
+              )}
             </View>
+
+            {/* Card: Bem-estar pós-treino */}
+            {(sessao.nivel_fadiga || sessao.sintomas_gastrointestinais) && (
+              <View style={styles.card}>
+                <Text style={styles.cardTitulo}>Bem-estar pós-treino</Text>
+
+                {sessao.nivel_fadiga !== null && (
+                  <>
+                    <View style={styles.linhaRow}>
+                      <Text style={styles.linhaChave}>Nível de fadiga</Text>
+                      <View style={styles.fadigaRow}>
+                        {[1,2,3,4,5].map(n => (
+                          <View
+                            key={n}
+                            style={[
+                              styles.fadigaDot,
+                              n <= (sessao.nivel_fadiga ?? 0) && styles.fadigaDotAtivo,
+                            ]}
+                          />
+                        ))}
+                      </View>
+                    </View>
+                    <Text style={styles.fadigaLegenda}>1 = Sem fadiga · 5 = Exaustão extrema</Text>
+                    <View style={styles.divisor} />
+                  </>
+                )}
+
+                {sessao.sintomas_gastrointestinais && (
+                  <View>
+                    <Text style={[styles.linhaChave, { marginBottom: 4 }]}>Sintomas gastrointestinais</Text>
+                    <Text style={styles.sintomasTexto}>{sessao.sintomas_gastrointestinais}</Text>
+                  </View>
+                )}
+              </View>
+            )}
 
             {/* Botões de exportação */}
             <View style={styles.exportRow}>
@@ -446,6 +517,15 @@ const styles = StyleSheet.create({
   },
 
   condicaoIcone: { fontSize: 16 },
+
+  fadigaRow: { flexDirection: 'row', gap: 6 },
+  fadigaDot: {
+    width: 16, height: 16, borderRadius: 8,
+    backgroundColor: '#e0e0e0',
+  },
+  fadigaDotAtivo: { backgroundColor: '#B3151F' },
+  fadigaLegenda: { fontSize: 10, color: '#aaa', marginTop: 2 },
+  sintomasTexto: { fontSize: 13, color: '#444', lineHeight: 20 },
 
   exportRow: { flexDirection: 'row', gap: 12 },
   exportBtn: {
