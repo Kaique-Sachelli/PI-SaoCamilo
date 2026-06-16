@@ -7,6 +7,7 @@ import {
   Text,
   View,
   ImageBackground,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -19,11 +20,12 @@ export default function CronometroScreen() {
   const [urinaInput, setUrinaInput] = useState('');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const router = useRouter();
-  const { massa_pre, clima_temp, clima_umidade, urina_pre_cor } = useLocalSearchParams<{
+  const { massa_pre, clima_temp, clima_umidade, urina_pre_cor, modalidade } = useLocalSearchParams<{
     massa_pre: string;
     clima_temp: string;
     clima_umidade: string;
     urina_pre_cor: string;
+    modalidade: string;
   }>();
 
   useEffect(() => {
@@ -63,10 +65,27 @@ export default function CronometroScreen() {
   };
 
   const handleEncerrar = () => {
-    setRunning(false);
-    router.push(
-      `/checklist-pos-sessao?massa_pre=${massa_pre}&clima_temp=${clima_temp}&clima_umidade=${clima_umidade}&ml_ingerido=${mlIngeridos}&duracao_segundos=${seconds}&urina_pre_cor=${urina_pre_cor ?? ''}&urina_sessao=${parseInt(urinaInput) || 0}`
-    );
+    const doEncerrar = () => {
+      setRunning(false);
+      router.push(
+        `/checklist-pos-sessao?massa_pre=${massa_pre}&clima_temp=${clima_temp}&clima_umidade=${clima_umidade}&ml_ingerido=${mlIngeridos}&duracao_segundos=${seconds}&urina_pre_cor=${urina_pre_cor ?? ''}&urina_sessao=${parseInt(urinaInput) || 0}&modalidade=${encodeURIComponent(modalidade ?? '')}`
+      );
+    };
+
+    if (seconds < 300) {
+      const min = Math.floor(seconds / 60);
+      const seg = seconds % 60;
+      Alert.alert(
+        'Sessão muito curta',
+        `A sessão durou apenas ${min}m ${seg}s. Com menos de 5 minutos os cálculos de sudorese ficam imprecisos.\n\nEncerrar mesmo assim?`,
+        [
+          { text: 'Continuar treino', style: 'cancel' },
+          { text: 'Encerrar', style: 'destructive', onPress: doEncerrar },
+        ]
+      );
+    } else {
+      doEncerrar();
+    }
   };
 
   return (
@@ -92,6 +111,18 @@ export default function CronometroScreen() {
         {/* Timer */}
         <Text style={styles.labelTempo}>TEMPO DESCORRIDO</Text>
         <Text style={styles.timer}>{formatTime(seconds)}</Text>
+
+        <View style={styles.addMinRow}>
+          {[1, 5, 10].map(min => (
+            <TouchableOpacity
+              key={min}
+              style={styles.addMinBtn}
+              onPress={() => setSeconds(s => s + min * 60)}
+            >
+              <Text style={styles.addMinTexto}>+{min} min</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
         {/* Hidratação circle */}
         <View style={styles.circulo}>
@@ -255,6 +286,25 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 2,
     marginBottom: 24,
+  },
+
+  addMinRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 20,
+  },
+  addMinBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
+  },
+  addMinTexto: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '600',
   },
 
   // Círculo de hidratação

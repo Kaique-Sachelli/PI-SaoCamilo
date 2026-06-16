@@ -80,8 +80,7 @@ const atletasFiltrados = atletas.filter((a) => {
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View>
-              <Text style={styles.titulo}>São Camilo</Text>
-              <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
+              <Text style={styles.titulo}>HIDRA PRO-FORMANCE</Text>
             </View>
             <TouchableOpacity onPress={() => setNotifVisivel(true)}>
               <View style={styles.sinoWrap}>
@@ -127,7 +126,7 @@ const atletasFiltrados = atletas.filter((a) => {
           {/* Lista de atletas */}
           {atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
-              key={atleta.id}
+              key={`atleta-${atleta.id || idx}`}
               style={styles.atletaCard}
               activeOpacity={0.75}
               onPress={() => router.push('/sessoes_treinador')}
@@ -144,11 +143,6 @@ const atletasFiltrados = atletas.filter((a) => {
                   <Text style={styles.atletaNome}>{atleta.nome}</Text>
                   <Text style={styles.atletaEsporte}>{atleta.esporte}</Text>
                 </View>
-              </View>
-
-              <View style={styles.atletaRight}>
-                <View style={[styles.statusDot, atleta.ativo ? styles.dotVerde : styles.dotVermelho]} />
-                <Text style={styles.atletaSeta}>›</Text>
               </View>
             </TouchableOpacity>
           ))}
@@ -187,7 +181,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 24,
   },
-  titulo: { fontSize: 28, color: '#fff', fontWeight: '700' },
+  titulo: { fontSize: 20, color: '#fff', fontWeight: '700' },
   subtitulo: { fontSize: 16, color: 'rgba(255,255,255,0.75)', fontWeight: '300', marginTop: 2 },
   sinoWrap: { position: 'relative', marginTop: 4 },
   sino: { width: 28, height: 28, tintColor: '#fff' },

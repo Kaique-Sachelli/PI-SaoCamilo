@@ -67,7 +67,7 @@ function converterCategoria(tipo: string) {
 export default function GerenciarUsuarios() {
   const router = useRouter();
   const [busca, setBusca] = useState('');
-   const [categoria, setCategoria] = useState<Categoria | 'Todos'>('Todos');
+  const [categoria, setCategoria] = useState<Categoria | 'Todos'>('Todos');
   const [removidos, setRemovidoss] = useState<number[]>([]);
   const [usuarios, setUsuarios] = useState<any[]>([]);
 
@@ -158,7 +158,7 @@ async function excluirUsuario(id: number) {
           <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
             <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitulo}>Arrumar nome (linha 161)</Text>
+          <Text style={styles.headerTitulo}>Gerenciar usuários</Text>
         </View>
 
         {/* ── Busca ── */}
@@ -176,7 +176,12 @@ async function excluirUsuario(id: number) {
         </View>
 
         {/* ── Filtros ── */}
-        <View style={styles.filtrosRow}>
+        <ScrollView
+          style={styles.filtrosScroll}
+          contentContainerStyle={styles.filtrosRow}
+          showsVerticalScrollIndicator={false}
+          nestedScrollEnabled
+        >
           {CATEGORIAS_GERAL.map((c) => (
             <TouchableOpacity
               key={c}
@@ -188,7 +193,7 @@ async function excluirUsuario(id: number) {
               </Text>
             </TouchableOpacity>
           ))}
-        </View>
+        </ScrollView>
 
         {/* ── Lista ── */}
         <ScrollView
@@ -273,9 +278,13 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, fontSize: 14, color: '#333' },
 
   // Filtros
+  filtrosScroll: {
+    maxHeight: 100,
+    paddingHorizontal: 16,
+  },
   filtrosRow: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
+    flexWrap: 'wrap',
     paddingVertical: 10,
     gap: 8,
   },

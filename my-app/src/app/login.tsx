@@ -143,7 +143,7 @@ export default function LoginScreen() {
               style={styles.forgotPasswordContainer}
             >
               <Text style={styles.forgotPasswordText}>
-                Esqueci minha senha
+                Esqueci minha senha!
               </Text>
             </TouchableOpacity>
 

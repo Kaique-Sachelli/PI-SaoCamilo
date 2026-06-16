@@ -46,7 +46,7 @@ export default function PerfilTreinador() {
           </View>
 
           <Text style={styles.nomeTexto}>{usuario?.nome}</Text>
-          <Text style={styles.funcaoTexto}>Médico</Text>
+          <Text style={styles.funcaoTexto}>{usuario?.tipo_perfil}</Text>
         </View>
 
         <ScrollView
@@ -73,14 +73,6 @@ export default function PerfilTreinador() {
               <View>
                 <Text style={styles.infoLabel}>Telefone:</Text>
                 <Text style={styles.infoValor}>+55 {usuario?.telefone}</Text>
-              </View>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Text style={styles.infoIcone}>📅</Text>
-              <View>
-                <Text style={styles.infoLabel}>Idade:</Text>
-                <Text style={styles.infoValor}>{usuario?.data_nascimento} anos</Text>
               </View>
             </View>
           </View>
