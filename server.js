@@ -160,7 +160,7 @@ app.get('/atletas', async (req, res) => {
   const busca = req.query.busca ? `%${req.query.busca}%` : null; 
   
   try { 
-    let sql = `SELECT id_usuario, nome, email, registro, tipo_perfil, situacao FROM Usuario WHERE tipo_perfil = 'Atleta'`; 
+    let sql = `SELECT id_usuario, nome, email, registro, tipo_perfil, situacao FROM Usuario WHERE tipo_perfil = 'Atleta' AND situacao = 'Ativo'`; 
     const params = []; 
     
     if (busca) { 
