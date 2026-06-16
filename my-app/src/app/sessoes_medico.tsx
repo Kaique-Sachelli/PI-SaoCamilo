@@ -12,33 +12,48 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { getUrl } from '../constants/url';
 
 type Aba = 'Sessões' | 'Dieta' | 'Exames';
 
 // ─── Aba Sessões ──────────────────────────────────────────────────────────────
 function AbaSessoes() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ id?: string; id_atleta?: string }>();
+  const atletaId = params.id || params.id_atleta;
 
   const [sessoes, setSessoes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     buscarSessoes();
-  }, []);
+  }, [atletaId]);
 
   async function buscarSessoes() {
+    if (!atletaId) {
+      setError('ID do atleta não informado. Volte e selecione um atleta novamente.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch(
-        'http://192.168.1.7:3000/atleta/1/sessoes'
-      );
+      const response = await fetch(getUrl(`/atleta/${atletaId}/sessoes`));
+
+      if (!response.ok) {
+        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+      }
 
       const data = await response.json();
 
       if (data.sucesso) {
-        setSessoes(data.sessoes);
+        setSessoes(data.sessoes ?? []);
+      } else {
+        setError(data.mensagem || 'Erro ao buscar sessões.');
       }
     } catch (error) {
       console.error('Erro ao buscar sessões:', error);
+      setError(error instanceof Error ? error.message : 'Erro desconhecido ao buscar sessões.');
     } finally {
       setLoading(false);
     }
@@ -48,6 +63,14 @@ function AbaSessoes() {
     return (
       <View style={{ padding: 20 }}>
         <Text>Carregando sessões...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={{ padding: 20 }}>
+        <Text style={{ color: '#B3151F' }}>{error}</Text>
       </View>
     );
   }
@@ -98,7 +121,7 @@ function AbaSessoes() {
             router.push({
               pathname: '/sessao_selecionada',
               params: {
-                idSessao: s.id_sessao,
+                id: String(s.id_sessao),
               },
             })
           }
@@ -234,8 +257,10 @@ function AbaExames({ onBaixar }: { onBaixar: (nome: string) => void }) {
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function SessoesMedico() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ tab?: string }>();
+  const params = useLocalSearchParams<{ tab?: string; id_atleta?: string; nome?: string }>();
   const tabInicial = (params.tab as Aba) || 'Sessões';
+  const atletaId = params.id_atleta;
+  const nomeAtleta = params.nome || 'Atleta';
   const [abaAtiva, setAbaAtiva] = useState<Aba>(tabInicial);
   const [exameSelecionado, setExameSelecionado] = useState<string | null>(null);
 
@@ -253,9 +278,9 @@ export default function SessoesMedico() {
             <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
           </TouchableOpacity>
           <View style={styles.headerNomeRow}>
-            <Text style={styles.nomeAtleta}>Atleta (Kacique)</Text>
+            <Text style={styles.nomeAtleta}>{nomeAtleta}</Text>
             <TouchableOpacity 
-            onPress={() => router.push('/perfil_atleta_medico')} 
+            onPress={() => router.push({ pathname: '/perfil_atleta_medico', params: { nome: nomeAtleta } })} 
             activeOpacity={0.8}>
               <Image
                 source={require('./assets/Img/marcus.jpg')}
@@ -281,7 +306,7 @@ export default function SessoesMedico() {
 
         {/* ── Conteúdo central — troca sem navegar ── */}
         <View style={styles.content}>
-          {abaAtiva === 'Sessões' && <AbaSessoes />}
+          {abaAtiva === 'Sessões' && <AbaSessoes atletaId={atletaId} />}
           {abaAtiva === 'Dieta'   && <AbaDieta />}
           {abaAtiva === 'Exames'  && <AbaExames onBaixar={(nome) => setExameSelecionado(nome)} />}
         </View>

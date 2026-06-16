@@ -268,7 +268,7 @@ const atletasFiltrados = atletas.filter((a) => {
             <Text style={styles.estadoTexto}>Nenhum atleta encontrado.</Text>
           )}
 
-          {!carregandoAtletas && atletasFiltrados.map((atleta, idx) => ( */} */}
+          {!carregandoAtletas && atletasFiltrados.map((atleta, idx) => ( */}
 
           {/* {atletasFiltrados.map((atleta, idx) => (
 
