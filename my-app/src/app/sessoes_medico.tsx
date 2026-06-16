@@ -8,239 +8,138 @@ import {
   ScrollView,
   ImageBackground,
   Platform,
-  Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { getUrl } from '../constants/url';
 
-type Aba = 'Sessões' | 'Dieta' | 'Exames';
+type Aba = 'Sessões' | 'Exames';
+
+function formatarData(dataStr: string): string {
+  const d = new Date(dataStr);
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const ano = d.getFullYear();
+  const hora = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return `${dia}/${mes}/${ano}, ${hora}:${min}`;
+}
+
+function formatarLiquido(ml: number | null): string {
+  const v = Number(ml);
+  if (!v) return 'N/D';
+  return v >= 1000 ? `${(v / 1000).toFixed(1)}L` : `${Math.round(v)}ml`;
+}
 
 // ─── Aba Sessões ──────────────────────────────────────────────────────────────
-function AbaSessoes() {
+function AbaSessoes({ atletaId }: { atletaId?: string }) {
   const router = useRouter();
-  const params = useLocalSearchParams<{ id?: string; id_atleta?: string }>();
-  const atletaId = params.id || params.id_atleta;
 
   const [sessoes, setSessoes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    buscarSessoes();
-  }, [atletaId]);
-
-  async function buscarSessoes() {
     if (!atletaId) {
-      setError('ID do atleta não informado. Volte e selecione um atleta novamente.');
+      setError('ID do atleta não informado.');
       setLoading(false);
       return;
     }
+    fetch(getUrl(`/atleta/${atletaId}/sessoes`))
+      .then(r => r.json())
+      .then(data => { if (data.sucesso) setSessoes(data.sessoes ?? []); else setError(data.mensagem || 'Erro ao buscar sessões.'); })
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [atletaId]);
 
-    try {
-      const response = await fetch(getUrl(`/atleta/${atletaId}/sessoes`));
+  const agora = Date.now();
+  const semanaMs = 7 * 24 * 60 * 60 * 1000;
+  const sessoesNaSemana = sessoes.filter(s => agora - new Date(s.data_hora_inicio).getTime() <= semanaMs).length;
+  const sessoesComLiquido = sessoes.filter(s => Number(s.volume_ml) > 0);
+  const liquidoMedio = sessoesComLiquido.length > 0
+    ? sessoesComLiquido.reduce((acc, s) => acc + Number(s.volume_ml), 0) / sessoesComLiquido.length / 1000
+    : null;
+  const sessoesComPerda = sessoes.filter(s => s.percentual_variacao != null);
+  const perdaMedia = sessoesComPerda.length > 0
+    ? sessoesComPerda.reduce((acc, s) => acc + Math.abs(Number(s.percentual_variacao)), 0) / sessoesComPerda.length
+    : null;
 
-      if (!response.ok) {
-        throw new Error(`Erro ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      if (data.sucesso) {
-        setSessoes(data.sessoes ?? []);
-      } else {
-        setError(data.mensagem || 'Erro ao buscar sessões.');
-      }
-    } catch (error) {
-      console.error('Erro ao buscar sessões:', error);
-      setError(error instanceof Error ? error.message : 'Erro desconhecido ao buscar sessões.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (loading) {
-    return (
-      <View style={{ padding: 20 }}>
-        <Text>Carregando sessões...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={{ padding: 20 }}>
-        <Text style={{ color: '#B3151F' }}>{error}</Text>
-      </View>
-    );
-  }
+  if (loading) return <ActivityIndicator color="#B3151F" style={{ marginTop: 40 }} />;
+  if (error) return <View style={{ padding: 20 }}><Text style={{ color: '#B3151F' }}>{error}</Text></View>;
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.abaContent}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Métricas */}
+    <ScrollView contentContainerStyle={styles.abaContent} showsVerticalScrollIndicator={false}>
       <View style={styles.metricasRow}>
         <View style={styles.metricaCard}>
           <Text style={[styles.metricaIcone, { color: '#e53935' }]}>⚡</Text>
-          <Text style={styles.metricaValor}>
-            {sessoes.length}
-          </Text>
-          <Text style={styles.metricaLabel}>Sessões</Text>
+          <Text style={styles.metricaValor}>{sessoesNaSemana}</Text>
+          <Text style={styles.metricaLabel}>Sessões/Semana</Text>
         </View>
-
         <View style={styles.metricaCard}>
           <Text style={[styles.metricaIcone, { color: '#1565c0' }]}>💧</Text>
-          <Text style={styles.metricaValor}>
-            {sessoes.length > 0
-              ? (sessoes[0].volume_ml / 1000).toFixed(1)
-              : '0'}
-          </Text>
-          <Text style={styles.metricaLabel}>Líquidos (L)</Text>
+          <Text style={styles.metricaValor}>{liquidoMedio != null ? liquidoMedio.toFixed(1) : 'N/D'}</Text>
+          <Text style={styles.metricaLabel}>L médio</Text>
         </View>
-
         <View style={styles.metricaCard}>
           <Text style={[styles.metricaIcone, { color: '#333' }]}>📊</Text>
-          <Text style={styles.metricaValor}>
-            {sessoes.length > 0
-              ? sessoes[0].percentual_variacao
-              : '0'}
-            %
-          </Text>
-          <Text style={styles.metricaLabel}>Última perda</Text>
+          <Text style={styles.metricaValor}>{perdaMedia != null ? `${perdaMedia.toFixed(1)}%` : 'N/D'}</Text>
+          <Text style={styles.metricaLabel}>Perda média</Text>
         </View>
       </View>
 
-      {sessoes.map((s, i) => (
+      {sessoes.length === 0 ? (
+        <Text style={{ textAlign: 'center', color: '#999', marginTop: 24 }}>Nenhuma sessão registrada.</Text>
+      ) : sessoes.map((s, i) => (
         <TouchableOpacity
           key={s.id_sessao}
           style={styles.sessaoCard}
           activeOpacity={0.75}
-          onPress={() =>
-            router.push({
-              pathname: '/sessao_selecionada',
-              params: {
-                id: String(s.id_sessao),
-              },
-            })
-          }
+          onPress={() => router.push({ pathname: '/sessao_selecionada', params: { id: String(s.id_sessao) } })}
         >
           <View style={styles.sessaoTopo}>
-            <Text style={styles.sessaoLabel}>
-              {i === 0
-                ? 'Última sessão'
-                : `Sessão ${s.id_sessao}`}
-            </Text>
-
+            <Text style={styles.sessaoLabel}>{i === 0 ? 'Última sessão' : `Sessão ${sessoes.length - i}`}</Text>
             <Text style={styles.sessaoSeta}>›</Text>
           </View>
-
           <View style={styles.divisor} />
-
           <View style={styles.detalheRow}>
             <Text style={styles.detalheChave}>Data</Text>
-
-            <Text style={styles.detalheValor}>
-              {new Date(
-                s.data_hora_inicio
-              ).toLocaleString('pt-BR')}
-            </Text>
+            <Text style={styles.detalheValor}>{formatarData(s.data_hora_inicio)}</Text>
           </View>
-
           <View style={styles.detalheRow}>
             <Text style={styles.detalheChave}>Duração</Text>
-
-            <Text style={styles.detalheValor}>
-              {s.duracao_minutos} min
-            </Text>
+            <Text style={styles.detalheValor}>{s.duracao_minutos} min</Text>
           </View>
-
           <View style={styles.detalheRow}>
-            <Text style={styles.detalheChave}>
-              Ingestão de líquidos
-            </Text>
-
-            <Text style={styles.detalheValor}>
-              {s.volume_ml} ml
-            </Text>
+            <Text style={styles.detalheChave}>Ingestão de líquidos</Text>
+            <Text style={styles.detalheValor}>{formatarLiquido(s.volume_ml)}</Text>
           </View>
-
           <View style={styles.detalheRow}>
-            <Text style={styles.detalheChave}>
-              Perda de peso
-            </Text>
-
-            <Text
-              style={[
-                styles.detalheValor,
-                {
-                  color: '#2e7d32',
-                  fontWeight: '600',
-                },
-              ]}
-            >
-              {s.percentual_variacao}%
+            <Text style={styles.detalheChave}>Perda de peso</Text>
+            <Text style={[styles.detalheValor, { color: '#2e7d32', fontWeight: '600' }]}>
+              {s.percentual_variacao != null ? `${Math.abs(Number(s.percentual_variacao)).toFixed(1)}%` : 'N/D'}
             </Text>
           </View>
         </TouchableOpacity>
-      ))}
-
-      {sessoes.length === 0 && (
-        <Text style={{ textAlign: 'center' }}>
-          Nenhuma sessão encontrada.
-        </Text>
-      )}
-    </ScrollView>
-  );
-}
-
-// ─── Aba Dieta ────────────────────────────────────────────────────────────────
-function AbaDieta() {
-  const REFEICOES = [
-    { titulo: 'Café da manhã',   horario: '07:00', itens: ['2 ovos mexidos', 'Pão integral (2 fatias)', '1 fruta', 'Café sem açúcar'] },
-    { titulo: 'Lanche da manhã', horario: '10:00', itens: ['1 iogurte natural', '1 punhado de castanhas'] },
-    { titulo: 'Almoço',          horario: '12:30', itens: ['150g de frango grelhado', 'Arroz integral (4 col.)', 'Feijão (1 concha)', 'Salada verde à vontade'] },
-    { titulo: 'Lanche da tarde', horario: '15:30', itens: ['1 banana com pasta de amendoim', '200ml de água de coco'] },
-    { titulo: 'Jantar',          horario: '19:00', itens: ['150g de peixe assado', 'Batata-doce (1 média)', 'Legumes refogados'] },
-  ];
-  return (
-    <ScrollView contentContainerStyle={styles.abaContent} showsVerticalScrollIndicator={false}>
-      <Text style={styles.secaoTitulo}>Plano Alimentar</Text>
-      {REFEICOES.map((r, i) => (
-        <View key={i} style={styles.refeicaoCard}>
-          <View style={styles.refeicaoTopo}>
-            <Text style={styles.refeicaoTitulo}>{r.titulo}</Text>
-            <View style={styles.horarioBadge}>
-              <Text style={styles.horarioTexto}>⏰ {r.horario}</Text>
-            </View>
-          </View>
-          <View style={styles.divisor} />
-          {r.itens.map((item, j) => (
-            <View key={j} style={styles.itemRow}>
-              <View style={styles.itemDot} />
-              <Text style={styles.itemTexto}>{item}</Text>
-            </View>
-          ))}
-        </View>
       ))}
     </ScrollView>
   );
 }
 
 // ─── Aba Exames ───────────────────────────────────────────────────────────────
-function AbaExames({ onBaixar }: { onBaixar: (nome: string) => void }) {
+function AbaExames() {
+  const EXAMES = [
+    { nome: 'Hemograma Completo', data: '10/05/2026', status: 'Normal',  cor: '#2e7d32' },
+    { nome: 'Glicemia em Jejum',  data: '10/05/2026', status: 'Normal',  cor: '#2e7d32' },
+    { nome: 'Colesterol Total',   data: '22/04/2026', status: 'Atenção', cor: '#e65100' },
+    { nome: 'Ferritina',          data: '22/04/2026', status: 'Baixo',   cor: '#c62828' },
+    { nome: 'Vitamina D',         data: '01/04/2026', status: 'Normal',  cor: '#2e7d32' },
+  ];
   return (
     <ScrollView contentContainerStyle={styles.abaContent} showsVerticalScrollIndicator={false}>
       <Text style={styles.secaoTitulo}>Exames Recentes</Text>
-      {[
-        { nome: 'Hemograma Completo', data: '10/05/2026', status: 'Normal',  cor: '#2e7d32' },
-        { nome: 'Glicemia em Jejum',  data: '10/05/2026', status: 'Normal',  cor: '#2e7d32' },
-        { nome: 'Colesterol Total',   data: '22/04/2026', status: 'Atenção', cor: '#e65100' },
-        { nome: 'Ferritina',          data: '22/04/2026', status: 'Baixo',   cor: '#c62828' },
-        { nome: 'Vitamina D',         data: '01/04/2026', status: 'Normal',  cor: '#2e7d32' },
-      ].map((e, i) => (
-        <TouchableOpacity key={i} style={styles.exameCard} activeOpacity={0.75} onPress={() => onBaixar(e.nome)}>
+      {EXAMES.map((e, i) => (
+        <View key={i} style={styles.exameCard}>
           <View style={styles.exameInfo}>
             <Text style={styles.exameNome}>{e.nome}</Text>
             <Text style={styles.exameData}>📅 {e.data}</Text>
@@ -248,7 +147,7 @@ function AbaExames({ onBaixar }: { onBaixar: (nome: string) => void }) {
           <View style={[styles.statusBadge, { backgroundColor: e.cor + '18', borderColor: e.cor }]}>
             <Text style={[styles.statusText, { color: e.cor }]}>{e.status}</Text>
           </View>
-        </TouchableOpacity>
+        </View>
       ))}
     </ScrollView>
   );
@@ -257,12 +156,11 @@ function AbaExames({ onBaixar }: { onBaixar: (nome: string) => void }) {
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function SessoesMedico() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ tab?: string; id_atleta?: string; nome?: string }>();
-  const tabInicial = (params.tab as Aba) || 'Sessões';
+  const params = useLocalSearchParams<{ id_atleta?: string; nome?: string }>();
+  const tabInicial: Aba = 'Sessões';
   const atletaId = params.id_atleta;
   const nomeAtleta = params.nome || 'Atleta';
   const [abaAtiva, setAbaAtiva] = useState<Aba>(tabInicial);
-  const [exameSelecionado, setExameSelecionado] = useState<string | null>(null);
 
   return (
     <ImageBackground
@@ -290,7 +188,7 @@ export default function SessoesMedico() {
           </View>
 
           <View style={styles.tabsContainer}>
-            {(['Sessões', 'Dieta', 'Exames'] as Aba[]).map((aba) => (
+            {(['Sessões', 'Exames'] as Aba[]).map((aba) => (
               <TouchableOpacity
                 key={aba}
                 style={[styles.tab, abaAtiva === aba && styles.tabAtiva]}
@@ -307,47 +205,8 @@ export default function SessoesMedico() {
         {/* ── Conteúdo central — troca sem navegar ── */}
         <View style={styles.content}>
           {abaAtiva === 'Sessões' && <AbaSessoes atletaId={atletaId} />}
-          {abaAtiva === 'Dieta'   && <AbaDieta />}
-          {abaAtiva === 'Exames'  && <AbaExames onBaixar={(nome) => setExameSelecionado(nome)} />}
+          {abaAtiva === 'Exames'  && <AbaExames />}
         </View>
-
-        {/* ── Modal de confirmação de download ── */}
-        <Modal
-          visible={exameSelecionado !== null}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setExameSelecionado(null)}
-        >
-          <TouchableOpacity
-            style={styles.modalOverlay}
-            activeOpacity={1}
-            onPress={() => setExameSelecionado(null)}
-          >
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitulo}>Baixar Exame</Text>
-              <Text style={styles.modalMensagem}>
-                Deseja baixar o exame{'\n'}
-                <Text style={styles.modalNomeExame}>{exameSelecionado}</Text>?
-              </Text>
-              <View style={styles.modalBotoes}>
-                <TouchableOpacity
-                  style={styles.modalBtnCancelar}
-                  onPress={() => setExameSelecionado(null)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.modalBtnCancelarTexto}>Cancelar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalBtnBaixar}
-                  onPress={() => setExameSelecionado(null)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.modalBtnBaixarTexto}>Baixar</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </Modal>
 
       </SafeAreaView>
     </ImageBackground>
@@ -416,51 +275,6 @@ const styles = StyleSheet.create({
   detalheRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   detalheChave: { fontSize: 13, color: '#999' },
   detalheValor: { fontSize: 13, color: '#222', fontWeight: '500' },
-
-  // Dieta
-  refeicaoCard: {
-    backgroundColor: '#fff', borderRadius: 14, padding: 14, gap: 8,
-    ...Platform.select({ ios: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' }, android: { elevation: 2 }, web: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' } }),
-  },
-  refeicaoTopo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  refeicaoTitulo: { fontSize: 15, fontWeight: '700', color: '#111' },
-  horarioBadge: { backgroundColor: '#fff3e0', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 },
-  horarioTexto: { fontSize: 12, color: '#e65100', fontWeight: '600' },
-  itemRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  itemDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: RED },
-  itemTexto: { fontSize: 13, color: '#444' },
-
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    backgroundColor: '#fff',
-    width: '80%',
-    borderRadius: 16,
-    paddingVertical: 24,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    gap: 16,
-    ...Platform.select({ ios: { boxshadow: '0px 4px 12px rgba(0,0,0,0.2)' }, android: { elevation: 8 }, web: { boxshadow: '0px 4px 12px rgba(0,0,0,0.2)' } }),
-  },
-  modalTitulo: { fontSize: 18, fontWeight: '700', color: '#111' },
-  modalMensagem: { fontSize: 14, color: '#555', textAlign: 'center', lineHeight: 22 },
-  modalNomeExame: { fontWeight: '700', color: '#111' },
-  modalBotoes: { flexDirection: 'row', gap: 12, width: '100%' },
-  modalBtnCancelar: {
-    flex: 1, borderWidth: 1, borderColor: '#ccc', borderRadius: 20,
-    paddingVertical: 10, alignItems: 'center',
-  },
-  modalBtnCancelarTexto: { fontSize: 14, fontWeight: '600', color: '#555' },
-  modalBtnBaixar: {
-    flex: 1, backgroundColor: RED, borderRadius: 20,
-    paddingVertical: 10, alignItems: 'center',
-  },
-  modalBtnBaixarTexto: { fontSize: 14, fontWeight: '700', color: '#fff' },
 
   // Exames
   exameCard: {
