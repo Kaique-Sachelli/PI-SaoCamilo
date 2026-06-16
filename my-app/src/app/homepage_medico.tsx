@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Text,
   View,
@@ -11,14 +11,14 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useUser } from '../context/UserContext';
 import { NavbarMedico } from './Navbar_Medico';
 import { NotificacaoPopup } from './notificacao';
 import { getUrl } from '../constants/url';
 
 interface Atleta {
-  id_usuario: number;
+  id: number;
   nome: string;
   esporte?: string;
   ativo?: string;
@@ -31,7 +31,7 @@ function iniciais(nome: string) {
 
 const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9'];
 
-export default function HomepageTreinador() {
+export default function HomepageMedico() {
   const router = useRouter();
   const { usuario } = useUser();
   const [busca, setBusca] = useState('');
@@ -40,25 +40,25 @@ export default function HomepageTreinador() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchAtletas();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchAtletas();
+    }, [])
+  );
 
-async function fetchAtletas() { 
-  try { 
-    const resposta = await fetch(getUrl(`/atletas`)); 
-    
-    if (!resposta.ok) { 
-      throw new Error('Erro ao buscar a lista de atletas');
-    } 
-    
+async function fetchAtletas() {
+  setLoading(true);
+  setError(null);
+  try {
+    const resposta = await fetch(getUrl('/atletas'));
+    if (!resposta.ok) throw new Error('Erro ao buscar a lista de atletas');
     const dados: Atleta[] = await resposta.json();
     setAtletas(dados);
-  } catch (err) { 
-    setError(err instanceof Error ? err.message : 'Erro desconhecido'); 
-  } finally { 
-    setLoading(false); 
-  } 
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Erro desconhecido');
+  } finally {
+    setLoading(false);
+  }
 }
 
 const atletasFiltrados = atletas.filter((a) => {
@@ -113,24 +113,24 @@ const atletasFiltrados = atletas.filter((a) => {
 
           {/* Cabeçalho da lista */}
           <View style={styles.listHeader}>
-            <Text style={styles.listTitulo}>Meu time</Text>
-            <TouchableOpacity
-              style={styles.gerenciarBtn}
-              onPress={() => router.push('/TelaGerenciarAtletas')}
-            >
-              <Text style={styles.gerenciarTexto}>Gerenciar </Text>
-              <Image source={require('./assets/Img/gerenciar.png')} style={styles.gerenciarIcone} />
-            </TouchableOpacity>
+            <Text style={styles.listTitulo}>Atletas</Text>
           </View>
 
           {/* Lista de atletas */}
-          {atletasFiltrados.map((atleta, idx) => (
+          {loading ? (
+            <Text style={styles.msgCentro}>Carregando...</Text>
+          ) : error ? (
+            <Text style={styles.msgCentro}>{error}</Text>
+          ) : atletasFiltrados.length === 0 ? (
+            <Text style={styles.msgCentro}>
+              {busca ? 'Nenhum atleta encontrado.' : 'Nenhum atleta cadastrado.'}
+            </Text>
+          ) : atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
-              key={`atleta-${atleta.id || idx}`}
-
+              key={`atleta-${atleta.id}`}
               style={styles.atletaCard}
               activeOpacity={0.75}
-              onPress={() => router.push({ pathname: '/sessoes_medico', params: { id_atleta: String(atleta.id_usuario), nome: atleta.nome } })}
+              onPress={() => router.push({ pathname: '/sessoes_medico', params: { id_atleta: String(atleta.id), nome: atleta.nome } })}
             >
               <View style={styles.atletaLeft}>
                 {atleta.foto ? (
@@ -259,6 +259,7 @@ const styles = StyleSheet.create({
   dotVerde: { backgroundColor: '#4CAF50' },
   dotVermelho: { backgroundColor: '#e53935' },
   atletaSeta: { fontSize: 22, color: '#ccc', fontWeight: '300' },
+  msgCentro: { textAlign: 'center', color: '#999', fontSize: 14, marginTop: 32, lineHeight: 22 },
 
   // Navbar
   navbar: {

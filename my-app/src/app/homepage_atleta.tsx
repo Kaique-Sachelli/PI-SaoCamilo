@@ -248,7 +248,6 @@ export default function HomepageAtleta() {
             </View>
           </View>
 
-          {/* ── Botão Pronto para Treinar ── */}
           <TouchableOpacity
             style={styles.btnTreinar}
             activeOpacity={0.85}

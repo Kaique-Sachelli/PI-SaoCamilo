@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Text,
   View,
@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useUser } from '../context/UserContext';
 import { NavbarTreinador } from './Navbar_Treinador';
 import { NotificacaoPopup } from './notificacao';
@@ -40,25 +40,30 @@ export default function HomepageTreinador() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchAtletas();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchAtletas();
+    }, [usuario?.id_usuario])
+  );
 
-async function fetchAtletas() { 
-  try { 
-    const resposta = await fetch(getUrl(`/atletas`)); 
-    
-    if (!resposta.ok) { 
+async function fetchAtletas() {
+  if (!usuario?.id_usuario) return;
+  setLoading(true);
+  setError(null);
+  try {
+    const resposta = await fetch(getUrl(`/treinador/${usuario.id_usuario}/atletas`));
+
+    if (!resposta.ok) {
       throw new Error('Erro ao buscar a lista de atletas');
-    } 
-    
+    }
+
     const dados: Atleta[] = await resposta.json();
     setAtletas(dados);
-  } catch (err) { 
-    setError(err instanceof Error ? err.message : 'Erro desconhecido'); 
-  } finally { 
-    setLoading(false); 
-  } 
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Erro desconhecido');
+  } finally {
+    setLoading(false);
+  }
 }
 
 const atletasFiltrados = atletas.filter((a) => {
@@ -124,28 +129,38 @@ const atletasFiltrados = atletas.filter((a) => {
           </View>
 
           {/* Lista de atletas */}
-          {atletasFiltrados.map((atleta, idx) => (
-            <TouchableOpacity
-              key={`atleta-${atleta.id || idx}`}
-              style={styles.atletaCard}
-              activeOpacity={0.75}
-              onPress={() => router.push('/sessoes_treinador')}
-            >
-              <View style={styles.atletaLeft}>
-                {atleta.foto ? (
-                  <Image source={atleta.foto} style={styles.atletaAvatar} />
-                ) : (
-                  <View style={[styles.atletaAvatar, styles.atletaAvatarPlaceholder, { backgroundColor: CORES_AVATAR[idx % CORES_AVATAR.length] }]}>
-                    <Text style={styles.atletaIniciais}>{iniciais(atleta.nome)}</Text>
+          {loading ? (
+            <Text style={styles.msgCentro}>Carregando...</Text>
+          ) : error ? (
+            <Text style={styles.msgCentro}>{error}</Text>
+          ) : atletasFiltrados.length === 0 ? (
+            <Text style={styles.msgCentro}>
+              {busca ? 'Nenhum atleta encontrado.' : 'Seu time está vazio.\nClique em Gerenciar para adicionar atletas.'}
+            </Text>
+          ) : (
+            atletasFiltrados.map((atleta, idx) => (
+              <TouchableOpacity
+                key={`atleta-${atleta.id || idx}`}
+                style={styles.atletaCard}
+                activeOpacity={0.75}
+                onPress={() => router.push({ pathname: '/sessoes_treinador', params: { id_atleta: String(atleta.id), nome: atleta.nome, esporte: atleta.esporte ?? '' } })}
+              >
+                <View style={styles.atletaLeft}>
+                  {atleta.foto ? (
+                    <Image source={atleta.foto} style={styles.atletaAvatar} />
+                  ) : (
+                    <View style={[styles.atletaAvatar, styles.atletaAvatarPlaceholder, { backgroundColor: CORES_AVATAR[idx % CORES_AVATAR.length] }]}>
+                      <Text style={styles.atletaIniciais}>{iniciais(atleta.nome)}</Text>
+                    </View>
+                  )}
+                  <View style={styles.atletaInfo}>
+                    <Text style={styles.atletaNome}>{atleta.nome}</Text>
+                    <Text style={styles.atletaEsporte}>{atleta.esporte}</Text>
                   </View>
-                )}
-                <View style={styles.atletaInfo}>
-                  <Text style={styles.atletaNome}>{atleta.nome}</Text>
-                  <Text style={styles.atletaEsporte}>{atleta.esporte}</Text>
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            ))
+          )}
         </ScrollView>
         {/* ── Bottom Nav ── */}
         <NavbarTreinador active="home"/>
@@ -266,4 +281,5 @@ const styles = StyleSheet.create({
   },
   navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   navImg: { width: 26, height: 26, resizeMode: 'contain' },
+  msgCentro: { textAlign: 'center', color: '#999', fontSize: 14, marginTop: 32, lineHeight: 22 },
 });

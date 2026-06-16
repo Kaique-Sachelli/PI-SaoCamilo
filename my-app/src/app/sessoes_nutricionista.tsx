@@ -14,7 +14,35 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { getUrl } from '../constants/url';
 
-type Aba = 'Sessões' | 'Exames';
+type Aba = 'Sessões' | 'Dieta';
+
+const REFEICOES = [
+  {
+    titulo: 'Café da manhã',
+    horario: '07:00',
+    itens: ['2 ovos mexidos', 'Pão integral (2 fatias)', '1 fruta da estação', 'Café sem açúcar'],
+  },
+  {
+    titulo: 'Lanche da manhã',
+    horario: '10:00',
+    itens: ['1 iogurte natural', '1 punhado de castanhas (30g)'],
+  },
+  {
+    titulo: 'Almoço',
+    horario: '12:30',
+    itens: ['150g de frango grelhado', 'Arroz integral (4 col. sopa)', 'Feijão (1 concha)', 'Salada verde à vontade'],
+  },
+  {
+    titulo: 'Lanche da tarde',
+    horario: '15:30',
+    itens: ['1 banana com pasta de amendoim', '200ml de água de coco'],
+  },
+  {
+    titulo: 'Jantar',
+    horario: '19:00',
+    itens: ['150g de peixe assado', 'Batata-doce (1 média)', 'Legumes refogados'],
+  },
+];
 
 function formatarData(dataStr: string): string {
   const d = new Date(dataStr);
@@ -35,17 +63,12 @@ function formatarLiquido(ml: number | null): string {
 // ─── Aba Sessões ──────────────────────────────────────────────────────────────
 function AbaSessoes({ atletaId }: { atletaId?: string }) {
   const router = useRouter();
-
   const [sessoes, setSessoes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!atletaId) {
-      setError('ID do atleta não informado.');
-      setLoading(false);
-      return;
-    }
+    if (!atletaId) { setError('ID do atleta não informado.'); setLoading(false); return; }
     fetch(getUrl(`/atleta/${atletaId}/sessoes`))
       .then(r => r.json())
       .then(data => { if (data.sucesso) setSessoes(data.sessoes ?? []); else setError(data.mensagem || 'Erro ao buscar sessões.'); })
@@ -126,27 +149,26 @@ function AbaSessoes({ atletaId }: { atletaId?: string }) {
   );
 }
 
-// ─── Aba Exames ───────────────────────────────────────────────────────────────
-function AbaExames() {
-  const EXAMES = [
-    { nome: 'Hemograma Completo', data: '10/05/2026', status: 'Normal',  cor: '#2e7d32' },
-    { nome: 'Glicemia em Jejum',  data: '10/05/2026', status: 'Normal',  cor: '#2e7d32' },
-    { nome: 'Colesterol Total',   data: '22/04/2026', status: 'Atenção', cor: '#e65100' },
-    { nome: 'Ferritina',          data: '22/04/2026', status: 'Baixo',   cor: '#c62828' },
-    { nome: 'Vitamina D',         data: '01/04/2026', status: 'Normal',  cor: '#2e7d32' },
-  ];
+// ─── Aba Dieta ────────────────────────────────────────────────────────────────
+function AbaDieta() {
   return (
     <ScrollView contentContainerStyle={styles.abaContent} showsVerticalScrollIndicator={false}>
-      <Text style={styles.secaoTitulo}>Exames Recentes</Text>
-      {EXAMES.map((e, i) => (
-        <View key={i} style={styles.exameCard}>
-          <View style={styles.exameInfo}>
-            <Text style={styles.exameNome}>{e.nome}</Text>
-            <Text style={styles.exameData}>📅 {e.data}</Text>
+      <Text style={styles.secaoTitulo}>Plano Alimentar</Text>
+      {REFEICOES.map((r, i) => (
+        <View key={i} style={styles.refeicaoCard}>
+          <View style={styles.refeicaoTopo}>
+            <Text style={styles.refeicaoTitulo}>{r.titulo}</Text>
+            <View style={styles.horarioBadge}>
+              <Text style={styles.horarioTexto}>⏰ {r.horario}</Text>
+            </View>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: e.cor + '18', borderColor: e.cor }]}>
-            <Text style={[styles.statusText, { color: e.cor }]}>{e.status}</Text>
-          </View>
+          <View style={styles.divisor} />
+          {r.itens.map((item, j) => (
+            <View key={j} style={styles.itemRow}>
+              <View style={styles.itemDot} />
+              <Text style={styles.itemTexto}>{item}</Text>
+            </View>
+          ))}
         </View>
       ))}
     </ScrollView>
@@ -154,13 +176,12 @@ function AbaExames() {
 }
 
 // ─── Componente principal ─────────────────────────────────────────────────────
-export default function SessoesMedico() {
+export default function SessoesNutricionista() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id_atleta?: string; nome?: string }>();
-  const tabInicial: Aba = 'Sessões';
   const atletaId = params.id_atleta;
   const nomeAtleta = params.nome || 'Atleta';
-  const [abaAtiva, setAbaAtiva] = useState<Aba>(tabInicial);
+  const [abaAtiva, setAbaAtiva] = useState<Aba>('Sessões');
 
   return (
     <ImageBackground
@@ -177,18 +198,14 @@ export default function SessoesMedico() {
           </TouchableOpacity>
           <View style={styles.headerNomeRow}>
             <Text style={styles.nomeAtleta}>{nomeAtleta}</Text>
-            <TouchableOpacity 
-            onPress={() => router.push({ pathname: '/perfil_atleta_medico', params: { nome: nomeAtleta } })} 
-            activeOpacity={0.8}>
-              <Image
-                source={require('./assets/Img/marcus.jpg')}
-                style={styles.avatarImg}
-              />
-            </TouchableOpacity>
+            <Image
+              source={require('./assets/Img/marcus.jpg')}
+              style={styles.avatarImg}
+            />
           </View>
 
           <View style={styles.tabsContainer}>
-            {(['Sessões', 'Exames'] as Aba[]).map((aba) => (
+            {(['Sessões', 'Dieta'] as Aba[]).map((aba) => (
               <TouchableOpacity
                 key={aba}
                 style={[styles.tab, abaAtiva === aba && styles.tabAtiva]}
@@ -202,10 +219,10 @@ export default function SessoesMedico() {
           </View>
         </View>
 
-        {/* ── Conteúdo central — troca sem navegar ── */}
+        {/* ── Conteúdo ── */}
         <View style={styles.content}>
           {abaAtiva === 'Sessões' && <AbaSessoes atletaId={atletaId} />}
-          {abaAtiva === 'Exames'  && <AbaExames />}
+          {abaAtiva === 'Dieta'   && <AbaDieta />}
         </View>
 
       </SafeAreaView>
@@ -219,7 +236,6 @@ const styles = StyleSheet.create({
   background: { flex: 1 },
   safeArea: { flex: 1, backgroundColor: 'transparent' },
 
-  // Header
   header: {
     backgroundColor: RED,
     paddingTop: 10,
@@ -234,7 +250,6 @@ const styles = StyleSheet.create({
   nomeAtleta: { color: '#fff', fontSize: 26, fontWeight: '700' },
   avatarImg: { width: 46, height: 46, borderRadius: 23, borderWidth: 2, borderColor: '#fff' },
 
-  // Tabs
   tabsContainer: {
     width: '100%',
     height: 46,
@@ -249,7 +264,6 @@ const styles = StyleSheet.create({
   tabTexto: { fontSize: 14, color: '#B0B0B0', fontWeight: '500' },
   tabTextoAtivo: { color: RED, fontWeight: '700', fontSize: 14 },
 
-  // Content
   content: { flex: 1 },
   abaContent: { padding: 16, gap: 12, paddingBottom: 24 },
   secaoTitulo: { fontSize: 15, fontWeight: '700', color: '#222', marginBottom: 2 },
@@ -276,15 +290,16 @@ const styles = StyleSheet.create({
   detalheChave: { fontSize: 13, color: '#999' },
   detalheValor: { fontSize: 13, color: '#222', fontWeight: '500' },
 
-  // Exames
-  exameCard: {
-    backgroundColor: '#fff', borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+  // Dieta
+  refeicaoCard: {
+    backgroundColor: '#fff', borderRadius: 14, padding: 14, gap: 8,
     ...Platform.select({ ios: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' }, android: { elevation: 2 }, web: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' } }),
   },
-  exameInfo: { flex: 1, gap: 3 },
-  exameNome: { fontSize: 14, fontWeight: '600', color: '#111' },
-  exameData: { fontSize: 12, color: '#888' },
-  statusBadge: { borderWidth: 1, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, marginLeft: 8 },
-  statusText: { fontSize: 12, fontWeight: '700' },
+  refeicaoTopo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  refeicaoTitulo: { fontSize: 15, fontWeight: '700', color: '#111' },
+  horarioBadge: { backgroundColor: '#fff3e0', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 },
+  horarioTexto: { fontSize: 12, color: '#e65100', fontWeight: '600' },
+  itemRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  itemDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: RED },
+  itemTexto: { fontSize: 13, color: '#444' },
 });

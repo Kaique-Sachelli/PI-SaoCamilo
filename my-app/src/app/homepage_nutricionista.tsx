@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Text,
   View,
@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useUser } from '../context/UserContext';
 import { NavbarNutricionista } from './Navbar_nutricionista';
 import { NotificacaoPopup } from './notificacao';
@@ -45,18 +45,18 @@ export default function HomepageNutricionista() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchAtletas();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchAtletas();
+    }, [])
+  );
 
   async function fetchAtletas() {
+    setLoading(true);
+    setError(null);
     try {
       const resposta = await fetch(getUrl('/atletas'));
-
-      if (!resposta.ok) {
-        throw new Error('Erro ao buscar a lista de atletas');
-      }
-
+      if (!resposta.ok) throw new Error('Erro ao buscar a lista de atletas');
       const dados: Atleta[] = await resposta.json();
       setAtletas(dados);
     } catch (err) {
@@ -73,22 +73,6 @@ export default function HomepageNutricionista() {
     const esporteMatch = a.esporte ? a.esporte.toLowerCase().includes(termoBusca) : false;
     return nomeMatch || esporteMatch;
   });
-
-  const abrirPerfilAtleta = (atleta: Atleta) => {
-    router.push({
-      pathname: '/perfil_atleta_nutricionista',
-      params: {
-        id_atleta: String(atleta.id),
-        nome: atleta.nome,
-        email: atleta.email || '',
-        telefone: atleta.telefone || '',
-        idade: atleta.idade != null ? String(atleta.idade) : '',
-        altura: atleta.altura != null ? String(atleta.altura) : '',
-        peso: atleta.peso != null ? String(atleta.peso) : '',
-        modalidade_esportiva: atleta.esporte || '',
-      },
-    });
-  };
 
   return (
     <ImageBackground
@@ -134,54 +118,24 @@ export default function HomepageNutricionista() {
 
           {/* Cabeçalho da lista */}
           <View style={styles.listHeader}>
-            <Text style={styles.listTitulo}>Meus atletas</Text>
-            <TouchableOpacity
-              style={styles.gerenciarBtn}
-              onPress={() => router.push('/TelaGerenciarAtletas')}
-            >
-              <Text style={styles.gerenciarTexto}>Gerenciar </Text>
-              <Image source={require('./assets/Img/gerenciar.png')} style={styles.gerenciarIcone} />
-            </TouchableOpacity>
+            <Text style={styles.listTitulo}>Atletas</Text>
           </View>
 
           {/* Lista de atletas */}
-          {loading && (
+          {loading ? (
             <Text style={styles.estadoTexto}>Carregando atletas...</Text>
-          )}
-
-          {!loading && atletasFiltrados.length === 0 && (
-            <Text style={styles.estadoTexto}>Nenhum atleta encontrado.</Text>
-          )}
-
-          {/* !carregandoAtletas && atletasFiltrados.map((atleta, idx) => ( */}
-
-          {/* {atletasFiltrados.map((atleta, idx) => (
-
-          {!carregandoAtletas && atletasFiltrados.map((atleta, idx) => (
+          ) : error ? (
+            <Text style={styles.estadoTexto}>{error}</Text>
+          ) : atletasFiltrados.length === 0 ? (
+            <Text style={styles.estadoTexto}>
+              {busca ? 'Nenhum atleta encontrado.' : 'Nenhum atleta cadastrado.'}
+            </Text>
+          ) : atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
-              key={atleta.id}
+              key={`atleta-${atleta.id}`}
               style={styles.atletaCard}
               activeOpacity={0.75}
-              onPress={() => abrirPerfilAtleta(atleta)}
-            >
-              <View style={styles.atletaLeft}>
-                <View style={[styles.atletaAvatar, styles.atletaAvatarPlaceholder, { backgroundColor: CORES_AVATAR[idx % CORES_AVATAR.length] }]}>
-                  <Text style={styles.atletaIniciais}>{iniciais(atleta.nome)}</Text>
-                </View>
-                <View style={styles.atletaInfo}>
-                  <Text style={styles.atletaNome}>{atleta.nome}</Text>
-                  <Text style={styles.atletaEsporte}>{atleta.esporte || 'Atleta'}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))} */}
-          {/* Lista de atletas */}
-          {atletasFiltrados.map((atleta, idx) => (
-            <TouchableOpacity
-              key={`atleta-${atleta.id || idx}`}
-              style={styles.atletaCard}
-              activeOpacity={0.75}
-              onPress={() => router.push('/sessoes_treinador')}
+              onPress={() => router.push({ pathname: '/sessoes_nutricionista', params: { id_atleta: String(atleta.id), nome: atleta.nome } })}
             >
               <View style={styles.atletaLeft}>
                 {atleta.foto ? (
@@ -196,11 +150,7 @@ export default function HomepageNutricionista() {
                   <Text style={styles.atletaEsporte}>{atleta.esporte}</Text>
                 </View>
               </View>
-
-              <View style={styles.atletaRight}>
-                <View style={[styles.statusDot, atleta.ativo ? styles.dotVerde : styles.dotVermelho]} />
-                <Text style={styles.atletaSeta}>›</Text>
-              </View>
+              <Text style={styles.atletaSeta}>›</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
