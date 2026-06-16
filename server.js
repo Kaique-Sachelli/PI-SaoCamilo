@@ -814,3 +814,12 @@ app.get('/clima', (req, res) => {
   });
 });
 
+inicializarBanco()
+  .then(() => {
+    app.listen(3000, () => console.log('Servidor rodando na porta 3000'));
+  })
+  .catch(err => {
+    console.error('Erro ao inicializar banco:', err.message);
+    process.exit(1);
+  });
+
