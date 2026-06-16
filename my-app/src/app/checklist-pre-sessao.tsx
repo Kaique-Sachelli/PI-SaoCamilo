@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 type CheckKey = 'bexiga' | 'balanca' | 'vestimenta';
 
@@ -37,8 +37,16 @@ export default function ChecklistPreSessao() {
   });
   const [weight, setWeight] = useState('');
   const [selectedUrine, setSelectedUrine] = useState(2);
-  const [temp] = useState('24');
-  const [humidity] = useState('27');
+  const params = useLocalSearchParams<{
+    clima_temp?: string;
+    clima_umidade?: string;
+    clima_vento?: string;
+    clima_sensacao?: string;
+  }>();
+  const temp = params.clima_temp ?? '24';
+  const humidity = params.clima_umidade ?? '27';
+  const vento = params.clima_vento ?? '0';
+  const sensacao = params.clima_sensacao ?? '--';
 
   const todosChecked = Object.values(checks).every(Boolean);
   const podeContinuar = todosChecked && !!weight;
@@ -153,6 +161,16 @@ export default function ChecklistPreSessao() {
               <View style={[styles.card, styles.envCard]}>
                 <Text style={styles.envLabel}>UMIDADE</Text>
                 <Text style={styles.envValue}>{humidity}%</Text>
+              </View>
+            </View>
+            <View style={[styles.envRow, { marginTop: 8 }]}>
+              <View style={[styles.card, styles.envCard]}>
+                <Text style={styles.envLabel}>SENSAÇÃO</Text>
+                <Text style={styles.envValue}>{sensacao !== '--' ? `${sensacao}°C` : '--'}</Text>
+              </View>
+              <View style={[styles.card, styles.envCard]}>
+                <Text style={styles.envLabel}>VENTO</Text>
+                <Text style={styles.envValue}>{vento} km/h</Text>
               </View>
             </View>
           </View>
