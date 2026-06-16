@@ -20,6 +20,11 @@ const CHECKLIST_ITEMS: { key: CheckKey; label: string }[] = [
   { key: 'vestimenta', label: 'Vestimenta mínima e consistente' },
 ];
 
+const MODALIDADES = [
+  'Futebol', 'Vôlei', 'Basquete', 'Natação', 'Atletismo',
+  'Handebol', 'Ciclismo', 'Musculação', 'Tênis', 'Outro',
+];
+
 const URINE_LEVELS = [
   { id: 1, bg: '#FFF9C4', textColor: '#9e8c00', badge: 'Hidratação adequada',     badgeBg: '#e8f5e9', badgeText: '#2e7d32' },
   { id: 2, bg: '#FFF176', textColor: '#9e8c00', badge: 'Hidratação adequada',     badgeBg: '#e8f5e9', badgeText: '#2e7d32' },
@@ -37,6 +42,7 @@ export default function ChecklistPreSessao() {
   });
   const [weight, setWeight] = useState('');
   const [selectedUrine, setSelectedUrine] = useState(2);
+  const [modalidade, setModalidade] = useState('');
   const params = useLocalSearchParams<{
     clima_temp?: string;
     clima_umidade?: string;
@@ -65,7 +71,7 @@ export default function ChecklistPreSessao() {
       return;
     }
     router.push(
-      `/cronometro?massa_pre=${weight}&clima_temp=${temp}&clima_umidade=${humidity}&urina_pre_cor=${selectedUrine}`
+      `/cronometro?massa_pre=${weight}&clima_temp=${temp}&clima_umidade=${humidity}&urina_pre_cor=${selectedUrine}&modalidade=${encodeURIComponent(modalidade)}`
     );
   }
 
@@ -148,6 +154,24 @@ export default function ChecklistPreSessao() {
               <Text style={[styles.badgeText, { color: urineSel.badgeText }]}>
                 {'✓  ' + urineSel.badge}
               </Text>
+            </View>
+          </View>
+
+          <View style={styles.card}>
+            <Text style={styles.sectionLabel}>Modalidade esportiva</Text>
+            <View style={styles.modalidadeGrid}>
+              {MODALIDADES.map(m => (
+                <TouchableOpacity
+                  key={m}
+                  style={[styles.modalidadeChip, modalidade === m && styles.modalidadeChipAtivo]}
+                  onPress={() => setModalidade(prev => prev === m ? '' : m)}
+                  activeOpacity={0.75}
+                >
+                  <Text style={[styles.modalidadeChipTexto, modalidade === m && styles.modalidadeChipTextoAtivo]}>
+                    {m}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
 
@@ -295,6 +319,15 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   badgeText: { fontSize: 12, fontWeight: '600' },
+
+  modalidadeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
+  modalidadeChip: {
+    borderWidth: 1.5, borderColor: '#ddd', borderRadius: 20,
+    paddingHorizontal: 14, paddingVertical: 8, backgroundColor: '#fafafa',
+  },
+  modalidadeChipAtivo: { borderColor: RED, backgroundColor: '#fff0f0' },
+  modalidadeChipTexto: { fontSize: 13, color: '#666', fontWeight: '500' },
+  modalidadeChipTextoAtivo: { color: RED, fontWeight: '700' },
 
   envRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
   envCard: { flex: 1, padding: 12, borderWidth: 1.5, borderColor: '#e0e0e0' },
