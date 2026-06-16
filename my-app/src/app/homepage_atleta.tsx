@@ -38,6 +38,7 @@ function iconeClima(descricao: string): string {
 const HORAS_GRAFICO = ['11:00','14:00','17:00','20:00','23:00','02:00','05:00','08:00'];
 
 type UltimaSessao = {
+  id_sessao: number;
   data_hora_inicio: string;
   duracao_minutos: number;
   massa_pre: number;
@@ -82,7 +83,7 @@ export default function HomepageAtleta() {
     fetch(getUrl(`/atleta/${usuario.id_usuario}/ultima-sessao`))
       .then(r => r.json())
       .then(data => {
-        console.log('ultima-sessao resposta:', JSON.stringify(data));
+        console.log('ultima-sessao resposta id_sessao:', data?.sessao?.id_sessao);
         if (data.sucesso && data.sessao) {
           const s = data.sessao;
           setUltimaSessao({
@@ -155,7 +156,11 @@ export default function HomepageAtleta() {
           <Text style={styles.secaoLabel}>Última sessão</Text>
 
           {ultimaSessao ? (
-            <View style={styles.sessaoCard}>
+            <TouchableOpacity
+              style={styles.sessaoCard}
+              activeOpacity={0.75}
+              onPress={() => router.push({ pathname: '/sessao_selecionada', params: { id: ultimaSessao.id_sessao } })}
+            >
               <View style={styles.sessaoTopo}>
                 <Text style={styles.sessaoData}>Treino  {formatarData(ultimaSessao.data_hora_inicio)}</Text>
                 <View style={[styles.hidratacaoOkBadge, { backgroundColor: (badgeSessao[ultimaSessao.status_color] ?? badgeSessao['Verde']).cor + '22', borderColor: (badgeSessao[ultimaSessao.status_color] ?? badgeSessao['Verde']).cor }]}>
@@ -173,7 +178,7 @@ export default function HomepageAtleta() {
                   <Text style={styles.metricaValor}>{ultimaSessao.taxa_sudorese?.toFixed(1)} <Text style={styles.metricaUnidade}>L/h</Text></Text>
                 </View>
                 <View style={styles.metricaItem}>
-                  <Text style={styles.metricaLabel}>Perda de peso</Text>
+                  <Text style={styles.metricaLabel}>Perda ajustada</Text>
                   <Text style={styles.metricaValor}>{ultimaSessao.perda_massa_ajustada?.toFixed(2)}<Text style={styles.metricaUnidade}>L</Text></Text>
                 </View>
                 <View style={styles.metricaItem}>
@@ -183,7 +188,7 @@ export default function HomepageAtleta() {
                   </Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           ) : (
             <View style={styles.sessaoCard}>
               <Text style={{ color: '#888', textAlign: 'center', paddingVertical: 16 }}>Nenhuma sessão registrada ainda</Text>
