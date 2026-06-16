@@ -70,7 +70,7 @@ export default function LoginScreen() {
   };
 
   const handleForgotPassword = () => {
-    alert('Funcionalidade de recuperação de senha em desenvolvimento');
+    router.push('/recuperar_senha');
   };
 
   const handleCreateAccount = () => {

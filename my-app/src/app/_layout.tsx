@@ -30,6 +30,7 @@ function NavegacaoRaiz() {
     >
       <Stack.Screen name="login" />
       <Stack.Screen name="cadastro" />
+      <Stack.Screen name="recuperar_senha" />
     </Stack>
   );
 }
