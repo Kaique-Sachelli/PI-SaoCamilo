@@ -178,7 +178,7 @@ export default function SessoesMedico() {
           <View style={styles.headerNomeRow}>
             <Text style={styles.nomeAtleta}>{nomeAtleta}</Text>
             <TouchableOpacity 
-            onPress={() => router.push({ pathname: '/perfil_atleta_medico', params: { nome: nomeAtleta } })} 
+            onPress={() => router.push({ pathname: '/perfil_atleta_medico', params: { id_atleta: atletaId, nome: nomeAtleta } })}
             activeOpacity={0.8}>
               <Image
                 source={require('./assets/Img/marcus.jpg')}

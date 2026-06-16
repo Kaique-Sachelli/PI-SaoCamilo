@@ -96,19 +96,16 @@ export default function SessoesTreinador() {
           {/* ── Cards de métricas ── */}
           <View style={styles.metricasRow}>
             <View style={styles.metricaCard}>
-              <Text style={[styles.metricaIcone, { color: '#e53935' }]}>⚡</Text>
               <Text style={styles.metricaValor}>{sessoesNaSemana}</Text>
               <Text style={styles.metricaLabel}>Sessões/Semana</Text>
             </View>
             <View style={styles.metricaCard}>
-              <Text style={[styles.metricaIcone, { color: '#1565c0' }]}>💧</Text>
               <Text style={styles.metricaValor}>
                 {liquidoMedio != null ? liquidoMedio.toFixed(1) : 'N/D'}
               </Text>
               <Text style={styles.metricaLabel}>L médio</Text>
             </View>
             <View style={styles.metricaCard}>
-              <Text style={[styles.metricaIcone, { color: '#333' }]}>📊</Text>
               <Text style={styles.metricaValor}>
                 {perdaMedia != null ? `${perdaMedia.toFixed(1)}%` : 'N/D'}
               </Text>

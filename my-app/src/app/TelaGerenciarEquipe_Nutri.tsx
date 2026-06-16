@@ -31,7 +31,7 @@ function iniciais(nome: string) {
   return nome.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
 }
 
-export default function TelaGerenciarAtletas() {
+export default function TelaGerenciarEquipe_Nutri() {
   const router = useRouter();
   const { usuario } = useUser();
   const [busca, setBusca] = useState('');
@@ -41,7 +41,7 @@ export default function TelaGerenciarAtletas() {
   const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
-    Promise.all([fetchTodosAtletas(), fetchAtletasDoTreinador()])
+    Promise.all([fetchTodosAtletas(), fetchAtletasDoNutricionista()])
       .finally(() => setCarregando(false));
   }, []);
 
@@ -57,10 +57,10 @@ export default function TelaGerenciarAtletas() {
     }
   }
 
-  async function fetchAtletasDoTreinador() {
+  async function fetchAtletasDoNutricionista() {
     if (!usuario?.id_usuario) return;
     try {
-      const resposta = await fetch(getUrl(`/treinador/${usuario.id_usuario}/atletas`));
+      const resposta = await fetch(getUrl(`/nutricionista/${usuario.id_usuario}/atletas`));
       if (resposta.ok) {
         const dados: Atleta[] = await resposta.json();
         setSelecionados(dados.map((a) => a.id));
@@ -88,7 +88,7 @@ export default function TelaGerenciarAtletas() {
     if (!usuario?.id_usuario) return;
     setSalvando(true);
     try {
-      const resposta = await fetch(getUrl(`/treinador/${usuario.id_usuario}/atletas`), {
+      const resposta = await fetch(getUrl(`/nutricionista/${usuario.id_usuario}/atletas`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ atleta_ids: selecionados }),
@@ -113,7 +113,6 @@ export default function TelaGerenciarAtletas() {
       resizeMode="cover"
     >
       <SafeAreaView style={styles.safeArea}>
-        {/* ── Header ── */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
             <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
@@ -122,7 +121,6 @@ export default function TelaGerenciarAtletas() {
           <Text style={styles.headerSubtitulo}>Selecione os atletas para compor seu grupo</Text>
         </View>
 
-        {/* ── Barra de pesquisa ── */}
         <View style={styles.searchWrap}>
           <View style={styles.searchRow}>
             <Text style={styles.searchIcone}>🔍</Text>
@@ -136,7 +134,6 @@ export default function TelaGerenciarAtletas() {
           </View>
         </View>
 
-        {/* ── Lista ── */}
         {carregando ? (
           <ActivityIndicator color={RED} style={{ marginTop: 40 }} />
         ) : (
@@ -183,7 +180,6 @@ export default function TelaGerenciarAtletas() {
           </ScrollView>
         )}
 
-        {/* ── Botão Salvar ── */}
         <View style={styles.footerWrap}>
           <TouchableOpacity
             style={[styles.salvarBtn, salvando && { opacity: 0.7 }]}

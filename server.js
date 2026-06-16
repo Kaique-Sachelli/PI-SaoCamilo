@@ -57,6 +57,12 @@ async function inicializarBanco() {
   } catch (_) {
     // coluna já existe
   }
+
+  try {
+    await db.query(`ALTER TABLE Atleta_Perfil ADD COLUMN id_medico INT`);
+  } catch (_) {
+    // coluna já existe
+  }
 }
 
 // rota de login
@@ -552,6 +558,7 @@ app.get('/usuarios/:id', async (req, res) => {
         u.*,
         a.idade,
         a.altura,
+        a.peso,
         a.modalidade_esportiva
       FROM Usuario u
       LEFT JOIN Atleta_Perfil a
@@ -839,6 +846,21 @@ app.get('/sessao/:id', async (req, res) => {
   }
 });
 
+app.put('/atleta/:id/medidas', async (req, res) => {
+  const { id } = req.params;
+  const { peso, altura } = req.body;
+  try {
+    await db.query(`INSERT IGNORE INTO Atleta_Perfil (id_atleta) VALUES (?)`, [id]);
+    await db.query(
+      `UPDATE Atleta_Perfil SET peso = ?, altura = ? WHERE id_atleta = ?`,
+      [peso ?? null, altura ?? null, id]
+    );
+    res.json({ sucesso: true });
+  } catch (err) {
+    res.status(500).json({ sucesso: false, mensagem: err.message });
+  }
+});
+
 app.get('/peso/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -859,6 +881,88 @@ app.get('/altura/:id', async (req, res) => {
   );
 
   res.json({ altura: rows[0]?.altura ?? null });
+});
+
+// rota de atletas de um médico
+app.get('/medico/:id/atletas', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.query(
+      `SELECT u.id_usuario AS id, u.nome, ap.modalidade_esportiva AS esporte
+       FROM Usuario u
+       JOIN Atleta_Perfil ap ON ap.id_atleta = u.id_usuario
+       WHERE ap.id_medico = ? AND u.situacao = 'Ativo'
+       ORDER BY u.nome`,
+      [id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ sucesso: false, mensagem: err.message });
+  }
+});
+
+// rota para atualizar a lista de atletas de um médico
+app.put('/medico/:id/atletas', async (req, res) => {
+  const { id } = req.params;
+  const { atleta_ids } = req.body;
+  if (!Array.isArray(atleta_ids)) {
+    return res.status(400).json({ sucesso: false, mensagem: 'atleta_ids deve ser um array' });
+  }
+  try {
+    await db.query(`UPDATE Atleta_Perfil SET id_medico = NULL WHERE id_medico = ?`, [id]);
+    if (atleta_ids.length > 0) {
+      for (const id_atleta of atleta_ids) {
+        await db.query(`INSERT IGNORE INTO Atleta_Perfil (id_atleta) VALUES (?)`, [id_atleta]);
+      }
+      await db.query(`UPDATE Atleta_Perfil SET id_medico = ? WHERE id_atleta IN (?)`, [id, atleta_ids]);
+    }
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ sucesso: false, mensagem: err.message });
+  }
+});
+
+// rota de atletas de um nutricionista
+app.get('/nutricionista/:id/atletas', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.query(
+      `SELECT u.id_usuario AS id, u.nome, ap.modalidade_esportiva AS esporte
+       FROM Usuario u
+       JOIN Atleta_Perfil ap ON ap.id_atleta = u.id_usuario
+       WHERE ap.id_nutricionista = ? AND u.situacao = 'Ativo'
+       ORDER BY u.nome`,
+      [id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ sucesso: false, mensagem: err.message });
+  }
+});
+
+// rota para atualizar a lista de atletas de um nutricionista
+app.put('/nutricionista/:id/atletas', async (req, res) => {
+  const { id } = req.params;
+  const { atleta_ids } = req.body;
+  if (!Array.isArray(atleta_ids)) {
+    return res.status(400).json({ sucesso: false, mensagem: 'atleta_ids deve ser um array' });
+  }
+  try {
+    await db.query(`UPDATE Atleta_Perfil SET id_nutricionista = NULL WHERE id_nutricionista = ?`, [id]);
+    if (atleta_ids.length > 0) {
+      for (const id_atleta of atleta_ids) {
+        await db.query(`INSERT IGNORE INTO Atleta_Perfil (id_atleta) VALUES (?)`, [id_atleta]);
+      }
+      await db.query(`UPDATE Atleta_Perfil SET id_nutricionista = ? WHERE id_atleta IN (?)`, [id, atleta_ids]);
+    }
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ sucesso: false, mensagem: err.message });
+  }
 });
 
 // rota de clima atual via OpenWeatherMap

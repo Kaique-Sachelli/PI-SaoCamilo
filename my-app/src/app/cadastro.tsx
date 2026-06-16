@@ -35,7 +35,6 @@ export default function CadastroScreen() {
   const [senha, setSenha] = useState('');
   const [registro, setRegistro] = useState('');
   const [tipoPerfil, setTipoPerfil] = useState<TipoPerfil>('Atleta');
-  const [idade, setIdade] = useState('');
   const [altura, setAltura] = useState('');
   const [peso, setPeso] = useState('');
   const [loading, setLoading] = useState(false);
@@ -70,7 +69,7 @@ export default function CadastroScreen() {
   const handleCriarConta = async () => {
     const label = registroLabel(tipoPerfil);
     const isAtleta = tipoPerfil === 'Atleta';
-    if (!nome || !dataNascimento || !telefone || !email || !senha || (label && !registro) || (isAtleta && (!idade || !altura || !peso))) {
+    if (!nome || !dataNascimento || !telefone || !email || !senha || (label && !registro) || (isAtleta && (!altura || !peso))) {
       alert('Por favor, preencha todos os campos');
       return;
     }
@@ -92,7 +91,7 @@ export default function CadastroScreen() {
           data_nascimento: dataNascimento,
           telefone,
           registro,
-          ...(tipoPerfil === 'Atleta' && { idade, altura, peso }),
+          ...(tipoPerfil === 'Atleta' && { altura, peso }),
         }),
       });
 
@@ -150,7 +149,7 @@ export default function CadastroScreen() {
                   <TouchableOpacity
                     key={tipo}
                     style={[styles.chip, tipoPerfil === tipo && styles.chipAtivo]}
-                    onPress={() => { setTipoPerfil(tipo); setRegistro(''); setIdade(''); setAltura(''); setPeso(''); }}
+                    onPress={() => { setTipoPerfil(tipo); setRegistro(''); setAltura(''); setPeso(''); }}
                     disabled={loading}
                   >
                     <Text style={[styles.chipText, tipoPerfil === tipo && styles.chipTextAtivo]}>
@@ -215,15 +214,6 @@ export default function CadastroScreen() {
 
               {tipoPerfil === 'Atleta' && (
                 <>
-                  <TextInput
-                    style={inputStyle}
-                    placeholder="Idade:"
-                    value={idade}
-                    onChangeText={setIdade}
-                    keyboardType="numeric"
-                    maxLength={3}
-                    editable={!loading}
-                  />
                   <TextInput
                     style={inputStyle}
                     placeholder="Altura (cm):"
