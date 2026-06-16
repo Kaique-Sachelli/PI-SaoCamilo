@@ -169,11 +169,6 @@ export default function HomepageNutricionista() {
                   <Text style={styles.atletaEsporte}>{atleta.esporte || 'Atleta'}</Text>
                 </View>
               </View>
-
-              <View style={styles.atletaRight}>
-                <View style={[styles.statusDot, atleta.ativo === 'Ativo' ? styles.dotVerde : styles.dotVermelho]} />
-                <Text style={styles.atletaSeta}>›</Text>
-              </View>
             </TouchableOpacity>
           ))}
         </ScrollView>

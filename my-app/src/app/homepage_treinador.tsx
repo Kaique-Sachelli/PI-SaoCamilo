@@ -144,11 +144,6 @@ const atletasFiltrados = atletas.filter((a) => {
                   <Text style={styles.atletaEsporte}>{atleta.esporte}</Text>
                 </View>
               </View>
-
-              <View style={styles.atletaRight}>
-                <View style={[styles.statusDot, atleta.ativo ? styles.dotVerde : styles.dotVermelho]} />
-                <Text style={styles.atletaSeta}>›</Text>
-              </View>
             </TouchableOpacity>
           ))}
         </ScrollView>

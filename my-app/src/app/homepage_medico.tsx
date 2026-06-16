@@ -146,7 +146,6 @@ const atletasFiltrados = atletas.filter((a) => {
               </View>
 
               <View style={styles.atletaRight}>
-                <View style={[styles.statusDot, atleta.ativo ? styles.dotVerde : styles.dotVermelho]} />
                 <Text style={styles.atletaSeta}>›</Text>
               </View>
             </TouchableOpacity>
