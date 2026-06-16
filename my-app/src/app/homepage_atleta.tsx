@@ -183,7 +183,12 @@ export default function HomepageAtleta() {
                 </View>
                 <View style={styles.metricaItem}>
                   <Text style={styles.metricaLabel}>Variação de massa</Text>
-                  <Text style={[styles.metricaValor, { color: ultimaSessao.percentual_variacao > 3 ? '#ef4444' : '#22c55e' }]}>
+                  <Text style={[styles.metricaValor, {
+                    color: ultimaSessao.percentual_variacao < 0 ? '#ef4444'
+                      : ultimaSessao.percentual_variacao < 2 ? '#22c55e'
+                      : ultimaSessao.percentual_variacao <= 3 ? '#f59e0b'
+                      : '#ef4444'
+                  }]}>
                     {ultimaSessao.percentual_variacao?.toFixed(1)}%
                   </Text>
                 </View>
