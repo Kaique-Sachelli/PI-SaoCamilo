@@ -24,6 +24,13 @@ interface AlturaData {
   altura: number;
 }
 
+function formatarNascimento(dataStr: string | undefined): string {
+  if (!dataStr) return '--';
+  const d = new Date(dataStr);
+  if (isNaN(d.getTime())) return dataStr;
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
 export default function Perfil() {
   const router = useRouter();
   const { usuario, logout } = useUser();
@@ -96,7 +103,7 @@ export default function Perfil() {
           </View>
 
           <Text style={styles.nome}>{usuario?.nome}</Text>
-          <Text style={styles.posicao}>Vôlei  •  Arremessador</Text>
+          <Text style={styles.posicao}>{usuario?.tipo_perfil}</Text>
         </View>
 
         <ScrollView
@@ -114,25 +121,29 @@ export default function Perfil() {
 
             <View style={styles.linhaInfo}>
               <Image source={require('./assets/Img/email.png')} style={styles.icone} />
-              <View>
-                <Text style={styles.linhaLabel}>E-mail:</Text>
-                <Text style={styles.linhaValor}>{usuario?.email}</Text>
+              <View style={styles.linhaTextos}>
+                <Text style={styles.linhaLabel}>E-mail</Text>
+                <Text style={styles.linhaValor} numberOfLines={1} adjustsFontSizeToFit>
+                  {usuario?.email ?? '--'}
+                </Text>
               </View>
             </View>
 
             <View style={styles.linhaInfo}>
               <Image source={require('./assets/Img/telefone.png')} style={styles.icone} />
-              <View>
-                <Text style={styles.linhaLabel}>Telefone:</Text>
-                <Text style={styles.linhaValor}>+55 {usuario?.telefone}</Text>
+              <View style={styles.linhaTextos}>
+                <Text style={styles.linhaLabel}>Telefone</Text>
+                <Text style={styles.linhaValor}>+55 {usuario?.telefone ?? '--'}</Text>
               </View>
             </View>
 
             <View style={styles.linhaInfo}>
               <Image source={require('./assets/Img/idade.png')} style={styles.icone} />
-              <View>
-                <Text style={styles.linhaLabel}>Idade:</Text>
-                <Text style={styles.linhaValor}>{usuario?.data_nascimento} anos</Text>
+              <View style={styles.linhaTextos}>
+                <Text style={styles.linhaLabel}>Data de nascimento</Text>
+                <Text style={styles.linhaValor}>
+                  {formatarNascimento(usuario?.data_nascimento)}
+                </Text>
               </View>
             </View>
           </View>
@@ -144,12 +155,16 @@ export default function Perfil() {
               <View style={styles.atleticoItem}>
                 <Image source={require('./assets/Img/batimento.png')} style={styles.atleticoIcone} />
                 <Text style={styles.atleticoLabel}>Altura</Text>
-                <Text style={styles.atleticoValor}>{altura ? `${altura} cm` : 'Altura não registrada'}</Text>
+                <Text style={styles.atleticoValor}>
+                  {altura != null ? `${Number(altura).toFixed(2)} m` : '--'}
+                </Text>
               </View>
               <View style={styles.atleticoItem}>
                 <Image source={require('./assets/Img/batimento.png')} style={styles.atleticoIcone} />
                 <Text style={styles.atleticoLabel}>Peso</Text>
-                <Text style={styles.atleticoValor}>{peso ? `${peso} kg` : 'Peso não registrado'}</Text>
+                <Text style={styles.atleticoValor}>
+                  {peso != null ? `${Number(peso).toFixed(1)} kg` : '--'}
+                </Text>
               </View>
             </View>
           </View>
@@ -239,7 +254,8 @@ const styles = StyleSheet.create({
   
   // Linhas informações
   linhaInfo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  icone: { width: 28, height: 28, resizeMode: 'contain' },
+  icone: { width: 28, height: 28, resizeMode: 'contain', flexShrink: 0 },
+  linhaTextos: { flex: 1 },
   linhaLabel: { fontSize: 12, color: '#888', marginBottom: 1 },
   linhaValor: { fontSize: 15, fontWeight: '500', color: '#111' },
 

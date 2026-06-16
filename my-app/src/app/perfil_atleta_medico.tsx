@@ -9,10 +9,12 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 export default function PerfilAtleta() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ nome?: string }>();
+  const nomeAtleta = params.nome || 'Atleta';
 
   return (
     <ImageBackground
@@ -28,7 +30,7 @@ export default function PerfilAtleta() {
             <TouchableOpacity onPress={() => router.back()} style={styles.voltarBtn}>
               <Text style={styles.voltarIcone}>‹</Text>
             </TouchableOpacity>
-            <Text style={styles.nomeAtleta}>Kacique da Silva</Text>
+            <Text style={styles.nomeAtleta}>{nomeAtleta}</Text>
           </View>
 
           <Text style={styles.posicao}>Vôlei  •  Arremessador</Text>

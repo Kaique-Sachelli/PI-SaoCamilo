@@ -15,24 +15,30 @@ import { NavbarAtleta } from './NavbarAtleta';
 import { useUser } from '../context/UserContext';
 import { getUrl } from '../constants/url';
 import { NotificacaoPopup } from './notificacao';
+import * as Location from 'expo-location';
 
-
-// Dados fictícios de clima
-const CLIMA = {
-  temp: 22,
-  descricao: 'Nublado',
-  chuva: '10%',
-  umidade: '75%',
-  vento: '0 km/h',
-  diaSemana: 'terça-feira',
-  hora: '10:00',
+type ClimaData = {
+  temp: number;
+  sensacao: number;
+  umidade: number;
+  vento: number;
+  descricao: string;
 };
 
-// Pontos do gráfico de temperatura (simulado)
-const PONTOS_GRAFICO = [22, 21, 20, 19, 19, 19, 19, 19, 19, 19, 19, 19];
-const HORAS_GRAFICO  = ['11:00','14:00','17:00','20:00','23:00','02:00','05:00','08:00'];
+function iconeClima(descricao: string): string {
+  const d = descricao.toLowerCase();
+  if (d.includes('trovoa') || d.includes('thunder')) return '⛈';
+  if (d.includes('chuva') || d.includes('rain') || d.includes('chuvisco')) return '🌧';
+  if (d.includes('neve') || d.includes('snow')) return '❄️';
+  if (d.includes('névoa') || d.includes('nevoeiro') || d.includes('mist') || d.includes('fog')) return '🌫';
+  if (d.includes('nublado') || d.includes('cloud') || d.includes('nuvens') || d.includes('encoberto')) return '🌥';
+  return '☀️';
+}
+
+const HORAS_GRAFICO = ['11:00','14:00','17:00','20:00','23:00','02:00','05:00','08:00'];
 
 type UltimaSessao = {
+  id_sessao: number;
   data_hora_inicio: string;
   duracao_minutos: number;
   massa_pre: number;
@@ -49,13 +55,35 @@ export default function HomepageAtleta() {
   const { usuario } = useUser();
   const [ultimaSessao, setUltimaSessao] = useState<UltimaSessao | null>(null);
   const [notifVisivel, setNotifVisivel] = useState(false);
+  const [clima, setClima] = useState<ClimaData | null>(null);
+
+  useEffect(() => {
+    async function fetchClima() {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        let lat = -23.5505;
+        let lon = -46.6333;
+        if (status === 'granted') {
+          const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
+          lat = loc.coords.latitude;
+          lon = loc.coords.longitude;
+        }
+        const r = await fetch(getUrl(`/clima?lat=${lat}&lon=${lon}`));
+        const data = await r.json();
+        if (data.sucesso) setClima(data.clima);
+      } catch (err) {
+        console.error('Erro ao buscar clima:', err);
+      }
+    }
+    fetchClima();
+  }, []);
 
   useEffect(() => {
     if (!usuario?.id_usuario) return;
     fetch(getUrl(`/atleta/${usuario.id_usuario}/ultima-sessao`))
       .then(r => r.json())
       .then(data => {
-        console.log('ultima-sessao resposta:', JSON.stringify(data));
+        console.log('ultima-sessao resposta id_sessao:', data?.sessao?.id_sessao);
         if (data.sucesso && data.sessao) {
           const s = data.sessao;
           setUltimaSessao({
@@ -86,9 +114,12 @@ export default function HomepageAtleta() {
     Vermelho: { texto: 'Alerta',         cor: '#ef4444' },
   };
 
-  // Mini gráfico de linha como barras
-  const maxVal = Math.max(...PONTOS_GRAFICO);
-  const minVal = Math.min(...PONTOS_GRAFICO);
+  const agora = new Date();
+  const diaSemana = agora.toLocaleDateString('pt-BR', { weekday: 'long' });
+  const hora = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const pontos = clima ? Array(12).fill(clima.temp) : [22, 21, 20, 19, 19, 19, 19, 19, 19, 19, 19, 19];
+  const maxVal = Math.max(...pontos);
+  const minVal = Math.min(...pontos);
   const range  = maxVal - minVal || 1;
 
   return (
@@ -124,7 +155,11 @@ export default function HomepageAtleta() {
           <Text style={styles.secaoLabel}>Última sessão</Text>
 
           {ultimaSessao ? (
-            <View style={styles.sessaoCard}>
+            <TouchableOpacity
+              style={styles.sessaoCard}
+              activeOpacity={0.75}
+              onPress={() => router.push({ pathname: '/sessao_selecionada', params: { id: ultimaSessao.id_sessao } })}
+            >
               <View style={styles.sessaoTopo}>
                 <Text style={styles.sessaoData}>Treino  {formatarData(ultimaSessao.data_hora_inicio)}</Text>
                 <View style={[styles.hidratacaoOkBadge, { backgroundColor: (badgeSessao[ultimaSessao.status_color] ?? badgeSessao['Verde']).cor + '22', borderColor: (badgeSessao[ultimaSessao.status_color] ?? badgeSessao['Verde']).cor }]}>
@@ -142,17 +177,22 @@ export default function HomepageAtleta() {
                   <Text style={styles.metricaValor}>{ultimaSessao.taxa_sudorese?.toFixed(1)} <Text style={styles.metricaUnidade}>L/h</Text></Text>
                 </View>
                 <View style={styles.metricaItem}>
-                  <Text style={styles.metricaLabel}>Perda de peso</Text>
+                  <Text style={styles.metricaLabel}>Perda ajustada</Text>
                   <Text style={styles.metricaValor}>{ultimaSessao.perda_massa_ajustada?.toFixed(2)}<Text style={styles.metricaUnidade}>L</Text></Text>
                 </View>
                 <View style={styles.metricaItem}>
                   <Text style={styles.metricaLabel}>Variação de massa</Text>
-                  <Text style={[styles.metricaValor, { color: ultimaSessao.percentual_variacao > 3 ? '#ef4444' : '#22c55e' }]}>
+                  <Text style={[styles.metricaValor, {
+                    color: ultimaSessao.percentual_variacao < 0 ? '#ef4444'
+                      : ultimaSessao.percentual_variacao < 2 ? '#22c55e'
+                      : ultimaSessao.percentual_variacao <= 3 ? '#f59e0b'
+                      : '#ef4444'
+                  }]}>
                     {ultimaSessao.percentual_variacao?.toFixed(1)}%
                   </Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           ) : (
             <View style={styles.sessaoCard}>
               <Text style={{ color: '#888', textAlign: 'center', paddingVertical: 16 }}>Nenhuma sessão registrada ainda</Text>
@@ -164,24 +204,24 @@ export default function HomepageAtleta() {
             {/* Topo clima */}
             <View style={styles.climaTopo}>
               <View style={styles.climaEsquerda}>
-                <Text style={styles.climaNuvem}>🌥</Text>
+                <Text style={styles.climaNuvem}>{iconeClima(clima?.descricao ?? '')}</Text>
                 <View>
-                  <Text style={styles.climaTemp}>{CLIMA.temp}°C</Text>
-                  <Text style={styles.climaDetalhes}>Chuva: {CLIMA.chuva}</Text>
-                  <Text style={styles.climaDetalhes}>Umidade: {CLIMA.umidade}</Text>
-                  <Text style={styles.climaDetalhes}>Vento: {CLIMA.vento}</Text>
+                  <Text style={styles.climaTemp}>{clima?.temp ?? '--'}°C</Text>
+                  <Text style={styles.climaDetalhes}>Sensação: {clima?.sensacao ?? '--'}°C</Text>
+                  <Text style={styles.climaDetalhes}>Umidade: {clima?.umidade ?? '--'}%</Text>
+                  <Text style={styles.climaDetalhes}>Vento: {clima?.vento ?? '--'} km/h</Text>
                 </View>
               </View>
               <View style={styles.climaDireita}>
                 <Text style={styles.climaTitulo}>Clima</Text>
-                <Text style={styles.climaDiaSemana}>{CLIMA.diaSemana}, {CLIMA.hora}</Text>
-                <Text style={styles.climaDescricao}>{CLIMA.descricao}</Text>
+                <Text style={styles.climaDiaSemana}>{diaSemana}, {hora}</Text>
+                <Text style={styles.climaDescricao}>{clima?.descricao ?? 'Carregando...'}</Text>
               </View>
             </View>
 
             {/* Tabs */}
             <View style={styles.climaTabs}>
-              {['Temperatura', 'Chuva', 'Vento'].map((tab, i) => (
+              {['Temperatura', 'Umidade', 'Vento'].map((tab, i) => (
                 <TouchableOpacity key={tab} style={[styles.climaTab, i === 0 && styles.climaTabAtivo]}>
                   <Text style={[styles.climaTabTexto, i === 0 && styles.climaTabTextoAtivo]}>{tab}</Text>
                 </TouchableOpacity>
@@ -190,7 +230,7 @@ export default function HomepageAtleta() {
 
             {/* Gráfico de temperatura (barras como sparkline) */}
             <View style={styles.graficoWrap}>
-              {PONTOS_GRAFICO.map((v, i) => {
+              {pontos.map((v, i) => {
                 const altura = ((v - minVal) / range) * 28 + 8;
                 return (
                   <View key={i} style={styles.graficoColunaWrap}>
@@ -212,7 +252,9 @@ export default function HomepageAtleta() {
           <TouchableOpacity
             style={styles.btnTreinar}
             activeOpacity={0.85}
-            onPress={() => router.push('/checklist-pre-sessao')}
+            onPress={() => router.push(
+              `/checklist-pre-sessao?clima_temp=${clima?.temp ?? 24}&clima_umidade=${clima?.umidade ?? 27}&clima_vento=${clima?.vento ?? 0}&clima_sensacao=${clima?.sensacao ?? 24}`
+            )}
           >
             <Text style={styles.btnTreinarTexto}>PRONTO PARA TREINAR?</Text>
           </TouchableOpacity>

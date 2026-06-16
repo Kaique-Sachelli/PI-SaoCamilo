@@ -67,7 +67,7 @@ function converterCategoria(tipo: string) {
 export default function GerenciarUsuarios() {
   const router = useRouter();
   const [busca, setBusca] = useState('');
-   const [categoria, setCategoria] = useState<Categoria | 'Todos'>('Todos');
+  const [categoria, setCategoria] = useState<Categoria | 'Todos'>('Todos');
   const [removidos, setRemovidoss] = useState<number[]>([]);
   const [usuarios, setUsuarios] = useState<any[]>([]);
 
