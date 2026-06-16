@@ -212,7 +212,6 @@ app.post('/dietas', async (req, res) => {
   let conn;
 
   try {
-<<<<<<< HEAD
     conn = await db.getConnection();
     await conn.beginTransaction();
 
@@ -230,35 +229,35 @@ app.post('/dietas', async (req, res) => {
       'SELECT id_usuario FROM Usuario WHERE id_usuario = ? AND tipo_perfil = "Nutricionista"',
       [idNutricionista]
     );
-=======
-    let sql = `
-      SELECT
-        u.id_usuario,
-        u.nome,
-        u.email,
-        u.telefone,
-        u.data_nascimento,
-        u.registro,
-        u.tipo_perfil,
-        u.situacao,
-        ap.idade,
-        ap.sexo,
-        ap.altura,
-        ap.peso,
-        ap.modalidade_esportiva
-      FROM Usuario u
-      LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = u.id_usuario
-      WHERE u.tipo_perfil = 'Atleta'
-    `;
-    const params = [];
 
-    if (busca) {
-      sql += ' AND (u.nome LIKE ? OR u.email LIKE ? OR u.registro LIKE ? OR ap.modalidade_esportiva LIKE ?)';
-      params.push(busca, busca, busca, busca);
-    }
+    // let sql = `
+    //   SELECT
+    //     u.id_usuario,
+    //     u.nome,
+    //     u.email,
+    //     u.telefone,
+    //     u.data_nascimento,
+    //     u.registro,
+    //     u.tipo_perfil,
+    //     u.situacao,
+    //     ap.idade,
+    //     ap.sexo,
+    //     ap.altura,
+    //     ap.peso,
+    //     ap.modalidade_esportiva
+    //   FROM Usuario u
+    //   LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = u.id_usuario
+    //   WHERE u.tipo_perfil = 'Atleta'
+    // `;
+    // const params = [];
 
-    sql += ' ORDER BY u.nome';
->>>>>>> feature/historico-longitudinal-filtros
+    // if (busca) {
+    //   sql += ' AND (u.nome LIKE ? OR u.email LIKE ? OR u.registro LIKE ? OR ap.modalidade_esportiva LIKE ?)';
+    //   params.push(busca, busca, busca, busca);
+    // }
+
+    // sql += ' ORDER BY u.nome';
+
 
     if (nutricionista.length === 0) {
       await conn.rollback();
