@@ -18,6 +18,10 @@ function campoTexto(valor) {
   return texto || null;
 }
 
+function senhaValida(valor) {
+  return typeof valor === 'string' && valor.length >= 6;
+}
+
 async function inicializarBanco() {
   await db.query(`
     CREATE TABLE IF NOT EXISTS Dieta (
@@ -58,6 +62,42 @@ app.post('/login', async (req, res) => {
     return res.json({ sucesso: true, mensagem: 'login ok', usuario: rows });
   } catch (err) {
     console.error('Erro no login:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
+  }
+});
+
+// rota de recuperacao de senha
+app.patch('/recuperar-senha', async (req, res) => {
+  const { email, novaSenha } = req.body;
+  const emailNormalizado = campoTexto(email);
+
+  if (!emailNormalizado || !novaSenha) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Informe o e-mail e a nova senha' });
+  }
+
+  if (!senhaValida(novaSenha)) {
+    return res.status(400).json({ sucesso: false, mensagem: 'A senha deve ter pelo menos 6 caracteres' });
+  }
+
+  try {
+    const [usuarios] = await db.query(
+      'SELECT id_usuario FROM Usuario WHERE email = ?',
+      [emailNormalizado]
+    );
+
+    if (usuarios.length === 0) {
+      return res.status(404).json({ sucesso: false, mensagem: 'E-mail nao encontrado' });
+    }
+
+    const hash = await bcrypt.hash(novaSenha, 10);
+    await db.query(
+      'UPDATE Usuario SET senha = ? WHERE id_usuario = ?',
+      [hash, usuarios[0].id_usuario]
+    );
+
+    res.json({ sucesso: true, mensagem: 'Senha atualizada com sucesso' });
+  } catch (err) {
+    console.error('Erro ao recuperar senha:', err.message);
     res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
   }
 });
@@ -713,17 +753,6 @@ app.get('/peso/:id', async (req, res) => {
     res.json({ peso: rows[0] });
 });
 
-inicializarBanco()
-  .then(() => {
-    app.listen(3000, () => {
-      console.log('rodando na porta 3000');
-    });
-  })
-  .catch((err) => {
-    console.error('Erro ao inicializar banco:', err.message);
-    process.exit(1);
-  });
-
 app.get('/altura/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -737,7 +766,13 @@ app.get('/altura/:id', async (req, res) => {
     res.json({ altura: rows[0] });
 });
 
-app.listen(3000, () => {
-  console.log('rodando na porta 3000');
-});
-
+inicializarBanco()
+  .then(() => {
+    app.listen(3000, () => {
+      console.log('rodando na porta 3000');
+    });
+  })
+  .catch((err) => {
+    console.error('Erro ao inicializar banco:', err.message);
+    process.exit(1);
+  });
