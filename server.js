@@ -39,6 +39,19 @@ async function inicializarBanco() {
     )
   `);
 
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS Exame (
+      id_exame INT PRIMARY KEY AUTO_INCREMENT,
+      id_atleta INT NOT NULL,
+      tipo_exame VARCHAR(100) NOT NULL,
+      data_exame DATE NOT NULL,
+      resultado TEXT,
+      status VARCHAR(20) DEFAULT 'Normal',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (id_atleta) REFERENCES Atleta_Perfil(id_atleta)
+    )
+  `);
+
   try {
     await db.query(`ALTER TABLE Atleta_Perfil ADD COLUMN id_treinador INT`);
   } catch (_) {
@@ -111,7 +124,7 @@ app.patch('/recuperar-senha', async (req, res) => {
 
 //rota de cadastro
 app.post('/cadastro', async (req, res) => {
-  const { nome, email, senha, tipo_perfil, data_nascimento, telefone, registro } = req.body;
+  const { nome, email, senha, tipo_perfil, data_nascimento, telefone, registro, idade, altura, peso } = req.body;
 
   if (!nome || !email || !senha || !tipo_perfil || !data_nascimento || !telefone) {
     return res.status(400).json({ sucesso: false, mensagem: 'Preencha todos os campos obrigatórios' });
@@ -127,10 +140,21 @@ app.post('/cadastro', async (req, res) => {
     }
 
     const hash = await bcrypt.hash(senha, 10);
-    await db.query(
+    const [result] = await db.query(
       'INSERT INTO Usuario (nome, email, senha, tipo_perfil, data_nascimento, telefone, registro) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [nome, email, hash, tipoNormalizado, dataNascimentoFormatada, telefone, registro || null]
     );
+
+    if (tipoNormalizado === 'Atleta') {
+      const idadeNum = idade ? parseInt(idade, 10) : null;
+      const alturaNum = altura ? parseFloat(altura) : null;
+      const pesoNum = peso ? parseFloat(peso) : null;
+      await db.query(
+        'INSERT INTO Atleta_Perfil (id_atleta, idade, altura, peso) VALUES (?, ?, ?, ?)',
+        [result.insertId, idadeNum, alturaNum, pesoNum]
+      );
+    }
+
     res.status(201).json({ sucesso: true, mensagem: 'Usuário cadastrado, aguardando aprovação' });
   } catch (err) {
     console.error('Erro no cadastro:', err.message);
@@ -869,6 +893,7 @@ app.get('/clima', (req, res) => {
     res.status(500).json({ sucesso: false, mensagem: 'Erro ao buscar clima' });
   });
 });
+
 
 inicializarBanco()
   .then(() => {
