@@ -14,7 +14,6 @@ import { useRouter } from 'expo-router';
 import { NavbarAtleta } from './NavbarAtleta';
 import { useUser } from '../context/UserContext';
 import { getUrl } from '../constants/url';
-import { NotificacaoPopup } from './notificacao';
 import * as Location from 'expo-location';
 
 type ClimaData = {
@@ -54,7 +53,6 @@ export default function HomepageAtleta() {
   const router = useRouter();
   const { usuario } = useUser();
   const [ultimaSessao, setUltimaSessao] = useState<UltimaSessao | null>(null);
-  const [notifVisivel, setNotifVisivel] = useState(false);
   const [clima, setClima] = useState<ClimaData | null>(null);
 
   useEffect(() => {
@@ -136,12 +134,6 @@ export default function HomepageAtleta() {
             <View>
               <Text style={styles.titulo}>HIDRA PRO-FORMANCE</Text>
             </View>
-            <TouchableOpacity onPress={() => setNotifVisivel(true)}>
-              <View style={styles.sinoWrap}>
-                <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
-                <View style={styles.sinoDot} />
-              </View>
-            </TouchableOpacity>
           </View>
             <Text style={styles.funcao}>Olá, {usuario?.nome}</Text>
         </View>
@@ -262,11 +254,6 @@ export default function HomepageAtleta() {
         {/* ── Bottom Nav ── */}
         <NavbarAtleta active="home" />
 
-        {/* ── Popup de Notificações ── */}
-        <NotificacaoPopup
-          visible={notifVisivel}
-          onClose={() => setNotifVisivel(false)}
-        />
       </SafeAreaView>
     </ImageBackground>
   );

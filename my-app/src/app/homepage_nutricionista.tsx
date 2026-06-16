@@ -14,7 +14,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useUser } from '../context/UserContext';
 import { NavbarNutricionista } from './Navbar_nutricionista';
-import { NotificacaoPopup } from './notificacao';
 import { getUrl } from '../constants/url';
 
 interface Atleta {
@@ -39,7 +38,6 @@ const CORES_AVATAR = ['#c0392b', '#8e44ad', '#16a085', '#d35400', '#2980b9'];
 export default function HomepageNutricionista() {
   const router = useRouter();
   const { usuario } = useUser();
-  const [notifVisivel, setNotifVisivel] = useState(false);
   const [busca, setBusca] = useState('');
   const [atletas, setAtletas] = useState<Atleta[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -91,12 +89,6 @@ export default function HomepageNutricionista() {
             <View>
               <Text style={styles.titulo}>HIDRA PRO-FORMANCE</Text>
             </View>
-            <TouchableOpacity onPress={() => setNotifVisivel(true)}>
-              <View style={styles.sinoWrap}>
-                <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
-                <View style={styles.sinoDot} />
-              </View>
-            </TouchableOpacity>
           </View>
           <Text style={styles.funcao}>Olá, {usuario?.nome}</Text>
         </View>
@@ -169,11 +161,6 @@ export default function HomepageNutricionista() {
         {/* ── Bottom Nav ── */}
         <NavbarNutricionista active="home" />
 
-        {/* ── Popup de Notificações ── */}
-        <NotificacaoPopup
-          visible={notifVisivel}
-          onClose={() => setNotifVisivel(false)}
-        />
       </SafeAreaView>
     </ImageBackground>
   );

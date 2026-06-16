@@ -14,7 +14,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useUser } from '../context/UserContext';
 import { NavbarTreinador } from './Navbar_Treinador';
-import { NotificacaoPopup } from './notificacao';
 import { getUrl } from '../constants/url';
 
 interface Atleta {
@@ -35,7 +34,6 @@ export default function HomepageTreinador() {
   const router = useRouter();
   const { usuario } = useUser();
   const [busca, setBusca] = useState('');
-  const [notifVisivel, setNotifVisivel] = useState(false);
   const [atletas, setAtletas] = useState<Atleta[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -87,12 +85,6 @@ const atletasFiltrados = atletas.filter((a) => {
             <View>
               <Text style={styles.titulo}>HIDRA PRO-FORMANCE</Text>
             </View>
-            <TouchableOpacity onPress={() => setNotifVisivel(true)}>
-              <View style={styles.sinoWrap}>
-                <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
-                <View style={styles.sinoDot} />
-              </View>
-            </TouchableOpacity>
           </View>
           <Text style={styles.funcao}>Olá, {usuario?.nome}</Text>
         </View>
@@ -165,11 +157,6 @@ const atletasFiltrados = atletas.filter((a) => {
         {/* ── Bottom Nav ── */}
         <NavbarTreinador active="home"/>
 
-        {/* ── Popup de Notificações ── */}
-        <NotificacaoPopup
-          visible={notifVisivel}
-          onClose={() => setNotifVisivel(false)}
-        />
       </SafeAreaView>
     </ImageBackground>
   );

@@ -14,7 +14,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useUser } from '../context/UserContext';
 import { NavbarMedico } from './Navbar_Medico';
-import { NotificacaoPopup } from './notificacao';
 import { getUrl } from '../constants/url';
 
 interface Atleta {
@@ -35,7 +34,6 @@ export default function HomepageMedico() {
   const router = useRouter();
   const { usuario } = useUser();
   const [busca, setBusca] = useState('');
-  const [notifVisivel, setNotifVisivel] = useState(false);
   const [atletas, setAtletas] = useState<Atleta[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,12 +84,6 @@ const atletasFiltrados = atletas.filter((a) => {
             <View>
               <Text style={styles.titulo}>HIDRA PRO-FORMANCE</Text>
             </View>
-            <TouchableOpacity onPress={() => setNotifVisivel(true)}>
-              <View style={styles.sinoWrap}>
-                <Image source={require('./assets/Img/sino.png')} style={styles.sino} />
-                <View style={styles.sinoDot} />
-              </View>
-            </TouchableOpacity>
           </View>
           <Text style={styles.funcao}>Olá, {usuario?.nome}</Text>
         </View>
@@ -166,11 +158,6 @@ const atletasFiltrados = atletas.filter((a) => {
         {/* ── Bottom Nav ── */}
         <NavbarMedico active="home"/>
 
-        {/* ── Popup de Notificações ── */}
-        <NotificacaoPopup
-          visible={notifVisivel}
-          onClose={() => setNotifVisivel(false)}
-        />
       </SafeAreaView>
     </ImageBackground>
   );
@@ -199,14 +186,6 @@ const styles = StyleSheet.create({
   },
   titulo: { fontSize: 20, color: '#fff', fontWeight: '700' },
   subtitulo: { fontSize: 16, color: 'rgba(255,255,255,0.75)', fontWeight: '300', marginTop: 2 },
-  sinoWrap: { position: 'relative', marginTop: 4 },
-  sino: { width: 28, height: 28, tintColor: '#fff' },
-  sinoDot: {
-    position: 'absolute', top: 0, right: 0,
-    width: 9, height: 9, borderRadius: 5,
-    backgroundColor: '#FF9800',
-    borderWidth: 1.5, borderColor: RED,
-  },
   funcao: { fontSize: 20, color: '#fff', fontWeight: '700' },
 
   // Scroll
