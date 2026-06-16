@@ -192,60 +192,107 @@ function CalendarioModal({
   );
 }
 
+const EXAMES = [
+  { nome: 'Hemograma Completo', data: '10/05/2026', status: 'Normal',  cor: '#2e7d32' },
+  { nome: 'Glicemia em Jejum',  data: '10/05/2026', status: 'Normal',  cor: '#2e7d32' },
+  { nome: 'Colesterol Total',   data: '22/04/2026', status: 'Atenção', cor: '#e65100' },
+  { nome: 'Ferritina',          data: '22/04/2026', status: 'Baixo',   cor: '#c62828' },
+  { nome: 'Vitamina D',         data: '01/04/2026', status: 'Normal',  cor: '#2e7d32' },
+];
+
 // ─── Aba Exames ───────────────────────────────────────────────────────────────
 function AbaExames() {
-  const [arquivoAdicionado, setArquivoAdicionado] = useState(false);
+  const [lista] = useState(EXAMES.map(e => ({ ...e })));
+  const [modalVisivel, setModalVisivel] = useState(false);
+  const [arquivoSelecionado, setArquivoSelecionado] = useState(false);
 
-  const handleAdicionarArquivo = () => {
+  function handleDropZone() {
     Alert.alert(
       'Adicionar arquivo',
       'Escolha uma opção',
       [
-        { text: 'Galeria de fotos',  onPress: () => setArquivoAdicionado(true) },
-        { text: 'Documentos (PDF)', onPress: () => setArquivoAdicionado(true) },
+        { text: 'Galeria de fotos',   onPress: () => setArquivoSelecionado(true) },
+        { text: 'Documentos (PDF)',   onPress: () => setArquivoSelecionado(true) },
         { text: 'Cancelar', style: 'cancel' },
       ]
     );
-  };
+  }
 
-  const handleEnviar = () => {
-    if (!arquivoAdicionado) {
-      Alert.alert('Atenção', 'Adicione um arquivo antes de enviar.');
-      return;
-    }
-    Alert.alert('Sucesso', 'Exame enviado com sucesso!', [
-      { text: 'OK', onPress: () => setArquivoAdicionado(false) },
-    ]);
-  };
+  function fecharModal() {
+    setModalVisivel(false);
+    setArquivoSelecionado(false);
+  }
+
+  function enviar() {
+    if (!arquivoSelecionado) { Alert.alert('Atenção', 'Selecione um arquivo antes de enviar.'); return; }
+    Alert.alert('Sucesso', 'Exame enviado com sucesso!', [{ text: 'OK', onPress: fecharModal }]);
+  }
 
   return (
-    <View style={styles.examesContainer}>
-      <Text style={styles.examesTitulo}>Adicione seus exames de sangue aqui:</Text>
+    <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+      <View style={styles.examesHeaderRow}>
+        <Text style={styles.examesSecaoTitulo}>Exames Recentes</Text>
+        <TouchableOpacity style={styles.addExameBtn} onPress={() => { setArquivoSelecionado(false); setModalVisivel(true); }}>
+          <Text style={styles.addExameBtnTexto}>+ Adicionar</Text>
+        </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity
-        style={[styles.uploadCard, arquivoAdicionado && styles.uploadCardOk]}
-        activeOpacity={0.8}
-        onPress={handleAdicionarArquivo}
-      >
-        {arquivoAdicionado ? (
-          <View style={styles.arquivoOkWrap}>
-            <Text style={styles.arquivoOkIcone}>✅</Text>
-            <Text style={styles.arquivoOkTexto}>Arquivo adicionado</Text>
-            <Text style={styles.arquivoOkSub}>Toque para substituir</Text>
+      {lista.map((e, i) => (
+        <View key={i} style={styles.exameCardNovo}>
+          <View style={{ flex: 1, gap: 3 }}>
+            <Text style={styles.exameNomeNovo}>{e.nome}</Text>
+            <Text style={{ fontSize: 12, color: '#888' }}>📅 {e.data}</Text>
           </View>
-        ) : (
-          <Text style={styles.maisIcone}>+</Text>
-        )}
-      </TouchableOpacity>
+          <View style={[styles.statusBadgeNovo, { backgroundColor: e.cor + '18', borderColor: e.cor }]}>
+            <Text style={[styles.statusTextNovo, { color: e.cor }]}>{e.status}</Text>
+          </View>
+        </View>
+      ))}
 
-      <TouchableOpacity
-        style={styles.btnEnviar}
-        activeOpacity={0.85}
-        onPress={handleEnviar}
-      >
-        <Text style={styles.btnEnviarTexto}>Enviar  ›</Text>
-      </TouchableOpacity>
-    </View>
+      <Modal visible={modalVisivel} transparent animationType="slide" onRequestClose={fecharModal}>
+        <TouchableOpacity
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }}
+          activeOpacity={1}
+          onPress={fecharModal}
+        >
+          <TouchableOpacity style={styles.exameModal} activeOpacity={1}>
+            <Text style={styles.exameModalTitulo}>Adicionar Exame</Text>
+            <Text style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>
+              Toque na área abaixo para selecionar um arquivo
+            </Text>
+
+            <TouchableOpacity
+              style={[styles.uploadZone, arquivoSelecionado && styles.uploadZoneOk]}
+              activeOpacity={0.75}
+              onPress={handleDropZone}
+            >
+              {arquivoSelecionado ? (
+                <View style={{ alignItems: 'center', gap: 8 }}>
+                  <Text style={{ fontSize: 40 }}>✅</Text>
+                  <Text style={{ fontSize: 15, fontWeight: '700', color: '#2e7d32' }}>Arquivo selecionado</Text>
+                  <Text style={{ fontSize: 12, color: '#888' }}>Toque para substituir</Text>
+                </View>
+              ) : (
+                <View style={{ alignItems: 'center', gap: 10 }}>
+                  <Text style={styles.uploadZonePlus}>+</Text>
+                  <Text style={{ fontSize: 13, color: '#aaa' }}>Arraste ou toque para adicionar</Text>
+                  <Text style={{ fontSize: 11, color: '#ccc' }}>PDF, JPG, PNG</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 4 }}>
+              <TouchableOpacity style={styles.exameBtnCancelar} onPress={fecharModal}>
+                <Text style={{ fontSize: 14, fontWeight: '600', color: '#555' }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.exameBtnSalvar} onPress={enviar}>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: '#fff' }}>Enviar</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+    </ScrollView>
   );
 }
 
@@ -522,17 +569,6 @@ export default function HistoricoAtleta() {
               <View style={styles.card}>
                 <View style={styles.sessoesHeader}>
                   <Text style={styles.cardTitulo}>Sessões Recentes</Text>
-                  <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <TouchableOpacity
-                      onPress={() => exportarPDF(sessoesFiltradas, usuario?.nome, taxaMedia, perdaMedia)}
-                      style={styles.pdfBtn}
-                    >
-                      <Text style={styles.pdfBtnTexto}>PDF</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setCalVisible(true)} style={styles.calBtn}>
-                      <Text style={styles.calBtnIcone}>📅</Text>
-                    </TouchableOpacity>
-                  </View>
                 </View>
 
                 <View style={styles.buscaRow}>
@@ -801,55 +837,61 @@ const styles = StyleSheet.create({
   exportTexto: { fontSize: 15, fontWeight: '700', color: '#fff' },
 
   // Exames
-  examesContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    gap: 28,
-  },
-  examesTitulo: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#222',
-    textAlign: 'center',
-  },
-
-  // Upload
-  uploadCard: {
-    width: '100%',
-    aspectRatio: 1,
+  examesHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  examesSecaoTitulo: { fontSize: 15, fontWeight: '700', color: '#222' },
+  addExameBtn: { backgroundColor: RED, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7 },
+  addExameBtnTexto: { fontSize: 13, fontWeight: '700', color: '#fff' },
+  exameModal: {
     backgroundColor: '#fff',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    gap: 10,
+  },
+  exameModalTitulo: { fontSize: 18, fontWeight: '700', color: '#111', marginBottom: 2 },
+  uploadZone: {
+    width: '100%',
+    aspectRatio: 1.4,
     borderWidth: 2,
     borderColor: RED,
-    ...Platform.select({
-      ios: { boxshadow: '0px 4px 16px rgba(0,0,0,0.12)' },
-      android: { elevation: 4 },
-      web: { boxshadow: '0px 4px 16px rgba(0,0,0,0.12)' },
-    }),
-  },
-  uploadCardOk: { borderColor: '#22c55e' },
-  maisIcone: { fontSize: 72, color: RED, fontWeight: '300', lineHeight: 80 },
-  arquivoOkWrap: { alignItems: 'center', gap: 8 },
-  arquivoOkIcone: { fontSize: 48 },
-  arquivoOkTexto: { fontSize: 18, fontWeight: '700', color: RED },
-  arquivoOkSub: { fontSize: 13, color: '#888' },
-  btnEnviar: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    paddingVertical: 18,
+    borderStyle: 'dashed',
+    borderRadius: 16,
+    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fafafa',
+  },
+  uploadZoneOk: { borderColor: '#2e7d32', borderStyle: 'solid' },
+  uploadZonePlus: { fontSize: 64, color: RED, fontWeight: '200', lineHeight: 72 },
+  exameBtnCancelar: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: '#f5f5f5',
+  },
+  exameBtnSalvar: {
+    flex: 2,
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: RED,
+  },
+  exameCardNovo: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     ...Platform.select({
-      ios: { boxshadow: '0px 4px 12px rgba(0,0,0,0.12)' },
-      android: { elevation: 3 },
-      web: { boxshadow: '0px 4px 12px rgba(0,0,0,0.12)' },
+      ios: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' },
+      android: { elevation: 2 },
+      web: { boxshadow: '0px 1px 4px rgba(0,0,0,0.07)' },
     }),
   },
-  btnEnviarTexto: { fontSize: 18, fontWeight: '700', color: RED, letterSpacing: 0.5 },
+  exameNomeNovo: { fontSize: 14, fontWeight: '700', color: '#111' },
+  statusBadgeNovo: { borderRadius: 20, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 4 },
+  statusTextNovo: { fontSize: 12, fontWeight: '700' },
 
   // Modal calendário
   modalOverlay: {

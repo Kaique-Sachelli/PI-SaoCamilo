@@ -49,7 +49,6 @@ export default function DietaAtleta() {
         {/* ── Header ── */}
         <View style={styles.header}>
           <Text style={styles.headerTitulo}>Plano Alimentar</Text>
-          <Text style={styles.headerSub}>Nutricionista: Dra. Ana Lima</Text>
         </View>
 
         {/* ── Conteúdo ── */}
@@ -102,7 +101,6 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   headerTitulo: { color: '#fff', fontSize: 26, fontWeight: '700' },
-  headerSub: { color: 'rgba(255,255,255,0.75)', fontSize: 13 },
 
   scrollContent: { padding: 16, gap: 12, paddingBottom: 24 },
   secaoTitulo: { fontSize: 15, fontWeight: '700', color: '#222', marginBottom: 2 },
