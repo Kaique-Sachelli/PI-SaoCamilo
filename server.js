@@ -521,6 +521,7 @@ app.post('/sessao/completa', async (req, res) => {
     duracao_minutos, volume_ml,
     perda_massa_ajustada, taxa_sudorese, percentual_variacao,
     alerta_seguranca, status_color,
+    modalidade_esportiva,
     intensidade_percebida, roupas_encharcadas, urina_pre_cor,
     volume_urina_ml,
     nivel_fadiga, sintomas_gastrointestinais,
@@ -531,6 +532,13 @@ app.post('/sessao/completa', async (req, res) => {
       'INSERT IGNORE INTO Atleta_Perfil (id_atleta) VALUES (?)',
       [id_atleta]
     );
+
+    if (modalidade_esportiva) {
+      await db.query(
+        'UPDATE Atleta_Perfil SET modalidade_esportiva = ? WHERE id_atleta = ?',
+        [modalidade_esportiva, id_atleta]
+      );
+    }
 
     const [sessao] = await db.query(
       `INSERT INTO Sessao_Treino
@@ -636,10 +644,12 @@ app.get('/atleta/:id/sessoes', async (req, res) => {
         rc.percentual_variacao,
         rc.alerta_seguranca,
         rc.status_color,
-        rh.volume_ml
+        rh.volume_ml,
+        ap.modalidade_esportiva
       FROM Sessao_Treino st
       LEFT JOIN Resultado_Calculo rc ON rc.id_sessao = st.id_sessao
       LEFT JOIN Registro_Hidratacao rh ON rh.id_sessao = st.id_sessao
+      LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = st.id_atleta
       WHERE st.id_atleta = ? AND st.status_sessao = 'Concluída'
     `;
 
