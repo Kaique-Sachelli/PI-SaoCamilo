@@ -58,7 +58,7 @@ export default function TelaGerenciarAtletas() {
             <Text style={styles.voltarTexto}>{'< Voltar'}</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitulo}>Gerenciar Atletas</Text>
-          <Text style={styles.headerSubtitulo}>Selecione os atletas para compor seu time</Text>
+          <Text style={styles.headerSubtitulo}>Selecione os atletas para compor seu grupo</Text>
         </View>
 
         {/* ── Barra de pesquisa (fora do header, acima da lista) ── */}
