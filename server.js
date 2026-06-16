@@ -6,6 +6,7 @@ app.use(express.json());
 
 const db = require('./db');
 const bcrypt = require('bcrypt');
+const https = require('https');
 
 function parseDateBR(str) {
   const parts = str.split('/');
@@ -737,7 +738,36 @@ app.get('/altura/:id', async (req, res) => {
     res.json({ altura: rows[0] });
 });
 
-app.listen(3000, () => {
-  console.log('rodando na porta 3000');
+// rota de clima atual via OpenWeatherMap
+app.get('/clima', (req, res) => {
+  const lat = parseFloat(req.query.lat) || -23.5505;
+  const lon = parseFloat(req.query.lon) || -46.6333;
+  const API_KEY = '767b1b3605d38e5550bdcf4fbed7be5f';
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=pt_br`;
+
+  https.get(url, (apiRes) => {
+    let data = '';
+    apiRes.on('data', chunk => { data += chunk; });
+    apiRes.on('end', () => {
+      try {
+        const json = JSON.parse(data);
+        res.json({
+          sucesso: true,
+          clima: {
+            temp: Math.round(json.main.temp),
+            sensacao: Math.round(json.main.feels_like),
+            umidade: json.main.humidity,
+            vento: Math.round((json.wind?.speed || 0) * 3.6),
+            descricao: json.weather[0].description,
+          },
+        });
+      } catch {
+        res.status(500).json({ sucesso: false, mensagem: 'Erro ao processar dados de clima' });
+      }
+    });
+  }).on('error', (err) => {
+    console.error('Erro na API de clima:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro ao buscar clima' });
+  });
 });
 
