@@ -183,10 +183,9 @@ export default function Perfil() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+        <NavbarAtleta active="perfil" />
+
       </SafeAreaView>
-
-      <NavbarAtleta active="perfil" />
-
     </ImageBackground>
   );
 }

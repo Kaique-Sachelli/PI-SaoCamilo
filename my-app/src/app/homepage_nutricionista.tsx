@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Alert,
   Text,
   View,
   StyleSheet,
@@ -18,38 +17,18 @@ import { NavbarNutricionista } from './Navbar_nutricionista';
 import { NotificacaoPopup } from './notificacao';
 import { getUrl } from '../constants/url';
 
-// type Atleta = {
-//   id_usuario: number;
-//   nome: string;
-//   email?: string;
-//   telefone?: string;
-//   situacao?: string;
-//   idade?: number | string | null;
-//   altura?: number | string | null;
-//   peso?: number | string | null;
-//   modalidade_esportiva?: string | null;
-// };
-
 interface Atleta {
   id: number;
   nome: string;
   esporte: string;
   ativo: string;
   foto: null;
+  email?: string;
+  telefone?: string;
+  idade?: number | string | null;
+  altura?: number | string | null;
+  peso?: number | string | null;
 }
-
-// type Atleta = {
-//   id_usuario: number;
-//   nome: string;
-//   email?: string;
-//   telefone?: string;
-//   situacao?: string;
-//   idade?: number | string | null;
-//   altura?: number | string | null;
-//   peso?: number | string | null;
-//   modalidade_esportiva?: string | null;
-// };
-
 
 function iniciais(nome: string) {
   return nome.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
@@ -63,61 +42,6 @@ export default function HomepageNutricionista() {
   const [notifVisivel, setNotifVisivel] = useState(false);
   const [busca, setBusca] = useState('');
   const [atletas, setAtletas] = useState<Atleta[]>([]);
-
-  // const [carregandoAtletas, setCarregandoAtletas] = useState(true);
-
-  // useEffect(() => {
-  //   carregarAtletas();
-  // }, []);
-
-  // async function carregarAtletas() {
-  //   try {
-  //     setCarregandoAtletas(true);
-
-  //     const response = await fetch(getUrl('/atletas'));
-  //     const dados = await response.json();
-
-  //     if (!response.ok) {
-  //       throw new Error(dados.mensagem || 'Não foi possível carregar os atletas.');
-  //     }
-
-  //     setAtletas(dados);
-  //   } catch (err) {
-  //     const mensagem = err instanceof Error ? err.message : 'Não foi possível carregar os atletas.';
-  //     console.log('Erro ao carregar atletas:', mensagem);
-  //     Alert.alert('Erro', mensagem);
-  //   } finally {
-  //     setCarregandoAtletas(false);
-  //   }
-  // }
-
-  // const atletasFiltrados = atletas.filter((atleta) => {
-  //   const termo = busca.trim().toLowerCase();
-  //   if (!termo) return true;
-
-  //   return [
-  //     atleta.nome,
-  //     atleta.email,
-  //     atleta.modalidade_esportiva,
-  //   ].some((valor) => (valor || '').toLowerCase().includes(termo));
-  // });
-
-  // const abrirPerfilAtleta = (atleta: Atleta) => {
-  //   router.push({
-  //     pathname: '/perfil_atleta_nutricionista',
-  //     params: {
-  //       id_atleta: String(atleta.id_usuario),
-  //       nome: atleta.nome,
-  //       email: atleta.email || '',
-  //       telefone: atleta.telefone || '',
-  //       idade: atleta.idade != null ? String(atleta.idade) : '',
-  //       altura: atleta.altura != null ? String(atleta.altura) : '',
-  //       peso: atleta.peso != null ? String(atleta.peso) : '',
-  //       modalidade_esportiva: atleta.modalidade_esportiva || '',
-  //     },
-  //   });
-  // };
-
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -125,84 +49,46 @@ export default function HomepageNutricionista() {
     fetchAtletas();
   }, []);
 
-async function fetchAtletas() { 
-  try { 
-    const resposta = await fetch(getUrl(`/atletas`)); 
-    
-    if (!resposta.ok) { 
-      throw new Error('Erro ao buscar a lista de atletas');
-    } 
-    
-    const dados: Atleta[] = await resposta.json();
-    setAtletas(dados);
-  } catch (err) { 
-    setError(err instanceof Error ? err.message : 'Erro desconhecido'); 
-  } finally { 
-    setLoading(false); 
-  } 
-}
+  async function fetchAtletas() {
+    try {
+      const resposta = await fetch(getUrl('/atletas'));
 
-const atletasFiltrados = atletas.filter((a) => {
-  const termoBusca = busca ? busca.toLowerCase() : "";
-  const nomeMatch = a.nome ? a.nome.toLowerCase().includes(termoBusca) : false;
-  const esporteMatch = a.esporte ? a.esporte.toLowerCase().includes(termoBusca) : false;
+      if (!resposta.ok) {
+        throw new Error('Erro ao buscar a lista de atletas');
+      }
 
-  return nomeMatch || esporteMatch;
-});
+      const dados: Atleta[] = await resposta.json();
+      setAtletas(dados);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  // const [carregandoAtletas, setCarregandoAtletas] = useState(true);
+  const atletasFiltrados = atletas.filter((a) => {
+    const termoBusca = busca.trim().toLowerCase();
+    if (!termoBusca) return true;
+    const nomeMatch = a.nome ? a.nome.toLowerCase().includes(termoBusca) : false;
+    const esporteMatch = a.esporte ? a.esporte.toLowerCase().includes(termoBusca) : false;
+    return nomeMatch || esporteMatch;
+  });
 
-  // useEffect(() => {
-  //   carregarAtletas();
-  // }, []);
-
-  // async function carregarAtletas() {
-  //   try {
-  //     setCarregandoAtletas(true);
-
-  //     const response = await fetch(getUrl('/atletas'));
-  //     const dados = await response.json();
-
-  //     if (!response.ok) {
-  //       throw new Error(dados.mensagem || 'Não foi possível carregar os atletas.');
-  //     }
-
-  //     setAtletas(dados);
-  //   } catch (err) {
-  //     const mensagem = err instanceof Error ? err.message : 'Não foi possível carregar os atletas.';
-  //     console.log('Erro ao carregar atletas:', mensagem);
-  //     Alert.alert('Erro', mensagem);
-  //   } finally {
-  //     setCarregandoAtletas(false);
-  //   }
-  // }
-
-  // const atletasFiltrados = atletas.filter((atleta) => {
-  //   const termo = busca.trim().toLowerCase();
-  //   if (!termo) return true;
-
-  //   return [
-  //     atleta.nome,
-  //     atleta.email,
-  //     atleta.modalidade_esportiva,
-  //   ].some((valor) => (valor || '').toLowerCase().includes(termo));
-  // });
-
-  // const abrirPerfilAtleta = (atleta: Atleta) => {
-  //   router.push({
-  //     pathname: '/perfil_atleta_nutricionista',
-  //     params: {
-  //       id_atleta: String(atleta.id_usuario),
-  //       nome: atleta.nome,
-  //       email: atleta.email || '',
-  //       telefone: atleta.telefone || '',
-  //       idade: atleta.idade != null ? String(atleta.idade) : '',
-  //       altura: atleta.altura != null ? String(atleta.altura) : '',
-  //       peso: atleta.peso != null ? String(atleta.peso) : '',
-  //       modalidade_esportiva: atleta.modalidade_esportiva || '',
-  //     },
-  //   });
-  // };
+  const abrirPerfilAtleta = (atleta: Atleta) => {
+    router.push({
+      pathname: '/perfil_atleta_nutricionista',
+      params: {
+        id_atleta: String(atleta.id),
+        nome: atleta.nome,
+        email: atleta.email || '',
+        telefone: atleta.telefone || '',
+        idade: atleta.idade != null ? String(atleta.idade) : '',
+        altura: atleta.altura != null ? String(atleta.altura) : '',
+        peso: atleta.peso != null ? String(atleta.peso) : '',
+        modalidade_esportiva: atleta.esporte || '',
+      },
+    });
+  };
 
   return (
     <ImageBackground
@@ -215,8 +101,7 @@ const atletasFiltrados = atletas.filter((a) => {
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View>
-              <Text style={styles.titulo}>São Camilo</Text>
-              <Text style={styles.subtitulo}>Nutri-Esportiva</Text>
+              <Text style={styles.titulo}>HIDRA PRO-FORMANCE</Text>
             </View>
             <TouchableOpacity onPress={() => setNotifVisivel(true)}>
               <View style={styles.sinoWrap}>
@@ -260,11 +145,11 @@ const atletasFiltrados = atletas.filter((a) => {
           </View>
 
           {/* Lista de atletas */}
-          {/* {carregandoAtletas && (
+          {loading && (
             <Text style={styles.estadoTexto}>Carregando atletas...</Text>
           )}
 
-          {!carregandoAtletas && atletasFiltrados.length === 0 && (
+          {!loading && atletasFiltrados.length === 0 && (
             <Text style={styles.estadoTexto}>Nenhum atleta encontrado.</Text>
           )}
 
@@ -274,7 +159,7 @@ const atletasFiltrados = atletas.filter((a) => {
 
           {!carregandoAtletas && atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
-              key={atleta.id_usuario}
+              key={atleta.id}
               style={styles.atletaCard}
               activeOpacity={0.75}
               onPress={() => abrirPerfilAtleta(atleta)}
@@ -285,13 +170,8 @@ const atletasFiltrados = atletas.filter((a) => {
                 </View>
                 <View style={styles.atletaInfo}>
                   <Text style={styles.atletaNome}>{atleta.nome}</Text>
-                  <Text style={styles.atletaEsporte}>{atleta.modalidade_esportiva || 'Atleta'}</Text>
+                  <Text style={styles.atletaEsporte}>{atleta.esporte || 'Atleta'}</Text>
                 </View>
-              </View>
-
-              <View style={styles.atletaRight}>
-                <View style={[styles.statusDot, atleta.situacao === 'Ativo' ? styles.dotVerde : styles.dotVermelho]} />
-                <Text style={styles.atletaSeta}>›</Text>
               </View>
             </TouchableOpacity>
           ))} */}
@@ -324,14 +204,15 @@ const atletasFiltrados = atletas.filter((a) => {
             </TouchableOpacity>
           ))}
         </ScrollView>
-      {/* ── Bottom Nav ── */}
-      <NavbarNutricionista active="home"/>
 
-      {/* ── Popup de Notificações ── */}
-      <NotificacaoPopup
-        visible={notifVisivel}
-        onClose={() => setNotifVisivel(false)}
-      />
+        {/* ── Bottom Nav ── */}
+        <NavbarNutricionista active="home" />
+
+        {/* ── Popup de Notificações ── */}
+        <NotificacaoPopup
+          visible={notifVisivel}
+          onClose={() => setNotifVisivel(false)}
+        />
       </SafeAreaView>
     </ImageBackground>
   );
@@ -358,8 +239,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 24,
   },
-  titulo: { fontSize: 28, color: '#fff', fontWeight: '700' },
-  subtitulo: { fontSize: 16, color: 'rgba(255,255,255,0.75)', fontWeight: '300', marginTop: 2 },
+  titulo: { fontSize: 20, color: '#fff', fontWeight: '700' },
   sinoWrap: { position: 'relative', marginTop: 4 },
   sino: { width: 28, height: 28, tintColor: '#fff' },
   sinoDot: {
