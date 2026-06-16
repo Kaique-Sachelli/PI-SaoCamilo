@@ -11,7 +11,6 @@ import {
   ImageBackground,
   Alert,
   ActivityIndicator,
-
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -34,6 +33,8 @@ type Sessao = {
   status_color: 'Verde' | 'Amarelo' | 'Vermelho' | null;
   volume_ml: number | null;
 };
+
+type Aba = 'Sessões' | 'Exames';
 
 function formatarData(dataStr: string): string {
   const d = new Date(dataStr);
@@ -189,156 +190,6 @@ function CalendarioModal({
   );
 }
 
-// ─── Aba Sessões ──────────────────────────────────────────────────────────────
-function AbaSessoes({
-  calVisible,
-  setCalVisible,
-  dataSel,
-  setDataSel,
-}: {
-  calVisible: boolean;
-  setCalVisible: (v: boolean) => void;
-  dataSel: string;
-  setDataSel: (d: string) => void;
-}) {
-  const [busca, setBusca] = useState('');
-
-  return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Cards de métricas topo */}
-      <View style={styles.metricasRow}>
-        <View style={styles.metricaCard}>
-          <View style={styles.metricaHeader}>
-            <Text style={styles.metricaIcone}>📈</Text>
-            <Text style={styles.metricaRotulo}>Taxa média</Text>
-          </View>
-          <Text style={styles.metricaValorGrande}>1.09</Text>
-          <Text style={styles.metricaUnidade}>L/h</Text>
-        </View>
-        <View style={styles.metricaCard}>
-          <View style={styles.metricaHeader}>
-            <Text style={styles.metricaIcone}>📅</Text>
-            <Text style={styles.metricaRotulo}>Perda média</Text>
-          </View>
-          <Text style={styles.metricaValorGrande}>1.7%</Text>
-          <Text style={styles.metricaUnidade}>Peso corporal</Text>
-        </View>
-      </View>
-
-      {/* Taxa de Sudorese & Intensidade */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitulo}>Taxa de Sudorese & Intensidade</Text>
-        <View style={styles.barraRow}>
-          <Text style={styles.barraData}>11/04</Text>
-          <View style={styles.barraTrack}>
-            <View style={[styles.barraBaixa, { flex: 0.3 }]} />
-            <View style={[styles.barraMedia, { flex: 0.4 }]} />
-            <View style={[styles.barraAlta, { flex: 0.3 }]} />
-          </View>
-          <Text style={styles.barraDur}>67min</Text>
-        </View>
-        <View style={styles.barraRow}>
-          <Text style={styles.barraData}>08/05</Text>
-          <View style={styles.barraTrack}>
-            <View style={[styles.barraBaixa, { flex: 0.5 }]} />
-            <View style={[styles.barraMedia, { flex: 0.35 }]} />
-            <View style={[styles.barraAlta, { flex: 0.15 }]} />
-          </View>
-          <Text style={styles.barraDur}>53min</Text>
-        </View>
-        <View style={styles.legendaRow}>
-          <View style={styles.legendaItem}>
-            <View style={[styles.legendaDot, { backgroundColor: '#90caf9' }]} />
-            <Text style={styles.legendaText}>Baixa</Text>
-          </View>
-          <View style={styles.legendaItem}>
-            <View style={[styles.legendaDot, { backgroundColor: '#ffb74d' }]} />
-            <Text style={styles.legendaText}>Média</Text>
-          </View>
-          <View style={styles.legendaItem}>
-            <View style={[styles.legendaDot, { backgroundColor: '#e53935' }]} />
-            <Text style={styles.legendaText}>Alta</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Sessões Recentes */}
-      <View style={styles.card}>
-        <View style={styles.sessoesHeader}>
-          <Text style={styles.cardTitulo}>Sessões Recentes</Text>
-          <TouchableOpacity onPress={() => setCalVisible(true)} style={styles.calBtn}>
-            <Text style={styles.calBtnIcone}>📅</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.buscaRow}>
-          <TextInput
-            style={styles.buscaInput}
-            placeholder="Nome:"
-            value={busca}
-            onChangeText={setBusca}
-            placeholderTextColor="#bbb"
-          />
-          {dataSel ? (
-            <TouchableOpacity onPress={() => setDataSel('')}>
-              <Text style={styles.dataSelTag}>📅 {dataSel}  ✕</Text>
-            </TouchableOpacity>
-          ) : null}
-        </View>
-
-        <Text style={styles.ultimaSessaoLabel}>Última sessão</Text>
-
-        {SESSOES.map((s) => (
-          <View key={s.id} style={styles.sessaoCard}>
-            <View style={styles.sessaoTopRow}>
-              <Text style={styles.sessaoDataTexto}>{s.data}</Text>
-              <View style={[styles.statusBadge, s.statusOk ? styles.statusOk : styles.statusAtencao]}>
-                <Text style={[styles.statusText, s.statusOk ? styles.statusOkText : styles.statusAtencaoText]}>
-                  {s.status}
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.sessaoNome}>{s.tipo}</Text>
-            <View style={styles.sessaoMetricasRow}>
-              <View style={styles.sessaoMetrica}>
-                <Text style={styles.sessaoMetricaLabel}>Taxa de sudorese</Text>
-                <Text style={styles.sessaoMetricaValor}>{s.sudorese}</Text>
-              </View>
-              <View style={styles.sessaoMetrica}>
-                <Text style={styles.sessaoMetricaLabel}>Perda de peso</Text>
-                <Text style={styles.sessaoMetricaValor}>{s.perdaPeso}</Text>
-              </View>
-              <View style={styles.sessaoMetrica}>
-                <Text style={styles.sessaoMetricaLabel}>Perda de peso</Text>
-                <Text style={[styles.sessaoMetricaValor, { color: '#e53935' }]}>{s.perdaPerc}</Text>
-              </View>
-            </View>
-          </View>
-        ))}
-      </View>
-
-      {/* Exportar Relatório */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitulo}>Exportar Relatório</Text>
-        <View style={styles.exportRow}>
-          <TouchableOpacity style={styles.exportBtn}>
-            <Text style={styles.exportIcone}>⬇</Text>
-            <Text style={styles.exportTexto}>PDF</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.exportBtn}>
-            <Text style={styles.exportIcone}>⬇</Text>
-            <Text style={styles.exportTexto}>Planilha</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
-  );
-}
-
 // ─── Aba Exames ───────────────────────────────────────────────────────────────
 function AbaExames() {
   const [arquivoAdicionado, setArquivoAdicionado] = useState(false);
@@ -479,12 +330,179 @@ export default function HistoricoAtleta() {
         {/* Conteúdo da aba */}
         <View style={styles.content}>
           {abaAtiva === 'Sessões' && (
-            <AbaSessoes
-              calVisible={calVisible}
-              setCalVisible={setCalVisible}
-              dataSel={dataSel}
-              setDataSel={setDataSel}
-            />
+            <ScrollView
+              style={styles.scroll}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {/* Métricas médias */}
+              <View style={styles.metricasRow}>
+                <View style={styles.metricaCard}>
+                  <View style={styles.metricaHeader}>
+                    <Text style={styles.metricaIcone}>📈</Text>
+                    <Text style={styles.metricaRotulo}>Taxa média</Text>
+                  </View>
+                  <Text style={styles.metricaValorGrande}>
+                    {taxaMedia !== null ? taxaMedia.toFixed(2) : '--'}
+                  </Text>
+                  <Text style={styles.metricaUnidade}>L/h</Text>
+                </View>
+                <View style={styles.metricaCard}>
+                  <View style={styles.metricaHeader}>
+                    <Text style={styles.metricaIcone}>📅</Text>
+                    <Text style={styles.metricaRotulo}>Perda média</Text>
+                  </View>
+                  <Text style={styles.metricaValorGrande}>
+                    {perdaMedia !== null ? perdaMedia.toFixed(1) + '%' : '--'}
+                  </Text>
+                  <Text style={styles.metricaUnidade}>Peso corporal</Text>
+                </View>
+              </View>
+
+              {/* Gráfico de intensidade — últimas 5 sessões */}
+              {sessoesGrafico.length > 0 && (
+                <View style={styles.card}>
+                  <Text style={styles.cardTitulo}>Taxa de Sudorese & Intensidade</Text>
+                  {sessoesGrafico.map((s) => {
+                    const d = new Date(s.data_hora_inicio);
+                    const label = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+                    const [fl, fm, fa] = intensidadeFlexes(s.taxa_sudorese);
+                    return (
+                      <View key={s.id_sessao} style={styles.barraRow}>
+                        <Text style={styles.barraData}>{label}</Text>
+                        <View style={styles.barraTrack}>
+                          {fl > 0 && <View style={[styles.barraBaixa, { flex: fl }]} />}
+                          {fm > 0 && <View style={[styles.barraMedia, { flex: fm }]} />}
+                          {fa > 0 && <View style={[styles.barraAlta, { flex: fa }]} />}
+                        </View>
+                        <Text style={styles.barraDur}>{s.duracao_minutos}min</Text>
+                      </View>
+                    );
+                  })}
+                  <View style={styles.legendaRow}>
+                    <View style={styles.legendaItem}>
+                      <View style={[styles.legendaDot, { backgroundColor: '#90caf9' }]} />
+                      <Text style={styles.legendaText}>Baixa</Text>
+                    </View>
+                    <View style={styles.legendaItem}>
+                      <View style={[styles.legendaDot, { backgroundColor: '#ffb74d' }]} />
+                      <Text style={styles.legendaText}>Média</Text>
+                    </View>
+                    <View style={styles.legendaItem}>
+                      <View style={[styles.legendaDot, { backgroundColor: '#e53935' }]} />
+                      <Text style={styles.legendaText}>Alta</Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              {/* Lista de sessões */}
+              <View style={styles.card}>
+                <View style={styles.sessoesHeader}>
+                  <Text style={styles.cardTitulo}>Sessões Recentes</Text>
+                  <TouchableOpacity onPress={() => setCalVisible(true)} style={styles.calBtn}>
+                    <Text style={styles.calBtnIcone}>📅</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.buscaRow}>
+                  <TextInput
+                    style={styles.buscaInput}
+                    placeholder="Filtrar por status ou data..."
+                    value={busca}
+                    onChangeText={setBusca}
+                    placeholderTextColor="#bbb"
+                  />
+                  {dataSel ? (
+                    <TouchableOpacity onPress={() => setDataSel('')}>
+                      <Text style={styles.dataSelTag}>📅 {dataSel}  ✕</Text>
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
+
+                {carregando ? (
+                  <ActivityIndicator color={RED} size="small" style={{ marginVertical: 20 }} />
+                ) : sessoesFiltradas.length === 0 ? (
+                  <Text style={styles.semSessoes}>
+                    {dataSel ? 'Nenhuma sessão nesta data.' : 'Nenhuma sessão encontrada.'}
+                  </Text>
+                ) : (
+                  <>
+                    <Text style={styles.ultimaSessaoLabel}>
+                      {sessoesFiltradas.length} {sessoesFiltradas.length === 1 ? 'sessão' : 'sessões'} registradas
+                    </Text>
+                    {sessoesFiltradas.map((s, idx) => {
+                      const st = statusInfo(s.status_color);
+                      return (
+                        <TouchableOpacity
+                          key={s.id_sessao}
+                          style={styles.sessaoCard}
+                          onPress={() =>
+                            router.push({ pathname: '/sessao_selecionada', params: { id: s.id_sessao } })
+                          }
+                          activeOpacity={0.75}
+                        >
+                          {idx === 0 && (
+                            <Text style={styles.maisRecenteLabel}>Mais recente</Text>
+                          )}
+                          <View style={styles.sessaoTopRow}>
+                            <Text style={styles.sessaoDataTexto}>
+                              {formatarData(s.data_hora_inicio)}
+                            </Text>
+                            <View style={[
+                              styles.statusBadge,
+                              st.cor === 'verde' && styles.statusOk,
+                              st.cor === 'amarelo' && styles.statusAtencao,
+                              st.cor === 'vermelho' && styles.statusCritico,
+                            ]}>
+                              <Text style={[
+                                styles.statusText,
+                                st.cor === 'verde' && styles.statusOkText,
+                                st.cor === 'amarelo' && styles.statusAtencaoText,
+                                st.cor === 'vermelho' && styles.statusCriticoText,
+                              ]}>
+                                {st.texto}
+                              </Text>
+                            </View>
+                          </View>
+                          <Text style={styles.sessaoNome}>{s.duracao_minutos} min de treino</Text>
+                          <View style={styles.sessaoMetricasRow}>
+                            <View style={styles.sessaoMetrica}>
+                              <Text style={styles.sessaoMetricaLabel}>Taxa de sudorese</Text>
+                              <Text style={styles.sessaoMetricaValor}>
+                                {s.taxa_sudorese !== null ? `${Number(s.taxa_sudorese).toFixed(2)} L/h` : '--'}
+                              </Text>
+                            </View>
+                            <View style={styles.sessaoMetrica}>
+                              <Text style={styles.sessaoMetricaLabel}>Perda de massa</Text>
+                              <Text style={styles.sessaoMetricaValor}>
+                                {s.perda_massa_ajustada !== null ? `${Number(s.perda_massa_ajustada).toFixed(2)} kg` : '--'}
+                              </Text>
+                            </View>
+                            <View style={styles.sessaoMetrica}>
+                              <Text style={styles.sessaoMetricaLabel}>Variação %</Text>
+                              <Text style={[
+                                styles.sessaoMetricaValor,
+                                {
+                                  color:
+                                    st.cor === 'verde' ? '#2e7d32' :
+                                    st.cor === 'vermelho' ? '#b71c1c' : '#e65100',
+                                },
+                              ]}>
+                                {s.percentual_variacao !== null
+                                  ? `${Number(s.percentual_variacao).toFixed(1)}%`
+                                  : '--'}
+                              </Text>
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </>
+                )}
+              </View>
+
+            </ScrollView>
           )}
           {abaAtiva === 'Exames' && <AbaExames />}
         </View>
@@ -493,199 +511,6 @@ export default function HistoricoAtleta() {
         <NavbarAtleta active="historico" />
 
         {/* Modal calendário */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitulo}>Histórico Longitudinal</Text>
-        </View>
-
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Métricas médias */}
-          <View style={styles.metricasRow}>
-            <View style={styles.metricaCard}>
-              <View style={styles.metricaHeader}>
-                <Text style={styles.metricaIcone}>📈</Text>
-                <Text style={styles.metricaRotulo}>Taxa média</Text>
-              </View>
-              <Text style={styles.metricaValorGrande}>
-                {taxaMedia !== null ? taxaMedia.toFixed(2) : '--'}
-              </Text>
-              <Text style={styles.metricaUnidade}>L/h</Text>
-            </View>
-            <View style={styles.metricaCard}>
-              <View style={styles.metricaHeader}>
-                <Text style={styles.metricaIcone}>📅</Text>
-                <Text style={styles.metricaRotulo}>Perda média</Text>
-              </View>
-              <Text style={styles.metricaValorGrande}>
-                {perdaMedia !== null ? perdaMedia.toFixed(1) + '%' : '--'}
-              </Text>
-              <Text style={styles.metricaUnidade}>Peso corporal</Text>
-            </View>
-          </View>
-
-          {/* Gráfico de intensidade — últimas 5 sessões */}
-          {sessoesGrafico.length > 0 && (
-            <View style={styles.card}>
-              <Text style={styles.cardTitulo}>Taxa de Sudorese & Intensidade</Text>
-              {sessoesGrafico.map((s) => {
-                const d = new Date(s.data_hora_inicio);
-                const label = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
-                const [fl, fm, fa] = intensidadeFlexes(s.taxa_sudorese);
-                return (
-                  <View key={s.id_sessao} style={styles.barraRow}>
-                    <Text style={styles.barraData}>{label}</Text>
-                    <View style={styles.barraTrack}>
-                      {fl > 0 && <View style={[styles.barraBaixa, { flex: fl }]} />}
-                      {fm > 0 && <View style={[styles.barraMedia, { flex: fm }]} />}
-                      {fa > 0 && <View style={[styles.barraAlta, { flex: fa }]} />}
-                    </View>
-                    <Text style={styles.barraDur}>{s.duracao_minutos}min</Text>
-                  </View>
-                );
-              })}
-              <View style={styles.legendaRow}>
-                <View style={styles.legendaItem}>
-                  <View style={[styles.legendaDot, { backgroundColor: '#90caf9' }]} />
-                  <Text style={styles.legendaText}>Baixa</Text>
-                </View>
-                <View style={styles.legendaItem}>
-                  <View style={[styles.legendaDot, { backgroundColor: '#ffb74d' }]} />
-                  <Text style={styles.legendaText}>Média</Text>
-                </View>
-                <View style={styles.legendaItem}>
-                  <View style={[styles.legendaDot, { backgroundColor: '#e53935' }]} />
-                  <Text style={styles.legendaText}>Alta</Text>
-                </View>
-              </View>
-            </View>
-          )}
-
-          {/* Lista de sessões */}
-          <View style={styles.card}>
-            <View style={styles.sessoesHeader}>
-              <Text style={styles.cardTitulo}>Sessões Recentes</Text>
-              <TouchableOpacity onPress={() => setCalVisible(true)} style={styles.calBtn}>
-                <Text style={styles.calBtnIcone}>📅</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.buscaRow}>
-              <TextInput
-                style={styles.buscaInput}
-                placeholder="Filtrar por status ou data..."
-                value={busca}
-                onChangeText={setBusca}
-                placeholderTextColor="#bbb"
-              />
-              {dataSel ? (
-                <TouchableOpacity onPress={() => setDataSel('')}>
-                  <Text style={styles.dataSelTag}>📅 {dataSel}  ✕</Text>
-                </TouchableOpacity>
-              ) : null}
-            </View>
-
-            {carregando ? (
-              <ActivityIndicator color={RED} size="small" style={{ marginVertical: 20 }} />
-            ) : sessoesFiltradas.length === 0 ? (
-              <Text style={styles.semSessoes}>
-                {dataSel ? 'Nenhuma sessão nesta data.' : 'Nenhuma sessão encontrada.'}
-              </Text>
-            ) : (
-              <>
-                <Text style={styles.ultimaSessaoLabel}>
-                  {sessoesFiltradas.length} {sessoesFiltradas.length === 1 ? 'sessão' : 'sessões'} registradas
-                </Text>
-                {sessoesFiltradas.map((s, idx) => {
-                  const st = statusInfo(s.status_color);
-                  return (
-                    <TouchableOpacity
-                      key={s.id_sessao}
-                      style={styles.sessaoCard}
-                      onPress={() =>
-                        router.push({ pathname: '/sessao_selecionada', params: { id: s.id_sessao } })
-                      }
-                      activeOpacity={0.75}
-                    >
-                      {idx === 0 && (
-                        <Text style={styles.maisRecenteLabel}>Mais recente</Text>
-                      )}
-                      <View style={styles.sessaoTopRow}>
-                        <Text style={styles.sessaoDataTexto}>
-                          {formatarData(s.data_hora_inicio)}
-                        </Text>
-                        <View style={[
-                          styles.statusBadge,
-                          st.cor === 'verde' && styles.statusOk,
-                          st.cor === 'amarelo' && styles.statusAtencao,
-                          st.cor === 'vermelho' && styles.statusCritico,
-                        ]}>
-                          <Text style={[
-                            styles.statusText,
-                            st.cor === 'verde' && styles.statusOkText,
-                            st.cor === 'amarelo' && styles.statusAtencaoText,
-                            st.cor === 'vermelho' && styles.statusCriticoText,
-                          ]}>
-                            {st.texto}
-                          </Text>
-                        </View>
-                      </View>
-                      <Text style={styles.sessaoNome}>{s.duracao_minutos} min de treino</Text>
-                      <View style={styles.sessaoMetricasRow}>
-                        <View style={styles.sessaoMetrica}>
-                          <Text style={styles.sessaoMetricaLabel}>Taxa de sudorese</Text>
-                          <Text style={styles.sessaoMetricaValor}>
-                            {s.taxa_sudorese !== null ? `${Number(s.taxa_sudorese).toFixed(2)} L/h` : '--'}
-                          </Text>
-                        </View>
-                        <View style={styles.sessaoMetrica}>
-                          <Text style={styles.sessaoMetricaLabel}>Perda de massa</Text>
-                          <Text style={styles.sessaoMetricaValor}>
-                            {s.perda_massa_ajustada !== null ? `${Number(s.perda_massa_ajustada).toFixed(2)} kg` : '--'}
-                          </Text>
-                        </View>
-                        <View style={styles.sessaoMetrica}>
-                          <Text style={styles.sessaoMetricaLabel}>Variação %</Text>
-                          <Text style={[
-                            styles.sessaoMetricaValor,
-                            {
-                              color:
-                                st.cor === 'verde' ? '#2e7d32' :
-                                st.cor === 'vermelho' ? '#b71c1c' : '#e65100',
-                            },
-                          ]}>
-                            {s.percentual_variacao !== null
-                              ? `${Number(s.percentual_variacao).toFixed(1)}%`
-                              : '--'}
-                          </Text>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </>
-            )}
-          </View>
-
-          {/* Exportar Relatório */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitulo}>Exportar Relatório</Text>
-            <View style={styles.exportRow}>
-              <TouchableOpacity style={styles.exportBtn}>
-                <Text style={styles.exportIcone}>⬇</Text>
-                <Text style={styles.exportTexto}>PDF</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.exportBtn}>
-                <Text style={styles.exportIcone}>⬇</Text>
-                <Text style={styles.exportTexto}>Planilha</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
-
-        <NavbarAtleta active="historico" />
         <CalendarioModal
           visible={calVisible}
           onClose={() => setCalVisible(false)}
