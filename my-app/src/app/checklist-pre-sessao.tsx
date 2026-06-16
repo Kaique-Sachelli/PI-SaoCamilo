@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 type CheckKey = 'bexiga' | 'balanca' | 'vestimenta';
 
@@ -18,6 +18,11 @@ const CHECKLIST_ITEMS: { key: CheckKey; label: string }[] = [
   { key: 'bexiga',     label: 'Bexiga esvaziada antes da pesagem' },
   { key: 'balanca',    label: 'Mesma balança e superfície nivelada' },
   { key: 'vestimenta', label: 'Vestimenta mínima e consistente' },
+];
+
+const MODALIDADES = [
+  'Futebol', 'Vôlei', 'Basquete', 'Natação', 'Atletismo',
+  'Handebol', 'Ciclismo', 'Musculação', 'Tênis', 'Outro',
 ];
 
 const URINE_LEVELS = [
@@ -37,8 +42,17 @@ export default function ChecklistPreSessao() {
   });
   const [weight, setWeight] = useState('');
   const [selectedUrine, setSelectedUrine] = useState(2);
-  const [temp] = useState('24');
-  const [humidity] = useState('27');
+  const [modalidade, setModalidade] = useState('');
+  const params = useLocalSearchParams<{
+    clima_temp?: string;
+    clima_umidade?: string;
+    clima_vento?: string;
+    clima_sensacao?: string;
+  }>();
+  const temp = params.clima_temp ?? '24';
+  const humidity = params.clima_umidade ?? '27';
+  const vento = params.clima_vento ?? '0';
+  const sensacao = params.clima_sensacao ?? '--';
 
   const todosChecked = Object.values(checks).every(Boolean);
   const podeContinuar = todosChecked && !!weight;
@@ -57,7 +71,7 @@ export default function ChecklistPreSessao() {
       return;
     }
     router.push(
-      `/cronometro?massa_pre=${weight}&clima_temp=${temp}&clima_umidade=${humidity}&urina_pre_cor=${selectedUrine}`
+      `/cronometro?massa_pre=${weight}&clima_temp=${temp}&clima_umidade=${humidity}&urina_pre_cor=${selectedUrine}&modalidade=${encodeURIComponent(modalidade)}`
     );
   }
 
@@ -143,6 +157,24 @@ export default function ChecklistPreSessao() {
             </View>
           </View>
 
+          <View style={styles.card}>
+            <Text style={styles.sectionLabel}>Modalidade esportiva</Text>
+            <View style={styles.modalidadeGrid}>
+              {MODALIDADES.map(m => (
+                <TouchableOpacity
+                  key={m}
+                  style={[styles.modalidadeChip, modalidade === m && styles.modalidadeChipAtivo]}
+                  onPress={() => setModalidade(prev => prev === m ? '' : m)}
+                  activeOpacity={0.75}
+                >
+                  <Text style={[styles.modalidadeChipTexto, modalidade === m && styles.modalidadeChipTextoAtivo]}>
+                    {m}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
           <View>
             <Text style={styles.sectionLabel}>Condições ambientais</Text>
             <View style={styles.envRow}>
@@ -153,6 +185,16 @@ export default function ChecklistPreSessao() {
               <View style={[styles.card, styles.envCard]}>
                 <Text style={styles.envLabel}>UMIDADE</Text>
                 <Text style={styles.envValue}>{humidity}%</Text>
+              </View>
+            </View>
+            <View style={[styles.envRow, { marginTop: 8 }]}>
+              <View style={[styles.card, styles.envCard]}>
+                <Text style={styles.envLabel}>SENSAÇÃO</Text>
+                <Text style={styles.envValue}>{sensacao !== '--' ? `${sensacao}°C` : '--'}</Text>
+              </View>
+              <View style={[styles.card, styles.envCard]}>
+                <Text style={styles.envLabel}>VENTO</Text>
+                <Text style={styles.envValue}>{vento} km/h</Text>
               </View>
             </View>
           </View>
@@ -277,6 +319,15 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   badgeText: { fontSize: 12, fontWeight: '600' },
+
+  modalidadeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
+  modalidadeChip: {
+    borderWidth: 1.5, borderColor: '#ddd', borderRadius: 20,
+    paddingHorizontal: 14, paddingVertical: 8, backgroundColor: '#fafafa',
+  },
+  modalidadeChipAtivo: { borderColor: RED, backgroundColor: '#fff0f0' },
+  modalidadeChipTexto: { fontSize: 13, color: '#666', fontWeight: '500' },
+  modalidadeChipTextoAtivo: { color: RED, fontWeight: '700' },
 
   envRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
   envCard: { flex: 1, padding: 12, borderWidth: 1.5, borderColor: '#e0e0e0' },

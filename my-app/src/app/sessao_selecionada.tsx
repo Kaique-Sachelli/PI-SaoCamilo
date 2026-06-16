@@ -8,10 +8,12 @@ import {
   ImageBackground,
   Platform,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { getUrl } from '../constants/url';
+import * as Print from 'expo-print';
 
 type SessaoDetalhe = {
   id_sessao: number;
@@ -21,6 +23,10 @@ type SessaoDetalhe = {
   massa_pos: number;
   clima_temp: number | null;
   clima_umidade: number | null;
+  intensidade_percebida: string | null;
+  roupas_encharcadas: number | null;
+  urina_pre_cor: number | null;
+  volume_urina_ml: number | null;
   taxa_sudorese: number | null;
   perda_massa_ajustada: number | null;
   percentual_variacao: number | null;
@@ -28,6 +34,8 @@ type SessaoDetalhe = {
   status_color: 'Verde' | 'Amarelo' | 'Vermelho' | null;
   volume_ml: number | null;
   modalidade_esportiva: string | null;
+  nivel_fadiga: number | null;
+  sintomas_gastrointestinais: string | null;
 };
 
 const ESCALA_CORES = [
@@ -76,6 +84,163 @@ function formatarDataDetalhe(dataStr: string): string {
   return `${dia}/${mes}/${ano}, ${hora}`;
 }
 
+async function gerarPDFSessao(s: SessaoDetalhe) {
+  const dataFormatada = formatarDataDetalhe(s.data_hora_inicio);
+  const dataExport = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  const statusTexto = s.status_color === 'Verde' ? 'Hidratação OK'
+    : s.status_color === 'Vermelho' ? 'Crítico'
+    : s.status_color === 'Amarelo' ? 'Atenção'
+    : '--';
+  const statusCor = s.status_color === 'Verde' ? '#2e7d32'
+    : s.status_color === 'Vermelho' ? '#b71c1c'
+    : '#e65100';
+
+  const nivel = s.urina_pre_cor
+    ? Math.min(8, Math.max(1, s.urina_pre_cor))
+    : nivelUrina(s.percentual_variacao ?? null);
+  const labelUrina: Record<number, string> = {
+    1: 'Bem hidratado', 2: 'Bem hidratado', 3: 'Hidratado',
+    4: 'Hidratação moderada', 5: 'Hidratação moderada',
+    6: 'Atenção à hidratação', 7: 'Hidratação insuficiente', 8: 'Hidratação insuficiente',
+  };
+
+  const fadigaDots = s.nivel_fadiga
+    ? Array.from({ length: 5 }, (_, i) =>
+        `<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${i < s.nivel_fadiga! ? '#B3151F' : '#e0e0e0'};margin-right:4px;"></span>`
+      ).join('')
+    : null;
+
+  const alertaHtml = s.alerta_seguranca ? `
+    <div style="background:${s.status_color === 'Vermelho' ? '#ffebee' : '#fff8e1'};border-left:4px solid ${statusCor};border-radius:8px;padding:12px 16px;margin-bottom:20px;">
+      <strong>${s.status_color === 'Vermelho' ? '🚨 Alerta Crítico' : '⚠️ Atenção'}</strong>
+      <p style="margin:6px 0 0;color:#444;font-size:13px;">${s.alerta_seguranca}</p>
+    </div>` : '';
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; color: #222; padding: 32px; }
+    h1   { color: #B3151F; font-size: 22px; margin-bottom: 2px; }
+    .subtitulo { font-size: 13px; color: #666; margin-bottom: 6px; }
+    .data-sessao { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 20px; }
+    .badge { display:inline-block; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
+             background: ${statusCor}22; color: ${statusCor}; border: 1px solid ${statusCor}; margin-left: 10px; }
+    .resumo { display: flex; gap: 14px; margin-bottom: 22px; }
+    .mini-card { flex: 1; border: 1px solid #e0e0e0; border-radius: 10px; padding: 12px 14px; }
+    .mini-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+    .mini-valor { font-size: 22px; font-weight: 700; color: #111; }
+    .mini-unidade { font-size: 11px; color: #888; }
+    .section { margin-bottom: 20px; }
+    .section-title { font-size: 14px; font-weight: 700; color: #222; border-bottom: 2px solid #B3151F;
+                     padding-bottom: 4px; margin-bottom: 10px; }
+    .row { display: flex; justify-content: space-between; padding: 7px 0;
+           border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+    .row:last-child { border-bottom: none; }
+    .row-label { color: #666; }
+    .row-valor { font-weight: 600; color: #222; }
+    .urina-barra { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin: 8px 0 4px; }
+    .urina-seg { flex: 1; }
+    .urina-info { font-size: 12px; color: #666; }
+    .rodape { margin-top: 32px; text-align: center; font-size: 11px; color: #aaa; border-top: 1px solid #eee; padding-top: 12px; }
+  </style>
+</head>
+<body>
+  <h1>São Camilo — Nutri-Esportiva</h1>
+  <div class="subtitulo">Relatório de Sessão de Treino</div>
+  <div class="data-sessao">${dataFormatada} <span class="badge">${statusTexto}</span></div>
+
+  ${alertaHtml}
+
+  <div class="resumo">
+    <div class="mini-card">
+      <div class="mini-label">Duração</div>
+      <div class="mini-valor">${s.duracao_minutos}</div>
+      <div class="mini-unidade">minutos</div>
+    </div>
+    <div class="mini-card">
+      <div class="mini-label">Volume Ingerido</div>
+      <div class="mini-valor">${s.volume_ml !== null ? (s.volume_ml / 1000).toFixed(1) : '--'}</div>
+      <div class="mini-unidade">litros</div>
+    </div>
+    <div class="mini-card">
+      <div class="mini-label">Taxa de Sudorese</div>
+      <div class="mini-valor">${s.taxa_sudorese !== null ? Number(s.taxa_sudorese).toFixed(2) : '--'}</div>
+      <div class="mini-unidade">L/h</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Hidratação</div>
+    <div class="row">
+      <span class="row-label">Massa pré-treino</span>
+      <span class="row-valor">${Number(s.massa_pre).toFixed(1)} kg</span>
+    </div>
+    <div class="row">
+      <span class="row-label">Massa pós-treino</span>
+      <span class="row-valor">${Number(s.massa_pos).toFixed(1)} kg</span>
+    </div>
+    <div class="row">
+      <span class="row-label">Perda de massa ajustada</span>
+      <span class="row-valor">${s.perda_massa_ajustada !== null ? Number(s.perda_massa_ajustada).toFixed(2) + ' kg' : 'N/D'}</span>
+    </div>
+    <div class="row">
+      <span class="row-label">Variação de massa</span>
+      <span class="row-valor" style="color:${statusCor}">${s.percentual_variacao !== null ? Number(s.percentual_variacao).toFixed(1) + '%' : 'N/D'}</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Escala de Hidratação Urinária (1–8)</div>
+    <div class="urina-barra">
+      ${['#FFF9C4','#FFF176','#FFEE58','#FFD740','#FFB300','#FF8F00','#795548','#4E342E']
+        .map((cor, i) => `<div class="urina-seg" style="background:${cor};${i === nivel - 1 ? 'outline:2px solid #333;' : ''}"></div>`)
+        .join('')}
+    </div>
+    <div class="urina-info">Nível ${nivel} — ${labelUrina[nivel]}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Condições do Treino</div>
+    ${s.clima_temp !== null ? `<div class="row"><span class="row-label">Temperatura</span><span class="row-valor">${s.clima_temp} °C</span></div>` : ''}
+    ${s.clima_umidade !== null ? `<div class="row"><span class="row-label">Umidade</span><span class="row-valor">${s.clima_umidade}%</span></div>` : ''}
+    ${s.modalidade_esportiva ? `<div class="row"><span class="row-label">Esporte</span><span class="row-valor">${s.modalidade_esportiva}</span></div>` : ''}
+    <div class="row">
+      <span class="row-label">Intensidade</span>
+      <span class="row-valor">${s.intensidade_percebida ?? calcularIntensidade(s.taxa_sudorese)}</span>
+    </div>
+    ${s.roupas_encharcadas !== null ? `<div class="row"><span class="row-label">Roupas encharcadas</span><span class="row-valor">${s.roupas_encharcadas ? 'Sim' : 'Não'}</span></div>` : ''}
+    ${s.volume_urina_ml !== null ? `<div class="row"><span class="row-label">Volume urinário na sessão</span><span class="row-valor">${s.volume_urina_ml} mL</span></div>` : ''}
+  </div>
+
+  ${(s.nivel_fadiga || s.sintomas_gastrointestinais) ? `
+  <div class="section">
+    <div class="section-title">Bem-estar pós-treino</div>
+    ${fadigaDots ? `<div class="row"><span class="row-label">Nível de fadiga</span><span>${fadigaDots}</span></div>
+    <div style="font-size:11px;color:#aaa;margin-bottom:6px;">1 = Sem fadiga · 5 = Exaustão extrema</div>` : ''}
+    ${s.sintomas_gastrointestinais ? `<div class="row" style="flex-direction:column;gap:4px;">
+      <span class="row-label">Sintomas gastrointestinais</span>
+      <span style="font-size:13px;color:#444;margin-top:4px;">${s.sintomas_gastrointestinais}</span>
+    </div>` : ''}
+  </div>` : ''}
+
+  <div class="rodape">São Camilo — Projeto Integrador • Gerado em ${dataExport}</div>
+</body>
+</html>`;
+
+  try {
+    await Print.printAsync({ html });
+  } catch (err: any) {
+    if (err?.message?.includes('cancelled') || err?.message?.includes('dismissed')) return;
+    Alert.alert('Erro', 'Não foi possível gerar o PDF.');
+    console.error('gerarPDFSessao erro:', err);
+  }
+}
+
 export default function SessaoSelecionada() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -106,7 +271,9 @@ export default function SessaoSelecionada() {
     })();
   }, [id]);
 
-  const nivelNum = nivelUrina(sessao?.percentual_variacao ?? null);
+  const nivelNum = sessao?.urina_pre_cor
+    ? Math.min(8, Math.max(1, sessao.urina_pre_cor))
+    : nivelUrina(sessao?.percentual_variacao ?? null);
   const nivelIdx = nivelNum - 1;
 
   return (
@@ -314,23 +481,85 @@ export default function SessaoSelecionada() {
               <View style={styles.linhaRow}>
                 <View style={styles.linhaEsquerda}>
                   <Text style={styles.condicaoIcone}>⚡</Text>
-                  <Text style={styles.linhaChave}>Intensidade estimada</Text>
+                  <Text style={styles.linhaChave}>Intensidade</Text>
                 </View>
                 <Text style={styles.linhaValor}>
-                  {calcularIntensidade(sessao.taxa_sudorese)}
+                  {sessao.intensidade_percebida ?? calcularIntensidade(sessao.taxa_sudorese)}
                 </Text>
               </View>
+
+              {sessao.roupas_encharcadas !== null && (
+                <>
+                  <View style={styles.divisor} />
+                  <View style={styles.linhaRow}>
+                    <View style={styles.linhaEsquerda}>
+                      <Text style={styles.condicaoIcone}>👕</Text>
+                      <Text style={styles.linhaChave}>Roupas encharcadas</Text>
+                    </View>
+                    <Text style={styles.linhaValor}>
+                      {sessao.roupas_encharcadas ? 'Sim' : 'Não'}
+                    </Text>
+                  </View>
+                </>
+              )}
+
+              {sessao.volume_urina_ml !== null && (
+                <>
+                  <View style={styles.divisor} />
+                  <View style={styles.linhaRow}>
+                    <View style={styles.linhaEsquerda}>
+                      <Text style={styles.condicaoIcone}>🚽</Text>
+                      <Text style={styles.linhaChave}>Volume urinário na sessão</Text>
+                    </View>
+                    <Text style={styles.linhaValor}>{sessao.volume_urina_ml} mL</Text>
+                  </View>
+                </>
+              )}
             </View>
 
-            {/* Botões de exportação */}
-            <View style={styles.exportRow}>
-              <TouchableOpacity style={styles.exportBtn}>
-                <Text style={styles.exportIcone}>⬇</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.exportBtn}>
-                <Text style={styles.exportIcone}>📄</Text>
-              </TouchableOpacity>
-            </View>
+            {/* Card: Bem-estar pós-treino */}
+            {(sessao.nivel_fadiga || sessao.sintomas_gastrointestinais) && (
+              <View style={styles.card}>
+                <Text style={styles.cardTitulo}>Bem-estar pós-treino</Text>
+
+                {sessao.nivel_fadiga !== null && (
+                  <>
+                    <View style={styles.linhaRow}>
+                      <Text style={styles.linhaChave}>Nível de fadiga</Text>
+                      <View style={styles.fadigaRow}>
+                        {[1,2,3,4,5].map(n => (
+                          <View
+                            key={n}
+                            style={[
+                              styles.fadigaDot,
+                              n <= (sessao.nivel_fadiga ?? 0) && styles.fadigaDotAtivo,
+                            ]}
+                          />
+                        ))}
+                      </View>
+                    </View>
+                    <Text style={styles.fadigaLegenda}>1 = Sem fadiga · 5 = Exaustão extrema</Text>
+                    <View style={styles.divisor} />
+                  </>
+                )}
+
+                {sessao.sintomas_gastrointestinais && (
+                  <View>
+                    <Text style={[styles.linhaChave, { marginBottom: 4 }]}>Sintomas gastrointestinais</Text>
+                    <Text style={styles.sintomasTexto}>{sessao.sintomas_gastrointestinais}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {/* Botão exportar PDF */}
+            <TouchableOpacity
+              style={styles.exportBtn}
+              activeOpacity={0.85}
+              onPress={() => gerarPDFSessao(sessao)}
+            >
+              <Text style={styles.exportBtnTexto}>Exportar Relatório PDF</Text>
+            </TouchableOpacity>
           </ScrollView>
         ) : null}
       </SafeAreaView>
@@ -447,14 +676,26 @@ const styles = StyleSheet.create({
 
   condicaoIcone: { fontSize: 16 },
 
-  exportRow: { flexDirection: 'row', gap: 12 },
+  fadigaRow: { flexDirection: 'row', gap: 6 },
+  fadigaDot: {
+    width: 16, height: 16, borderRadius: 8,
+    backgroundColor: '#e0e0e0',
+  },
+  fadigaDotAtivo: { backgroundColor: '#B3151F' },
+  fadigaLegenda: { fontSize: 10, color: '#aaa', marginTop: 2 },
+  sintomasTexto: { fontSize: 13, color: '#444', lineHeight: 20 },
+
   exportBtn: {
-    flex: 1,
     backgroundColor: RED,
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: 14,
+    paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Platform.select({
+      ios: { boxshadow: '0px 4px 12px rgba(179,21,31,0.35)' },
+      android: { elevation: 4 },
+      web: { boxshadow: '0px 4px 12px rgba(179,21,31,0.35)' },
+    }),
   },
-  exportIcone: { fontSize: 22, color: '#fff' },
+  exportBtnTexto: { fontSize: 16, fontWeight: '700', color: '#fff', letterSpacing: 0.5 },
 });
