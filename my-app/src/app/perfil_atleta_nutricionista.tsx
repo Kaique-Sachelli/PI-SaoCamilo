@@ -38,24 +38,29 @@ export default function PerfilAtleta() {
   const altura = textoParam(params.altura);
   const idade = textoParam(params.idade);
 
-<<<<<<< HEAD
   const abrirRelatorioAlimentar = () => {
     if (!idAtleta) {
       Alert.alert('Atenção', 'Selecione um atleta antes de adicionar uma dieta.');
-=======
-  const abrirHistorico = () => {
-    if (!idAtleta) {
-      Alert.alert('Atenção', 'Selecione um atleta antes de abrir o histórico.');
->>>>>>> feature/historico-longitudinal-filtros
       return;
     }
 
     router.push({
-<<<<<<< HEAD
       pathname: '/relatorio_alimentar',
-=======
+      params: {
+        id_atleta: idAtleta,
+        nome: nomeAtleta,
+      },
+    });
+  };
+
+  const abrirHistorico = () => {
+    if (!idAtleta) {
+      Alert.alert('Atenção', 'Selecione um atleta antes de abrir o histórico.');
+      return;
+    }
+
+    router.push({
       pathname: '/historico_longitudional_nutricionista',
->>>>>>> feature/historico-longitudinal-filtros
       params: {
         id_atleta: idAtleta,
         nome: nomeAtleta,
