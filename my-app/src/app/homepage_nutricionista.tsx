@@ -38,6 +38,19 @@ interface Atleta {
   foto: null;
 }
 
+// type Atleta = {
+//   id_usuario: number;
+//   nome: string;
+//   email?: string;
+//   telefone?: string;
+//   situacao?: string;
+//   idade?: number | string | null;
+//   altura?: number | string | null;
+//   peso?: number | string | null;
+//   modalidade_esportiva?: string | null;
+// };
+
+
 function iniciais(nome: string) {
   return nome.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
 }
@@ -137,6 +150,60 @@ const atletasFiltrados = atletas.filter((a) => {
   return nomeMatch || esporteMatch;
 });
 
+  // const [carregandoAtletas, setCarregandoAtletas] = useState(true);
+
+  // useEffect(() => {
+  //   carregarAtletas();
+  // }, []);
+
+  // async function carregarAtletas() {
+  //   try {
+  //     setCarregandoAtletas(true);
+
+  //     const response = await fetch(getUrl('/atletas'));
+  //     const dados = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(dados.mensagem || 'Não foi possível carregar os atletas.');
+  //     }
+
+  //     setAtletas(dados);
+  //   } catch (err) {
+  //     const mensagem = err instanceof Error ? err.message : 'Não foi possível carregar os atletas.';
+  //     console.log('Erro ao carregar atletas:', mensagem);
+  //     Alert.alert('Erro', mensagem);
+  //   } finally {
+  //     setCarregandoAtletas(false);
+  //   }
+  // }
+
+  // const atletasFiltrados = atletas.filter((atleta) => {
+  //   const termo = busca.trim().toLowerCase();
+  //   if (!termo) return true;
+
+  //   return [
+  //     atleta.nome,
+  //     atleta.email,
+  //     atleta.modalidade_esportiva,
+  //   ].some((valor) => (valor || '').toLowerCase().includes(termo));
+  // });
+
+  // const abrirPerfilAtleta = (atleta: Atleta) => {
+  //   router.push({
+  //     pathname: '/perfil_atleta_nutricionista',
+  //     params: {
+  //       id_atleta: String(atleta.id_usuario),
+  //       nome: atleta.nome,
+  //       email: atleta.email || '',
+  //       telefone: atleta.telefone || '',
+  //       idade: atleta.idade != null ? String(atleta.idade) : '',
+  //       altura: atleta.altura != null ? String(atleta.altura) : '',
+  //       peso: atleta.peso != null ? String(atleta.peso) : '',
+  //       modalidade_esportiva: atleta.modalidade_esportiva || '',
+  //     },
+  //   });
+  // };
+
   return (
     <ImageBackground
       source={require('./assets/Img/Background.png')}
@@ -192,8 +259,8 @@ const atletasFiltrados = atletas.filter((a) => {
             </TouchableOpacity>
           </View>
 
-          {/* Lista de atletas
-          {carregandoAtletas && (
+          {/* Lista de atletas */}
+          {/* {carregandoAtletas && (
             <Text style={styles.estadoTexto}>Carregando atletas...</Text>
           )}
 
@@ -201,9 +268,11 @@ const atletasFiltrados = atletas.filter((a) => {
             <Text style={styles.estadoTexto}>Nenhum atleta encontrado.</Text>
           )}
 
-          {!carregandoAtletas && atletasFiltrados.map((atleta, idx) => ( */}
+          {!carregandoAtletas && atletasFiltrados.map((atleta, idx) => ( */} */}
 
           {/* {atletasFiltrados.map((atleta, idx) => (
+
+          {!carregandoAtletas && atletasFiltrados.map((atleta, idx) => (
             <TouchableOpacity
               key={atleta.id_usuario}
               style={styles.atletaCard}

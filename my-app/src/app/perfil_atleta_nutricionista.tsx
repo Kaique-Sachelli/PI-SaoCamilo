@@ -38,14 +38,24 @@ export default function PerfilAtleta() {
   const altura = textoParam(params.altura);
   const idade = textoParam(params.idade);
 
+<<<<<<< HEAD
   const abrirRelatorioAlimentar = () => {
     if (!idAtleta) {
       Alert.alert('Atenção', 'Selecione um atleta antes de adicionar uma dieta.');
+=======
+  const abrirHistorico = () => {
+    if (!idAtleta) {
+      Alert.alert('Atenção', 'Selecione um atleta antes de abrir o histórico.');
+>>>>>>> feature/historico-longitudinal-filtros
       return;
     }
 
     router.push({
+<<<<<<< HEAD
       pathname: '/relatorio_alimentar',
+=======
+      pathname: '/historico_longitudional_nutricionista',
+>>>>>>> feature/historico-longitudinal-filtros
       params: {
         id_atleta: idAtleta,
         nome: nomeAtleta,
@@ -128,7 +138,7 @@ export default function PerfilAtleta() {
             <TouchableOpacity
               style={styles.btnAzul}
               activeOpacity={0.85}
-              onPress={() => router.push('/historico_longitudional_nutricionista')}
+              onPress={abrirHistorico}
             >
               <Text style={styles.btnAzulTexto}>Histórico Longitudinal</Text>
             </TouchableOpacity>
@@ -139,7 +149,7 @@ export default function PerfilAtleta() {
             <Text style={styles.secaoTitulo}>Contatos do Atleta</Text>
 
             <View style={styles.contatoRow}>
-              <Text style={styles.contatoIcone}>✉</Text>
+                <Text style={styles.contatoIcone}>✉</Text>
               <View>
                 <Text style={styles.contatoLabel}>E-mail:</Text>
                 <Text style={styles.contatoValor}>{emailAtleta}</Text>
@@ -147,7 +157,7 @@ export default function PerfilAtleta() {
             </View>
 
             <View style={styles.contatoRow}>
-              <Text style={styles.contatoIcone}>📞</Text>
+                <Text style={styles.contatoIcone}>📞</Text>
               <View>
                 <Text style={styles.contatoLabel}>Telefone:</Text>
                 <Text style={styles.contatoValor}>{telefoneAtleta}</Text>
