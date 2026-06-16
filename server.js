@@ -18,6 +18,29 @@ function campoTexto(valor) {
   return texto || null;
 }
 
+function idInteiroPositivo(valor) {
+  const numero = Number(valor);
+  return Number.isInteger(numero) && numero > 0 ? numero : null;
+}
+
+function colunaVinculoPerfil(tipoPerfil) {
+  if (tipoPerfil === 'Nutricionista') return 'id_nutricionista';
+  if (tipoPerfil === 'Treinador') return 'id_treinador';
+  return null;
+}
+
+async function buscarProfissional(idProfissional, conexao = db) {
+  const [rows] = await conexao.query(
+    `SELECT id_usuario, tipo_perfil
+     FROM Usuario
+     WHERE id_usuario = ?
+       AND tipo_perfil IN ('Nutricionista', 'Treinador', 'Medico')`,
+    [idProfissional]
+  );
+
+  return rows[0] || null;
+}
+
 async function inicializarBanco() {
   await db.query(`
     CREATE TABLE IF NOT EXISTS Dieta (
@@ -31,6 +54,17 @@ async function inicializarBanco() {
       data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (id_atleta) REFERENCES Atleta_Perfil(id_atleta),
       FOREIGN KEY (id_nutricionista) REFERENCES Usuario(id_usuario)
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS Profissional_Atleta (
+      id_profissional INT NOT NULL,
+      id_atleta INT NOT NULL,
+      data_vinculo TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id_profissional, id_atleta),
+      FOREIGN KEY (id_profissional) REFERENCES Usuario(id_usuario),
+      FOREIGN KEY (id_atleta) REFERENCES Usuario(id_usuario)
     )
   `);
 }
@@ -156,27 +190,246 @@ app.patch('/usuario/:id/aprovar', async (req, res) => {
 //     });
 //   }
 
-app.get('/atletas', async (req, res) => { 
-  const busca = req.query.busca ? `%${req.query.busca}%` : null; 
-  
-  try { 
-    let sql = `SELECT id_usuario, nome, email, registro, tipo_perfil, situacao FROM Usuario WHERE tipo_perfil = 'Atleta'`; 
-    const params = []; 
-    
-    if (busca) { 
-      sql += ' AND (nome LIKE ? OR email LIKE ? OR registro LIKE ?)'; 
-      params.push(busca, busca, busca); 
-    } 
-    
-    sql += ' ORDER BY nome'; 
-    
-    const [rows] = await db.query(sql, params); 
-    res.json(rows); 
-  } catch (err) { 
-    console.error(err); 
-    res.status(500).json({ sucesso: false, mensagem: err.message }); 
-  } 
+app.get('/atletas', async (req, res) => {
+  const busca = req.query.busca ? `%${req.query.busca}%` : null;
 
+  try {
+    let sql = `
+      SELECT
+        u.id_usuario,
+        u.id_usuario AS id,
+        u.nome,
+        u.email,
+        u.telefone,
+        u.data_nascimento,
+        u.registro,
+        u.tipo_perfil,
+        u.situacao,
+        ap.idade,
+        ap.sexo,
+        ap.altura,
+        ap.peso,
+        ap.modalidade_esportiva,
+        COALESCE(ap.modalidade_esportiva, 'Atleta') AS esporte,
+        (u.situacao = 'Ativo') AS ativo
+      FROM Usuario u
+      LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = u.id_usuario
+      WHERE u.tipo_perfil = 'Atleta'
+    `;
+    const params = [];
+
+    if (busca) {
+      sql += ' AND (u.nome LIKE ? OR u.email LIKE ? OR u.registro LIKE ? OR ap.modalidade_esportiva LIKE ?)';
+      params.push(busca, busca, busca, busca);
+    }
+
+    sql += ' ORDER BY u.nome';
+
+    const [rows] = await db.query(sql, params);
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ sucesso: false, mensagem: err.message });
+  }
+
+});
+
+// lista todos os atletas e informa se eles estao vinculados ao profissional
+app.get('/profissionais/:id/atletas', async (req, res) => {
+  const idProfissional = idInteiroPositivo(req.params.id);
+  const busca = req.query.busca ? `%${req.query.busca}%` : null;
+
+  if (!idProfissional) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Profissional invalido' });
+  }
+
+  try {
+    const profissional = await buscarProfissional(idProfissional);
+
+    if (!profissional) {
+      return res.status(404).json({ sucesso: false, mensagem: 'Profissional nao encontrado' });
+    }
+
+    let sql = `
+      SELECT
+        u.id_usuario,
+        u.id_usuario AS id,
+        u.nome,
+        u.email,
+        u.telefone,
+        u.data_nascimento,
+        u.registro,
+        u.tipo_perfil,
+        u.situacao,
+        ap.idade,
+        ap.sexo,
+        ap.altura,
+        ap.peso,
+        ap.modalidade_esportiva,
+        COALESCE(ap.modalidade_esportiva, 'Atleta') AS esporte,
+        (u.situacao = 'Ativo') AS ativo,
+        (pa.id_profissional IS NOT NULL) AS vinculado
+      FROM Usuario u
+      LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = u.id_usuario
+      LEFT JOIN Profissional_Atleta pa
+        ON pa.id_atleta = u.id_usuario
+       AND pa.id_profissional = ?
+      WHERE u.tipo_perfil = 'Atleta'
+    `;
+    const params = [idProfissional];
+
+    if (busca) {
+      sql += ' AND (u.nome LIKE ? OR u.email LIKE ? OR u.registro LIKE ? OR ap.modalidade_esportiva LIKE ?)';
+      params.push(busca, busca, busca, busca);
+    }
+
+    sql += ' ORDER BY vinculado DESC, u.nome';
+
+    const [rows] = await db.query(sql, params);
+    res.json({ sucesso: true, atletas: rows });
+  } catch (err) {
+    console.error('Erro ao listar atletas do profissional:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
+  }
+});
+
+// lista somente os atletas adicionados a lista do profissional
+app.get('/profissionais/:id/atletas/vinculados', async (req, res) => {
+  const idProfissional = idInteiroPositivo(req.params.id);
+  const busca = req.query.busca ? `%${req.query.busca}%` : null;
+
+  if (!idProfissional) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Profissional invalido' });
+  }
+
+  try {
+    const profissional = await buscarProfissional(idProfissional);
+
+    if (!profissional) {
+      return res.status(404).json({ sucesso: false, mensagem: 'Profissional nao encontrado' });
+    }
+
+    let sql = `
+      SELECT
+        u.id_usuario,
+        u.id_usuario AS id,
+        u.nome,
+        u.email,
+        u.telefone,
+        u.data_nascimento,
+        u.registro,
+        u.tipo_perfil,
+        u.situacao,
+        ap.idade,
+        ap.sexo,
+        ap.altura,
+        ap.peso,
+        ap.modalidade_esportiva,
+        COALESCE(ap.modalidade_esportiva, 'Atleta') AS esporte,
+        (u.situacao = 'Ativo') AS ativo,
+        TRUE AS vinculado
+      FROM Profissional_Atleta pa
+      INNER JOIN Usuario u ON u.id_usuario = pa.id_atleta
+      LEFT JOIN Atleta_Perfil ap ON ap.id_atleta = u.id_usuario
+      WHERE pa.id_profissional = ?
+        AND u.tipo_perfil = 'Atleta'
+    `;
+    const params = [idProfissional];
+
+    if (busca) {
+      sql += ' AND (u.nome LIKE ? OR u.email LIKE ? OR u.registro LIKE ? OR ap.modalidade_esportiva LIKE ?)';
+      params.push(busca, busca, busca, busca);
+    }
+
+    sql += ' ORDER BY u.nome';
+
+    const [rows] = await db.query(sql, params);
+    res.json({ sucesso: true, atletas: rows });
+  } catch (err) {
+    console.error('Erro ao listar atletas vinculados:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
+  }
+});
+
+// adiciona ou remove um atleta da lista do profissional
+app.patch('/profissionais/:id/atletas/:idAtleta', async (req, res) => {
+  const idProfissional = idInteiroPositivo(req.params.id);
+  const idAtleta = idInteiroPositivo(req.params.idAtleta);
+  const deveVincular = req.body?.vinculado === true || req.body?.vinculado === 1 || req.body?.vinculado === 'true';
+
+  if (!idProfissional || !idAtleta) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Dados invalidos' });
+  }
+
+  let conn;
+
+  try {
+    conn = await db.getConnection();
+    await conn.beginTransaction();
+
+    const profissional = await buscarProfissional(idProfissional, conn);
+
+    if (!profissional) {
+      await conn.rollback();
+      return res.status(404).json({ sucesso: false, mensagem: 'Profissional nao encontrado' });
+    }
+
+    const [atletas] = await conn.query(
+      'SELECT id_usuario FROM Usuario WHERE id_usuario = ? AND tipo_perfil = "Atleta"',
+      [idAtleta]
+    );
+
+    if (atletas.length === 0) {
+      await conn.rollback();
+      return res.status(404).json({ sucesso: false, mensagem: 'Atleta nao encontrado' });
+    }
+
+    const colunaPerfil = colunaVinculoPerfil(profissional.tipo_perfil);
+
+    if (deveVincular) {
+      await conn.query(
+        'INSERT IGNORE INTO Profissional_Atleta (id_profissional, id_atleta) VALUES (?, ?)',
+        [idProfissional, idAtleta]
+      );
+
+      await conn.query(
+        'INSERT IGNORE INTO Atleta_Perfil (id_atleta) VALUES (?)',
+        [idAtleta]
+      );
+
+      if (colunaPerfil) {
+        await conn.query(
+          `UPDATE Atleta_Perfil SET ${colunaPerfil} = ? WHERE id_atleta = ?`,
+          [idProfissional, idAtleta]
+        );
+      }
+    } else {
+      await conn.query(
+        'DELETE FROM Profissional_Atleta WHERE id_profissional = ? AND id_atleta = ?',
+        [idProfissional, idAtleta]
+      );
+
+      if (colunaPerfil) {
+        await conn.query(
+          `UPDATE Atleta_Perfil SET ${colunaPerfil} = NULL WHERE id_atleta = ? AND ${colunaPerfil} = ?`,
+          [idAtleta, idProfissional]
+        );
+      }
+    }
+
+    await conn.commit();
+    res.json({
+      sucesso: true,
+      mensagem: deveVincular ? 'Atleta adicionado a lista' : 'Atleta removido da lista',
+      vinculado: deveVincular,
+    });
+  } catch (err) {
+    if (conn) await conn.rollback();
+    console.error('Erro ao atualizar vinculo de atleta:', err.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro interno: ' + err.message });
+  } finally {
+    if (conn) conn.release();
+  }
 });
 
 // rota para enviar dieta do nutricionista para um atleta
@@ -713,17 +966,6 @@ app.get('/peso/:id', async (req, res) => {
     res.json({ peso: rows[0] });
 });
 
-inicializarBanco()
-  .then(() => {
-    app.listen(3000, () => {
-      console.log('rodando na porta 3000');
-    });
-  })
-  .catch((err) => {
-    console.error('Erro ao inicializar banco:', err.message);
-    process.exit(1);
-  });
-
 app.get('/altura/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -737,7 +979,13 @@ app.get('/altura/:id', async (req, res) => {
     res.json({ altura: rows[0] });
 });
 
-app.listen(3000, () => {
-  console.log('rodando na porta 3000');
-});
-
+inicializarBanco()
+  .then(() => {
+    app.listen(3000, () => {
+      console.log('rodando na porta 3000');
+    });
+  })
+  .catch((err) => {
+    console.error('Erro ao inicializar banco:', err.message);
+    process.exit(1);
+  });
